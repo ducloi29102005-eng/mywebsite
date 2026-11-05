@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Bảng Quản Trị Hệ Thống | Panthera Admin</title>
+    <style>
+        :root {
+            --primary: #ff5a00;
+            --danger: #ff4444;
+            --success: #00c851;
+            --bg-dark: #0a0a0a;
+            --surface: #141414;
+            --surface-hover: #1b1b1b;
+            --border: #262626;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar bên trái theo ảnh */
+        .sidebar {
+            width: 260px;
+            background: transparent;
+            padding: 30px 24px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-brand {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 1.5px;
+            margin-bottom: 35px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-links { list-style: none; padding: 0; margin: 0; }
+        .nav-links a {
+            display: block;
+            padding: 14px 20px;
+            color: var(--text-main);
+            text-decoration: none;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .nav-links a.active {
+            background: rgba(255, 90, 0, 0.12);
+            color: var(--primary);
+            border: 1px solid rgba(255, 90, 0, 0.25);
+        }
+        .nav-links a.link-website {
+            color: #b0b0b0;
+        }
+        .nav-links a.link-website:hover {
+            color: #ffffff;
+        }
+        .logout-btn {
+            margin-top: 15px;
+            color: var(--danger) !important;
+            border: 1px solid rgba(255, 68, 68, 0.35);
+            border-radius: 10px;
+            text-align: center;
+            padding: 12px 20px;
+            display: block;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .logout-btn:hover {
+            background: rgba(255, 68, 68, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 40px 50px;
+            overflow-y: auto;
+        }
+        .header-title {
+            margin-bottom: 30px;
+        }
+        .header-title h2 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .header-title p {
+            margin: 8px 0 0 0;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Thẻ thống kê 3 ô theo ảnh */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+            margin-bottom: 35px;
+        }
+        .stat-card {
+            background: #111111;
+            border: 1px solid #222222;
+            border-radius: 14px;
+            padding: 24px;
+        }
+        .stat-card span {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        .stat-card h3 {
+            margin: 14px 0 0 0;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        /* Bảng danh sách */
+        .table-container {
+            background: #111111;
+            border: 1px solid #1f1f1f;
+            border-radius: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+        th {
+            background: #151515;
+            padding: 18px 24px;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-bottom: 1px solid #202020;
+        }
+        td {
+            padding: 18px 24px;
+            border-bottom: 1px solid #1c1c1c;
+            vertical-align: middle;
+        }
+        tr:hover { background: var(--surface-hover); }
+
+        /* Badge vai trò và trạng thái chuẩn theo ảnh */
+        .badge-role {
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            display: inline-block;
+            letter-spacing: 0.5px;
+        }
+        .badge-admin {
+            background: #2b1708;
+            color: #ff6a00;
+        }
+        .badge-user {
+            background: #242424;
+            color: #8c8c8c;
+        }
+
+        .badge-status {
+            padding: 5px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .badge-active {
+            background: #0d2818;
+            color: #00c851;
+        }
+        .badge-banned {
+            background: #2d1010;
+            color: #ff4444;
+        }
+
+        /* Nút Tuỳ chọn ▼ theo ảnh */
+        .action-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .action-btn {
+            background: #1f1f1f;
+            color: #ffffff;
+            border: 1px solid #2f2f2f;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .action-btn:hover {
+            background: #2a2a2a;
+        }
+
+        /* Menu thả xuống chuẩn theo ảnh */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 6px;
+            background: #181818;
+            border: 1px solid #2c2c2c;
+            border-radius: 10px;
+            min-width: 170px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.8);
+            z-index: 1000;
+            padding: 6px 0;
+        }
+        .dropdown-menu form { margin: 0; }
+        .dropdown-menu button {
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            color: #e5e5e5;
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .dropdown-menu button:hover {
+            background: #242424;
+            color: #ffffff;
+        }
+        .dropdown-menu .btn-delete {
+            color: #ff5252 !important;
+        }
+        .dropdown-menu .btn-delete:hover {
+            background: rgba(255, 82, 82, 0.12);
+        }
+
+        /* MODAL CHỌN LÝ DO KHÓA (KHÔI PHỤC THEO ẢNH CHỤP) */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .modal-card {
+            position: relative;
+            width: 100%;
+            max-width: 520px;
+            background: #111111;
+            border: 1px solid #ff444455;
+            border-radius: 18px;
+            padding: 26px 28px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+            box-sizing: border-box;
+        }
+        .modal-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2.5px;
+            background: linear-gradient(90deg, #ff5a00, #ff2222);
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 22px;
+            position: relative;
+        }
+        .modal-icon {
+            width: 44px;
+            height: 44px;
+            background: #261717;
+            border: 1px solid #4a2121;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-size: 19px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+        .modal-header p {
+            margin: 4px 0 0;
+            font-size: 13px;
+            color: #888888;
+        }
+        .btn-close {
+            position: absolute;
+            right: 0;
+            top: 2px;
+            background: transparent;
+            border: none;
+            color: #777777;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .btn-close:hover { color: #ffffff; }
+
+        .section-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 800;
+            color: #7a7a7a;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: #171717;
+            border: 1px solid #262626;
+            padding: 14px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .radio-option:hover {
+            background: #1e1e1e;
+            border-color: #383838;
+        }
+        .radio-option input[type="radio"] { display: none; }
+
+        .custom-radio {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #555555;
+            display: inline-block;
+            transition: 0.2s;
+            box-sizing: border-box;
+        }
+        .radio-option input[type="radio"]:checked + .custom-radio {
+            border-color: #ff3b30;
+            background: #ff3b30;
+            box-shadow: 0 0 12px rgba(255, 59, 48, 0.8);
+        }
+        .radio-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #e2e2e2;
+        }
+
+        .custom-reason-box {
+            margin-top: 12px;
+            display: none;
+        }
+        .custom-reason-box textarea {
+            width: 100%;
+            box-sizing: border-box;
+            background: #171717;
+            border: 1px solid #333333;
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: #ffffff;
+            font-size: 13px;
+            resize: vertical;
+            outline: none;
+            font-family: inherit;
+        }
+        .custom-reason-box textarea:focus {
+            border-color: var(--primary);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 26px;
+        }
+        .btn-cancel {
+            background: #242424;
+            color: #cccccc;
+            border: 1px solid #363636;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-cancel:hover {
+            background: #2d2d2d;
+            color: #ffffff;
+        }
+        .btn-submit-lock {
+            background: #ff2a2a;
+            color: #ffffff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 18px rgba(255, 42, 42, 0.5);
+            transition: 0.2s;
+        }
+        .btn-submit-lock:hover {
+            background: #ff1515;
+            box-shadow: 0 4px 24px rgba(255, 42, 42, 0.7);
+        }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <span>PANTHERA ADMIN</span>
+    </div>
+    <ul class="nav-links">
+        <li><a th:href="@{/admin/dashboard}" class="active">Quản lý Tài khoản</a></li>
+
+        <!-- Nút này chỉ xuất hiện nếu tài khoản đang đăng nhập có role USER -->
+        <li th:if="${currentUser != null and currentUser.role == 'USER'}">
+            <a th:href="@{/profile}" class="link-website">Quay lại Website</a>
+        </li>
+
+        <li><a th:href="@{/logout}" class="logout-btn">Đăng xuất</a></li>
+    </ul>
+</aside>
+
+<main class="main-content">
+    <div class="header-title">
+        <h2>DANH SÁCH NGƯỜI DÙNG</h2>
+        <p>Quản lý toàn bộ tài khoản đã đăng ký trên hệ thống</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span>TỔNG SỐ TÀI KHOẢN</span>
+            <h3 th:text="${users != null ? users.size() : 0}">3</h3>
+        </div>
+        <div class="stat-card">
+            <span>QUYỀN QUẢN TRỊ</span>
+            <h3 style="color: var(--primary);" th:text="${users != null ? users.?[role == 'ADMIN'].size() : 0}">1</h3>
+        </div>
+        <div class="stat-card">
+            <span>TRẠNG THÁI BÌNH THƯỜNG</span>
+            <h3 style="color: var(--success);" th:text="${users != null ? users.?[status != 'BANNED'].size() : 0}">3</h3>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>Tên đăng nhập</th>
+                <th>User ID</th>
+                <th>Vai trò</th>
+                <th>Trạng thái</th>
+                <th style="text-align: right;">Hành động</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="u : ${users}">
+                <td style="font-weight: 700;" th:text="${u.username}">admin</td>
+                <td style="font-family: monospace; color: var(--text-muted);" th:text="${u.userId}">uuid</td>
+                <td>
+                    <span th:if="${u.role == 'ADMIN'}" class="badge-role badge-admin">ADMIN</span>
+                    <span th:unless="${u.role == 'ADMIN'}" class="badge-role badge-user">USER</span>
+                </td>
+                <td>
+                    <span th:if="${u.status == 'BANNED'}" class="badge-status badge-banned">Đã Ban</span>
+                    <span th:unless="${u.status == 'BANNED'}" class="badge-status badge-active">Hoạt động</span>
+                </td>
+                <td style="text-align: right;">
+                    <div class="action-dropdown">
+                        <button type="button" class="action-btn" onclick="toggleDropdown(this)">Tuỳ chọn ▼</button>
+                        <div class="dropdown-menu">
+                            <!-- CẤP / HẠ QUYỀN ADMIN (CHỮ ĐƠN GIẢN THEO ẢNH) -->
+                            <form th:action="@{/admin/users/toggle-role}" method="post">
+                                <input type="hidden" name="userId" th:value="${u.userId}">
+                                <button type="submit" th:if="${u.role != 'ADMIN'}">Cấp quyền Admin</button>
+                                <button type="submit" th:if="${u.role == 'ADMIN'}">Hạ quyền xuống User</button>
+                            </form>
+
+                            <!-- KHÓA / MỞ KHÓA TÀI KHOẢN -->
+                            <button type="button"
+                                    th:if="${u.status != 'BANNED'}"
+                                    th:onclick="openBanModal([[${u.userId}]], [[${u.username}]])">
+                                Khóa tài khoản
+                            </button>
+
+                            <form th:action="@{/admin/users/toggle-ban}" method="post" th:if="${u.status == 'BANNED'}">
+                                <input type="hidden" name="userId" th:value="${u.userId}">
+                                <button type="submit" style="color: var(--success);">Mở khóa tài khoản</button>
+                            </form>
+
+                            <!-- XÓA TÀI KHOẢN -->
+                            <form th:action="@{/admin/users/delete}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tài khoản này?');">
+                                <input type="hidden" name="userId" th:value="${u.userId}">
+                                <button type="submit" class="btn-delete">Xóa tài khoản</button>
+                            </form>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <tr th:if="${users == null or #lists.isEmpty(users)}">
+                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                    Chưa có người dùng nào được tìm thấy trong hệ thống.
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<!-- MODAL KHÓA TÀI KHOẢN THEO ĐÚNG ẢNH BẠN GỬI -->
+<div id="banModal" class="modal-backdrop">
+    <div class="modal-card">
+        <div class="modal-header">
+            <div class="modal-icon">🔒</div>
+            <div>
+                <h3>Xác nhận khóa tài khoản</h3>
+                <p>Khóa quyền truy cập của: <strong id="modalTargetUser" style="color: var(--primary);">username</strong></p>
+            </div>
+            <button type="button" class="btn-close" onclick="closeBanModal()">✕</button>
+        </div>
+
+        <form id="banForm" th:action="@{/admin/users/toggle-ban}" method="post">
+            <input type="hidden" name="userId" id="banModalUserId">
+            <input type="hidden" name="reason" id="finalBanReason">
+
+            <div class="modal-body">
+                <label class="section-label">LÝ DO KHÓA</label>
+
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="presetReason" value="Gian lận trong game / hệ thống" checked onchange="toggleCustomReason(false)">
+                        <span class="custom-radio"></span>
+                        <span class="radio-text">⚔️ Gian lận trong game / hệ thống</span>
+                    </label>
+
+                    <label class="radio-option">
+                        <input type="radio" name="presetReason" value="Tên vi phạm / Ngôn từ không phù hợp" onchange="toggleCustomReason(false)">
+                        <span class="custom-radio"></span>
+                        <span class="radio-text">⚠️ Tên vi phạm / Ngôn từ không phù hợp</span>
+                    </label>
+
+                    <label class="radio-option">
+                        <input type="radio" name="presetReason" value="Spam / Lạm dụng tính năng" onchange="toggleCustomReason(false)">
+                        <span class="custom-radio"></span>
+                        <span class="radio-text">🚫 Spam / Lạm dụng tính năng</span>
+                    </label>
+
+                    <label class="radio-option">
+                        <input type="radio" name="presetReason" value="OTHER" onchange="toggleCustomReason(true)">
+                        <span class="custom-radio"></span>
+                        <span class="radio-text">📝 Lý do khác...</span>
+                    </label>
+                </div>
+
+                <div class="custom-reason-box" id="customReasonWrapper">
+                    <textarea id="customReasonInput" rows="3" placeholder="Nhập lý do cụ thể..."></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeBanModal()">Hủy bỏ</button>
+                <button type="submit" class="btn-submit-lock" onclick="prepareSubmit(event)">Khóa tài khoản</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleDropdown(btn) {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            if (menu !== btn.nextElementSibling) {
+                menu.style.display = 'none';
+            }
+        });
+        const currentMenu = btn.nextElementSibling;
+        currentMenu.style.display = currentMenu.style.display === 'block' ? 'none' : 'block';
+    }
+
+    window.addEventListener('click', function(e) {
+        if (!e.target.matches('.action-btn')) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.style.display = 'none';
+            });
+        }
+    });
+
+    function openBanModal(userId, username) {
+        document.querySelectorAll('.dropdown-menu').forEach(m => m.style.display = 'none');
+        document.getElementById('banModalUserId').value = userId;
+        document.getElementById('modalTargetUser').innerText = username;
+        document.getElementById('banModal').style.display = 'flex';
+    }
+
+    function closeBanModal() {
+        document.getElementById('banModal').style.display = 'none';
+    }
+
+    function toggleCustomReason(isCustom) {
+        const box = document.getElementById('customReasonWrapper');
+        box.style.display = isCustom ? 'block' : 'none';
+        if (isCustom) {
+            document.getElementById('customReasonInput').focus();
+        }
+    }
+
+    function prepareSubmit(e) {
+        const selectedRadio = document.querySelector('input[name="presetReason"]:checked');
+        const customInput = document.getElementById('customReasonInput').value.trim();
+        const reasonInput = document.getElementById('finalBanReason');
+
+        if (selectedRadio.value === 'OTHER') {
+            if (!customInput) {
+                e.preventDefault();
+                alert('Vui lòng nhập lý do cụ thể!');
+                return;
+            }
+            reasonInput.value = customInput;
+        } else {
+            reasonInput.value = selectedRadio.value;
+        }
+    }
+</script>
+</body>
+</html>

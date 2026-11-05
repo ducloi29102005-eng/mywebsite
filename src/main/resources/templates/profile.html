@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Lý Tài Khoản | Panthera</title>
+    <style>
+        :root {
+            --primary:#ff5a00; /* Vàng Panthera */
+            --bg-dark: #050505;
+            --surface: #121212;
+            --border: #2a2a2a;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+        }
+        body {
+            margin: 0; background-color: var(--bg-dark); color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex; min-height: 100vh;
+        }
+        /* Sidebar */
+        .sidebar {
+            width: 280px; background: var(--surface); border-right: 1px solid var(--border);
+            padding: 30px 20px; box-sizing: border-box; display: flex; flex-direction: column;
+        }
+        .sidebar .logo {
+            width: 160px; display: block; margin: 0 auto 40px auto;
+        }
+        .nav-menu { list-style: none; padding: 0; margin: 0; }
+        .nav-menu li a {
+            display: flex; align-items: center; padding: 15px 20px; color: var(--text-muted);
+            text-decoration: none; border-radius: 8px; margin-bottom: 10px;
+            font-weight: 500; transition: all 0.3s;
+        }
+        .nav-menu li a:hover {
+            background: rgba(212, 175, 55, 0.05); color: var(--primary);
+        }
+        .nav-menu li a.active {
+            background: rgba(212, 175, 55, 0.1); color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+        /* Main Content */
+        .main-content {
+            flex: 1; padding: 50px; background: var(--bg-dark);
+        }
+        .content-header { margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        .content-header h2 { margin: 0; font-weight: 400; font-size: 24px; letter-spacing: 1px; }
+
+        .form-container {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; padding: 40px; max-width: 700px;
+        }
+        .alert-success {
+            background: rgba(212, 175, 55, 0.1); color: var(--primary);
+            padding: 15px; border-radius: 8px; border: 1px solid var(--primary); margin-bottom: 25px;
+        }
+        .form-row { display: flex; gap: 20px; margin-bottom: 20px; }
+        .form-group { flex: 1; }
+        label { display: block; font-size: 12px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
+        input {
+            width: 100%; padding: 14px; background: var(--bg-dark); border: 1px solid var(--border);
+            color: var(--text-main); border-radius: 6px; box-sizing: border-box; font-size: 15px;
+            transition: all 0.3s;
+        }
+        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 8px rgba(212, 175, 55, 0.2); }
+        input[readonly] { color: var(--text-muted); cursor: not-allowed; }
+        .btn-save {
+            background: var(--primary); color: #000; border: none; padding: 15px 30px;
+            font-size: 14px; font-weight: bold; text-transform: uppercase; border-radius: 6px;
+            cursor: pointer; transition: 0.3s; margin-top: 10px; display: block; width: 100%;
+        }
+        .btn-save:hover { background: #e5c048; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <!-- Logo hiển thị tại đây -->
+    <img th:src="@{/images/logo.jpg}" alt="Panthera Logo" class="logo">
+    <ul class="nav-menu">
+        <li><a th:href="@{/profile}">Hồ sơ của bạn</a></li>
+        <li><a th:href="@{/profile/games}">Trò chơi đã liên kết</a></li>
+        <li><a th:href="@{/profile/security}">Phương thức đăng nhập</a></li>
+        <li style="margin-top: 20px;" th:if="${user != null and user.role == 'ADMIN'}">
+            <a th:href="@{/admin/dashboard}" style="color: #ff9900; border-left: 2px solid #ff9900; padding-left: 15px;">Trang Quản Trị</a>
+        </li>
+
+        <li style="margin-top: 50px;"><a th:href="@{/logout}" style="color: #ff4d4d;">Đăng xuất</a></li>
+    </ul>
+</aside>
+
+<main class="main-content">
+    <div class="content-header">
+        <h2>THÔNG TIN TÀI KHOẢN</h2>
+    </div>
+
+    <div class="form-container">
+        <div th:if="${param.success}" class="alert-success">
+            Cập nhật thông tin thành công!
+        </div>
+
+        <form th:action="@{/profile/edit}" th:object="${profile}" method="post">
+            <!-- Cụm hiển thị User ID và Tên đăng nhập chuẩn phong cách VNG -->
+            <div class="form-row" style="margin-bottom: 20px;">
+                <div class="form-group">
+                    <label>User ID</label>
+                    <!-- th:field="*{id}" sẽ tự động lấy chuỗi ObjectId từ MongoDB -->
+                    <input type="text" th:value="${user.userId}" name="userId" readonly
+                           style="color: #ff5a00; font-family: monospace; letter-spacing: 1px; cursor: default; background: #0d0d0d;">
+                </div>
+                <div class="form-group">
+                    <label>Tên đăng nhập</label>
+                    <input type="text" th:value="${user.username}" readonly
+                           style="color: #888888; cursor: not-allowed; background: #0d0d0d;">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Họ và Tên</label>
+                    <input type="text" th:field="*{fullName}" placeholder="Nhập họ và tên đầy đủ">
+                </div>
+                <div class="form-group">
+                    <label>Ngày sinh</label>
+                    <input type="date" th:field="*{dateOfBirth}">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Số điện thoại</label>
+                    <input type="text" th:field="*{phoneNumber}" placeholder="Nhập số điện thoại">
+                </div>
+                <div class="form-group">
+                    <label>Địa chỉ</label>
+                    <input type="text" th:field="*{address}" placeholder="Tỉnh/Thành phố">
+                </div>
+            </div>
+
+            <!-- HẾT ĐOẠN CHÈN -->
+            <button type="submit" class="btn-save">LƯU THAY ĐỔI</button>
+        </form>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Trò Chơi Đã Liên Kết | Panthera</title>
+    <style>
+        :root { --primary: #ff5a00; --bg-dark: #050505; --surface: #121212; --border: #2a2a2a; --text-main: #ffffff; --text-muted: #888888; }
+        body { margin: 0; background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; min-height: 100vh; }
+        .sidebar { width: 280px; background: var(--surface); border-right: 1px solid var(--border); padding: 30px 20px; box-sizing: border-box; display: flex; flex-direction: column; }
+        .sidebar .logo { width: 160px; display: block; margin: 0 auto 40px auto; }
+        .nav-menu { list-style: none; padding: 0; margin: 0; }
+        .nav-menu li a { display: flex; align-items: center; padding: 15px 20px; color: var(--text-muted); text-decoration: none; border-radius: 8px; margin-bottom: 10px; font-weight: 500; transition: all 0.3s; }
+        .nav-menu li a.active { background: rgba(255, 90, 0, 0.1); color: var(--primary); border-left: 4px solid var(--primary); }
+        .main-content { flex: 1; padding: 50px; background: var(--bg-dark); }
+        .content-header { margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        .content-header h2 { margin: 0; font-weight: 400; font-size: 24px; letter-spacing: 1px; }
+        .form-container { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 40px; max-width: 700px; }
+        .alert-success { background: rgba(255, 90, 0, 0.1); color: var(--primary); padding: 15px; border-radius: 8px; border: 1px solid var(--primary); margin-bottom: 25px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 12px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
+        input { width: 100%; padding: 14px; background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-main); border-radius: 6px; box-sizing: border-box; font-size: 15px; transition: all 0.3s; margin-bottom: 10px; }
+        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 8px rgba(255, 90, 0, 0.2); }
+        .btn-save { background: var(--primary); color: #000; border: none; padding: 15px 30px; font-size: 14px; font-weight: bold; text-transform: uppercase; border-radius: 6px; cursor: pointer; transition: 0.3s; margin-top: 10px; display: block; width: 100%; }
+        .btn-save:hover { background: #e55300; box-shadow: 0 0 15px rgba(255, 90, 0, 0.4); }
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <img th:src="@{/images/logo.jpg}" alt="Panthera Logo" class="logo">
+    <ul class="nav-menu">
+        <li><a th:href="@{/profile}">Hồ sơ của bạn</a></li>
+        <li><a th:href="@{/profile/games}" class="active">Trò chơi đã liên kết</a></li>
+        <li><a th:href="@{/profile/security}">Phương thức đăng nhập</a></li>
+        <!-- Nút chuyển tới trang Admin -->
+        <li style="margin-top: 20px;" th:if="${user != null and user.role == 'ADMIN'}">
+            <a th:href="@{/admin/dashboard}" style="color: #ff9900; border-left: 2px solid #ff9900; padding-left: 15px;">Trang Quản Trị</a>
+        </li>
+        <li style="margin-top: 50px;"><a th:href="@{/logout}" style="color: #ff4d4d;">Đăng xuất</a></li>
+    </ul>
+</aside>
+
+<main class="main-content">
+    <div class="content-header">
+        <h2>ĐĂNG NHẬP VÀ KẾT NỐI</h2>
+        <p style="color: var(--text-muted); font-size: 14px; margin-top: 5px;">Bạn đang sử dụng các kênh sau để đăng nhập vào các trò chơi và trang web</p>
+    </div>
+
+    <div style="max-width: 800px;">
+        <!-- Lặp qua danh sách Game -->
+        <div th:each="game : ${appList}" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 25px; overflow: hidden;">
+
+            <!-- Header: Tên Game -->
+            <div style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 15px;">
+                <div style="width: 50px; height: 50px; border-radius: 12px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: #000;">
+                    <span th:text="${#strings.substring(game.appId, 0, 1).toUpperCase()}">G</span>
+                </div>
+                <div style="font-size: 18px; font-weight: 600; text-transform: uppercase; color: #fff;" th:text="${game.appId}">TÊN GAME</div>
+            </div>
+
+            <!-- Các phương thức kết nối của Game -->
+            <div style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+                <div style="font-size: 14px; font-weight: bold; color: var(--text-muted); margin-bottom: 5px;">Đăng nhập bằng phương thức</div>
+
+                <!-- 1. GOOGLE / GMAIL -->
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #151515; padding: 15px 20px; border-radius: 8px; border: 1px solid #2a2a2a;">
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 5px; color: #ea4335;">Google</div>
+                        <div th:if="${game.gmail != null && !#strings.isEmpty(game.gmail.uid)}" style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+                            Uid: <span th:text="${game.gmail.uid}"></span><br>
+                            <span style="color: #4caf50;">✓ Đã liên kết: <span th:text="${game.gmail.createTime}"></span></span>
+                        </div>
+                        <div th:if="${game.gmail == null || #strings.isEmpty(game.gmail.uid)}" style="font-size: 13px; color: var(--text-muted);">
+                            Chưa liên kết
+                        </div>
+                    </div>
+                    <button type="button" style="padding: 8px 20px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); background: transparent; color: #fff; font-weight: bold; transition: 0.3s;"
+                            th:text="${game.gmail != null && !#strings.isEmpty(game.gmail.uid) ? 'HỦY LIÊN KẾT' : 'LIÊN KẾT'}"
+                            onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='transparent'">
+                    </button>
+                </div>
+
+                <!-- 2. FACEBOOK -->
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #151515; padding: 15px 20px; border-radius: 8px; border: 1px solid #2a2a2a;">
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 5px; color: #1877F2;">Facebook</div>
+                        <div th:if="${game.facebook != null && !#strings.isEmpty(game.facebook.uid)}" style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+                            Uid: <span th:text="${game.facebook.uid}"></span><br>
+                            <span style="color: #4caf50;">✓ Đã liên kết: <span th:text="${game.facebook.createTime}"></span></span>
+                        </div>
+                        <div th:if="${game.facebook == null || #strings.isEmpty(game.facebook.uid)}" style="font-size: 13px; color: var(--text-muted);">
+                            Chưa liên kết
+                        </div>
+                    </div>
+                    <button type="button" style="padding: 8px 20px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); background: transparent; color: #fff; font-weight: bold; transition: 0.3s;"
+                            th:text="${game.facebook != null && !#strings.isEmpty(game.facebook.uid) ? 'HỦY LIÊN KẾT' : 'LIÊN KẾT'}"
+                            onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='transparent'">
+                    </button>
+                </div>
+
+                <!-- 3. APPLE -->
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #151515; padding: 15px 20px; border-radius: 8px; border: 1px solid #2a2a2a;">
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 5px; color: #ffffff;">Apple</div>
+                        <div th:if="${game.apple != null && !#strings.isEmpty(game.apple.uid)}" style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+                            Uid: <span th:text="${game.apple.uid}"></span><br>
+                            <span style="color: #4caf50;">✓ Đã liên kết: <span th:text="${game.apple.createTime}"></span></span>
+                        </div>
+                        <div th:if="${game.apple == null || #strings.isEmpty(game.apple.uid)}" style="font-size: 13px; color: var(--text-muted);">
+                            Chưa liên kết
+                        </div>
+                    </div>
+                    <button type="button" style="padding: 8px 20px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); background: transparent; color: #fff; font-weight: bold; transition: 0.3s;"
+                            th:text="${game.apple != null && !#strings.isEmpty(game.apple.uid) ? 'HỦY LIÊN KẾT' : 'LIÊN KẾT'}"
+                            onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='transparent'">
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Màn hình trống -->
+        <div th:if="${appList == null || #lists.isEmpty(appList)}" style="text-align: center; padding: 50px; color: var(--text-muted); border: 1px dashed var(--border); border-radius: 12px;">
+            Không tìm thấy dữ liệu trò chơi nào.
+        </div>
+    </div>
+</main></body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng Nhập | Panthera</title>
+    <style>
+        body {
+            margin: 0; background-color: #050505; color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex; justify-content: center; align-items: center; height: 100vh;
+        }
+        .auth-card {
+            background: #121212; border: 1px solid #2a2a2a; border-radius: 16px;
+            padding: 40px; width: 100%; max-width: 380px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8); text-align: center;
+        }
+        .logo { width: 140px; margin-bottom: 30px; }
+        .alert { padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; }
+        .alert-error { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid #ff4d4d; }
+        .alert-success { background: rgba(212, 175, 55, 0.1); color: #d4af37; border: 1px solid #d4af37; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; font-size: 12px; color: #888; text-transform: uppercase; margin-bottom: 8px; }
+        .input-group input {
+            width: 100%; padding: 14px; background: #0a0a0a; border: 1px solid #333;
+            color: #fff; border-radius: 8px; box-sizing: border-box; transition: 0.3s;
+        }
+        .input-group input:focus { outline: none; border-color: #d4af37; box-shadow: 0 0 8px rgba(212, 175, 55, 0.2); }
+        .btn-submit {
+            width: 100%; padding: 15px; background: #d4af37; color: #000;
+            border: none; border-radius: 8px; font-weight: bold; font-size: 15px;
+            text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        .btn-submit:hover { background: #e5c048; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+        .footer-link { margin-top: 25px; font-size: 14px; color: #888; }
+        .footer-link a { color: #d4af37; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="auth-card">
+    <img th:src="@{/images/logo.jpg}" alt="Panthera Logo" class="logo">
+
+    <div th:if="${param.error}" class="alert alert-error">Sai tên đăng nhập hoặc mật khẩu!</div>
+    <div th:if="${param.logout}" class="alert alert-success">Đã đăng xuất thành công.</div>
+    <div th:if="${param.registered}" class="alert alert-success">Đăng ký thành công! Hãy đăng nhập.</div>
+
+    <form th:action="@{/login}" method="post">
+        <div class="input-group">
+            <label>Tên đăng nhập</label>
+            <input type="text" name="username" placeholder="Nhập tài khoản" required>
+        </div>
+        <div class="input-group">
+            <label>Mật khẩu</label>
+            <input type="password" name="password" placeholder="Nhập mật khẩu" required>
+        </div>
+        <button type="submit" class="btn-submit">Đăng Nhập</button>
+    </form>
+
+    <div class="footer-link">
+        Chưa có tài khoản? <a th:href="@{/register}">Tạo ngay</a>
+    </div>
+</div>
+</body>
+</html>

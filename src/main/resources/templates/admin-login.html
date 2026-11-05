@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng nhập Hệ thống | Panthera Admin</title>
+    <style>
+        :root {
+            --admin-primary: #ff3300; /* Đỏ cam đặc trưng quyền quản trị */
+            --admin-hover: #ff5500;
+            --bg-dark: #0a0a0a;
+            --surface: #1a1a1a;
+            --border: #333;
+            --text-main: #ffffff;
+        }
+        body {
+            margin: 0;
+            background: radial-gradient(circle at top, #222, var(--bg-dark) 80%);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .admin-login-box {
+            background: var(--surface);
+            padding: 50px 40px;
+            border-radius: 16px;
+            width: 340px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--border);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Dải viền màu trên cùng box */
+        .admin-login-box::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff3300, #ff9900);
+        }
+        /* Cấu hình logo chuẩn tỷ lệ tròn */
+        .logo {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+            border: 3px solid #333;
+            box-shadow: 0 0 20px rgba(255, 51, 0, 0.15);
+        }
+        h2 {
+            margin: 0 0 30px 0;
+            font-size: 22px;
+            letter-spacing: 2px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        .error-msg {
+            background: rgba(255, 51, 0, 0.1);
+            color: #ff4d4d;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 51, 0, 0.3);
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            background: #111;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--admin-primary);
+            box-shadow: 0 0 10px rgba(255, 51, 0, 0.2);
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--admin-primary), var(--admin-hover));
+            color: #fff;
+            border: none;
+            font-weight: bold;
+            font-size: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 51, 0, 0.4);
+        }
+        .btn-return {
+            display: inline-block;
+            margin-top: 25px;
+            color: #777;
+            text-decoration: none;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+        .btn-return:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+<div class="admin-login-box">
+    <!-- Đường dẫn logo sử dụng chung với cấu hình của trang profile -->
+    <img th:src="@{/images/logo.jpg}" alt="Panthera Logo" class="logo">
+
+    <h2>QUẢN TRỊ VIÊN</h2>
+
+    <div th:if="${error}" class="error-msg" th:text="${error}"></div>
+
+    <form th:action="@{/admin/login}" method="post">
+        <div class="form-group">
+            <input type="text" name="username" placeholder="Tên đăng nhập" required>
+        </div>
+        <div class="form-group">
+            <input type="password" name="password" placeholder="Mật khẩu" required>
+        </div>
+        <button type="submit" class="btn-submit">Truy Cập Hệ Thống</button>
+    </form>
+
+    <a th:href="@{/profile}" class="btn-return">← Trở về trang người dùng</a>
+</div>
+</body>
+</html>

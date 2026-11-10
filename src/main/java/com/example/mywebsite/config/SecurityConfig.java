@@ -22,7 +22,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // Tắt CSRF để nhận form POST đăng ký
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/login", "/css/**","/images/**","/js/**").permitAll()
+                        .requestMatchers("/register", "/login","/banned", "/forgot-password","/verify-otp", "/reset-password", "/error", "/css/**","/images/**","/js/**").permitAll()
                         .requestMatchers("/admin/**", "/profile/**").authenticated()
                         .anyRequest().authenticated()
                 )
@@ -30,6 +30,10 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .successHandler(successHandler) // Dùng handler kiểm tra role từ MongoDB
                         .permitAll()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .successHandler(successHandler)
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
@@ -40,7 +44,7 @@ public class SecurityConfig {
 
         return http.build();
     }
-
+    // Viết gọn lại vì bạn đã import PasswordEncoder và BCryptPasswordEncoder ở trên rồi
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

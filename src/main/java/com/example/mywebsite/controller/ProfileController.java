@@ -9,6 +9,7 @@ import com.example.mywebsite.service.UserService;
 import com.example.mywebsite.repository.UserProfileRepository;
 import com.example.mywebsite.repository.UserDataRepository;
 import com.example.mywebsite.repository.GameLinkedRepository;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,8 +18,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class ProfileController {
@@ -34,38 +39,60 @@ public class ProfileController {
     @Autowired
     private GameLinkedRepository gameLinkedRepository;
 
-    // Hàm phụ trợ tiện dùng lại: Lấy userId của tài khoản đang đăng nhập
-    private String getUserId(Principal principal) {
-        return userRepository.findByUsername(principal.getName())
-                .map(User::getUserId)
-                .orElse(null);
+    // ========================================================
+    // HÀM QUAN TRỌNG: Lấy đúng username dù đăng nhập bằng Google hay Form
+    // ========================================================
+    private String getActualUsername(Principal principal) {
+        if (principal == null) return null;
+        if (principal instanceof OAuth2AuthenticationToken) {
+            return ((OAuth2AuthenticationToken) principal).getPrincipal().getAttribute("email");
+        }
+        return principal.getName();
     }
 
     // ========================================================
-    // TAB 1: HỒ SƠ CỦA BẠN
+    // HÀM CHUẨN HÓA: Tìm trực tiếp userId
+    // ========================================================
+    private String getUserId(Principal principal) {
+        if (principal == null) return null;
+        String identifier;
+
+        // Nếu đăng nhập Google -> Tìm qua cột gmail
+        if (principal instanceof OAuth2AuthenticationToken) {
+            identifier = ((OAuth2AuthenticationToken) principal).getPrincipal().getAttribute("email");
+            return userRepository.findByGmail(identifier).map(User::getUserId).orElse(null);
+        } else {
+            // Nếu đăng nhập thường -> Tìm qua cột username
+            identifier = principal.getName();
+            return userRepository.findByUsername(identifier).map(User::getUserId).orElse(null);
+        }
+    }
+
+    // ========================================================
+    // TAB 1: HỒ SƠ CỦA BẠN (Đã chuyển sang dùng userId)
     // ========================================================
     @GetMapping("/profile")
     public String showProfile(Principal principal, Model model) {
-        String username = principal.getName();
-        User currentUser = userRepository.findByUsername(username).orElse(new User());
+        String userId = getUserId(principal);
+        if (userId != null) {
+            User currentUser = userRepository.findByUserId(userId).orElse(new User());
+            UserProfile currentProfile = userProfileRepository.findByUserId(userId).orElse(new UserProfile());
 
-        UserProfile currentProfile = new UserProfile();
-        if (currentUser.getUserId() != null) {
-            currentProfile = userProfileRepository.findByUserId(currentUser.getUserId())
-                    .orElse(new UserProfile());
+            model.addAttribute("user", currentUser);
+            model.addAttribute("profile", currentProfile);
+            model.addAttribute("userData", currentUser);
+        } else {
+            return "redirect:/login"; // Nếu chưa đăng nhập thì đẩy về trang login
         }
-
-        model.addAttribute("user", currentUser);
-        model.addAttribute("profile", currentProfile);
-        System.out.println("profile" + model.toString());
         return "profile";
     }
 
     @PostMapping("/profile/edit")
     public String saveProfile(Principal principal, @ModelAttribute UserProfile updatedInfo) {
-        System.out.println("client send " + updatedInfo.getPhoneNumber());
-        String username = principal.getName();
-        userService.updateProfile(username, updatedInfo);
+        String username = getActualUsername(principal);
+        if (username != null) {
+            userService.updateProfile(username, updatedInfo);
+        }
         return "redirect:/profile?success";
     }
 
@@ -101,64 +128,60 @@ public class ProfileController {
     }
 
     // ========================================================
-    // TAB 3: PHƯƠNG THỨC ĐĂNG NHẬP
+    // TAB 3: PHƯƠNG THỨC ĐĂNG NHẬP / CÀI ĐẶT BẢO MẬT
     // ========================================================
-    // Hiển thị giao diện đổi mật khẩu
     @GetMapping("/profile/security")
-    public String showSecuritySettings(Principal principal, Model model) {
+    public String showSecurityPage(Principal principal, Model model) {
         String userId = getUserId(principal);
-        UserData currentUserData = new UserData();
 
         if (userId != null) {
-            currentUserData = userDataRepository.findByUserId(userId)
-                    .orElse(new UserData());
-        }
+            User currentUser = userRepository.findByUserId(userId).orElse(new User());
+            model.addAttribute("user", currentUser);
 
-        model.addAttribute("userData", currentUserData);
-        return "security"; // Trả về file security.html
+            // Lấy thông tin từ bảng UserData dựa trên userId
+            UserData userData = userDataRepository.findByUserId(userId).orElse(new UserData());
+
+            // Nếu bảng UserData chưa kịp cập nhật, lấy tạm Gmail từ bảng User sang để hiển thị không bị lỗi
+            if (userData.getGmail() == null || userData.getGmail().trim().isEmpty()) {
+                userData.setGmail(currentUser.getGmail());
+            }
+
+            // Gửi userData lên giao diện HTML
+            model.addAttribute("userData", userData);
+        } else {
+            return "redirect:/login";
+        }
+        return "security";
     }
 
-    // 2. Hàm này bị thiếu: Xử lý khi bấm nút "LIÊN KẾT" Gmail
-    @PostMapping("/profile/security/link-gmail")
-    public String linkGmail(Principal principal, @RequestParam("gmail") String gmail) {
+    // Endpoint bắt đầu liên kết Google (Lưu userId vào session)
+    @GetMapping("/link-google-start")
+    public String startGoogleLink(Principal principal, jakarta.servlet.http.HttpSession session) {
         String userId = getUserId(principal);
         if (userId != null) {
-            UserData data = userDataRepository.findByUserId(userId)
-                    .orElse(new UserData());
-            data.setUserId(userId);
-            data.setGmail(gmail);
-            userDataRepository.save(data);
+            session.setAttribute("linkingUserId", userId);
+            return "redirect:/oauth2/authorization/google";
         }
-        return "redirect:/profile/security?success";
+        return "redirect:/login";
     }
 
+    // Endpoint Hủy Liên Kết Gmail (Đã cập nhật để xóa sạch ở cả 2 bảng bằng userId)
+    @RequestMapping(value = "/profile/security/unlink-gmail", method = {RequestMethod.GET, RequestMethod.POST})
+    public String unlinkGmail(Principal principal) {
+        String userId = getUserId(principal);
+        if (userId != null) {
+            // 1. Gỡ liên kết gmail ở bảng User
+            userRepository.findByUserId(userId).ifPresent(user -> {
+                user.setGmail(null);
+                userRepository.save(user);
+            });
 
-    @GetMapping("/profile/security/password")
-    public String showChangePasswordForm() {
-        return "password";
-    }
-
-    //set new password
-    @PostMapping("/profile/security/password")
-    public String processChangePassword(Principal principal,
-                                        @RequestParam("oldPassword") String oldPassword,
-                                        @RequestParam("newPassword") String newPassword,
-                                        @RequestParam("confirmPassword") String confirmPassword,
-                                        Model model) {
-        // Kiểm tra mật khẩu mới và xác nhận có giống nhau không
-        if (!newPassword.equals(confirmPassword)) {
-            model.addAttribute("error", "Mật khẩu xác nhận không khớp!");
-            return "password";
+            // 2. Gỡ liên kết gmail ở bảng UserData
+            userDataRepository.findByUserId(userId).ifPresent(userData -> {
+                userData.setGmail(null);
+                userDataRepository.save(userData);
+            });
         }
-
-        // Gọi UserService để đổi mật khẩu
-        boolean success = userService.changePassword(principal.getName(), oldPassword, newPassword);
-        if (!success) {
-            model.addAttribute("error", "Mật khẩu hiện tại không chính xác!");
-            return "password";
-        }
-
-        // Đổi thành công, đá về trang Phương thức đăng nhập kèm thông báo
-        return "redirect:/profile/security?success";
+        return "redirect:/profile/security?unlinkSuccess";
     }
 }

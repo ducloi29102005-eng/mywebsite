@@ -3,14 +3,19 @@ package com.example.mywebsite.controller;
 import com.example.mywebsite.model.User;
 import com.example.mywebsite.repository.UserRepository;
 import com.example.mywebsite.service.UserService;
+import com.example.mywebsite.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Controller
 public class AuthController {
@@ -19,6 +24,12 @@ public class AuthController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping("/login")
     public String login() {
@@ -33,21 +44,27 @@ public class AuthController {
 
     @PostMapping("/register")
     public String registerUser(@ModelAttribute User user) {
-        System.out.println("====== NHẬN DỮ LIỆU ĐĂNG KÝ ======");
-        System.out.println("Username: " + user.getUsername());
-        System.out.println("Password: " + user.getPassword());
         userService.registerUser(user);
-        System.out.println("====== LƯU USER THÀNH CÔNG ======");
         return "redirect:/login?registered";
     }
+
+    // ĐÃ GỘP 2 HÀM BANNED LÀM 1 ĐỂ TRÁNH LỖI
     @GetMapping("/banned")
-    public String showBannedPage(Principal principal, Model model) {
-        if (principal != null) {
-            User user = userRepository.findByUsername(principal.getName()).orElse(null);
+    public String showBannedPage(@RequestParam(value = "username", required = false) String paramUsername,
+                                 Principal principal,
+                                 Model model) {
+        String targetUsername = null;
+
+        if (paramUsername != null && !paramUsername.trim().isEmpty()) {
+            targetUsername = paramUsername;
+        } else if (principal != null) {
+            targetUsername = principal.getName();
+        }
+
+        if (targetUsername != null) {
+            User user = userRepository.findByUsername(targetUsername).orElse(null);
             if (user != null) {
                 model.addAttribute("username", user.getUsername());
-
-                // Lấy lý do bị khóa từ database (kiểm tra getter tương ứng trong User entity của bạn)
                 String reason = user.getBanReason();
                 if (reason == null || reason.trim().isEmpty()) {
                     reason = "Tài khoản của bạn đã bị khóa do vi phạm tiêu chuẩn cộng đồng.";
@@ -56,5 +73,64 @@ public class AuthController {
             }
         }
         return "banned";
+    }
+
+    @GetMapping("/forgot-password")
+    public String showForgotPasswordForm() {
+        return "forgot-password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String processForgotPassword(@RequestParam("email") String email, Model model) {
+        Optional<User> userOptional = userRepository.findByUsername(email);
+        if (userOptional.isEmpty()) {
+            model.addAttribute("error", "Email không tồn tại trong hệ thống.");
+            return "forgot-password";
+        }
+
+        User user = userOptional.get();
+        String otp = emailService.generateOtp();
+        user.setOtpCode(otp);
+        user.setOtpExpiryTime(LocalDateTime.now().plusMinutes(5));
+        userRepository.save(user);
+
+        try {
+            emailService.sendOtpEmail(email, otp);
+        } catch (Exception e) {
+            model.addAttribute("error", "Hệ thống gửi mail đang bị lỗi!");
+            return "forgot-password";
+        }
+
+        model.addAttribute("email", email);
+        return "verify-otp";
+    }
+
+    @PostMapping("/verify-otp")
+    public String verifyOtpCode(@RequestParam("email") String email, @RequestParam("otpCode") String otpCode, Model model) {
+        Optional<User> userOptional = userRepository.findByUsername(email);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            if (user.getOtpCode() != null && user.getOtpCode().equals(otpCode) && user.getOtpExpiryTime().isAfter(LocalDateTime.now())) {
+                model.addAttribute("email", email);
+                return "reset-password";
+            }
+        }
+
+        model.addAttribute("error", "Mã OTP không chính xác hoặc đã hết hạn!");
+        model.addAttribute("email", email);
+        return "verify-otp";
+    }
+
+    @PostMapping("/reset-password")
+    public String processResetPassword(@RequestParam("email") String email, @RequestParam("newPassword") String newPassword) {
+        Optional<User> userOptional = userRepository.findByUsername(email);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setPassword(passwordEncoder.encode(newPassword));
+            user.setOtpCode(null);
+            userRepository.save(user);
+        }
+        return "redirect:/login?resetSuccess";
     }
 }

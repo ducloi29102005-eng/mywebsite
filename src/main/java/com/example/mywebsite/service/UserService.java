@@ -1,126 +1,83 @@
 package com.example.mywebsite.service;
 
-import com.example.mywebsite.model.*;
-import com.example.mywebsite.repository.*;
+import com.example.mywebsite.model.User;
+import com.example.mywebsite.model.UserProfile;
+import com.example.mywebsite.repository.UserRepository;
+import com.example.mywebsite.repository.UserProfileRepository;
+import com.example.mywebsite.repository.UserDataRepository;
+import com.example.mywebsite.repository.GameLinkedRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
 import java.util.List;
+import java.util.Optional;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import java.util.UUID; // Dùng để tạo userId tự động
 
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private UserProfileRepository userProfileRepository;
-    @Autowired
-    private UserInfoRepository userInfoRepository;
-    @Autowired
-    private UserDataRepository userDataRepository;
-    @Autowired
-    private GameLinkedRepository gameLinkedRepository;
+    // Dán đoạn này vào bên trong class UserService
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     public void registerUser(User user) {
+        // Sinh userId tự động cho tài khoản mới
+        user.setUserId(UUID.randomUUID().toString());
+        // Mã hóa mật khẩu
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        if (user.getRole() == null || user.getRole().isEmpty()) {
-            user.setRole("USER");
-        }
-        if (user.getStatus() == null || user.getStatus().isEmpty()) {
-            user.setStatus("ACTIVE");
-        }
-
-        // 1. Tạo mã userId riêng có dấu gạch ngang
-        String customUserId = UUID.randomUUID().toString();
-        user.setUserId(customUserId);
-
-        // 2. Lưu User gốc
-        User savedUser = userRepository.save(user);
-        String commonUserId = savedUser.getUserId();
-
-        // 3. Khởi tạo và liên kết các bảng phụ bằng chung 1 mã commonUserId
-        // -> Bảng 1: user_infor
-        UserInfo info = new UserInfo();
-        info.setUserId(commonUserId);
-        userInfoRepository.save(info);
-
-        // -> Bảng 2: user_data (Gmail)
-        UserData data = new UserData();
-        data.setUserId(commonUserId);
-        userDataRepository.save(data);
-
-        // -> Bảng 3: game_linked (Game)
-        GameLinked games = new GameLinked();
-        games.setUserId(commonUserId);
-        gameLinkedRepository.save(games);
-
-        // -> Bảng 4: user_profiles
-        UserProfile profile = new UserProfile();
-        profile.setUserId(commonUserId);
-        userProfileRepository.save(profile);
-    }
-
-    public void updateProfile(String username, UserProfile updatedInfo) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản"));
-        String commonUserId = user.getUserId();
-
-        // Tìm profile dựa trên UUID
-        UserProfile existingProfile = userProfileRepository.findByUserId(commonUserId)
-                .orElse(new UserProfile());
-
-        // Cập nhật thông tin cá nhân
-        existingProfile.setUserId(commonUserId);
-        existingProfile.setFullName(updatedInfo.getFullName());
-        existingProfile.setDateOfBirth(updatedInfo.getDateOfBirth());
-        existingProfile.setPhoneNumber(updatedInfo.getPhoneNumber());
-        existingProfile.setAddress(updatedInfo.getAddress());
-
-        // Lưu vào bảng user_profiles
-        userProfileRepository.save(existingProfile);
-    }
-
-    public boolean changePassword(String username, String oldPassword, String newPassword) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản"));
-
-        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-            return false;
-        }
-
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setRole("USER");
+        user.setStatus("ACTIVE");
         userRepository.save(user);
-        return true;
     }
 
-    public User authenticate(String username, String password) {
-        User user = userRepository.findByUsername(username).orElse(null);
+    @Autowired
+    private UserRepository userRepository;
 
-        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
-            // Trả về user để LoginController kiểm tra status == 'BANNED' và chuyển trang banned.html
-            return user;
+    @Autowired
+    private UserProfileRepository userProfileRepository;
+
+    @Autowired
+    private UserDataRepository userDataRepository;
+
+    @Autowired
+    private GameLinkedRepository gameLinkedRepository;
+
+    // =======================================================
+    // 1. CHỨC NĂNG USER: Cập nhật hồ sơ
+    // =======================================================
+    public void updateProfile(String username, UserProfile updatedInfo) {
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            String userId = user.getUserId();
+
+            if (userId != null) {
+                UserProfile profile = userProfileRepository.findByUserId(userId).orElse(new UserProfile());
+                profile.setUserId(userId);
+
+                // Cập nhật các trường thông tin từ form vào database
+                if (updatedInfo.getFullName() != null) {
+                    profile.setFullName(updatedInfo.getFullName());
+                }
+                userProfileRepository.save(profile);
+            }
         }
-        return null;
     }
 
-    // ==========================================
-    // CÁC HÀM XỬ LÝ DÀNH RIÊNG CHO QUẢN TRỊ VIÊN
-    // ==========================================
+    // =======================================================
+    // 2. CHỨC NĂNG ADMIN: Quản lý người dùng
+    // =======================================================
 
-    // 1. Lấy toàn bộ danh sách tài khoản hiển thị trên Dashboard
+    // Lấy danh sách tất cả người dùng
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    // 2. Chuyển đổi vai trò qua lại giữa ADMIN và USER
+    // Đổi vai trò (ADMIN <-> USER)
     public void toggleAdminRole(String userId) {
         userRepository.findByUserId(userId).ifPresent(user -> {
-            if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+            if ("ADMIN".equals(user.getRole())) {
                 user.setRole("USER");
             } else {
                 user.setRole("ADMIN");
@@ -129,7 +86,7 @@ public class UserService {
         });
     }
 
-    // 3. Khóa hoặc Mở khóa tài khoản (BANNED <-> ACTIVE)
+    // Khóa / Mở khóa tài khoản
     public void toggleBanStatus(String userId, String reason) {
         userRepository.findByUserId(userId).ifPresent(user -> {
             if ("BANNED".equalsIgnoreCase(user.getStatus())) {
@@ -137,20 +94,23 @@ public class UserService {
                 user.setBanReason(null);
             } else {
                 user.setStatus("BANNED");
-                user.setBanReason(reason != null && !reason.trim().isEmpty() ? reason : "Vi phạm quy định hệ thống");
+                user.setBanReason(reason);
             }
             userRepository.save(user);
         });
     }
 
-    // 4. Xóa tài khoản chính và dọn dẹp các collection liên quan
+    // Xóa tài khoản (Xóa sạch dữ liệu ở cả 4 bảng dựa trên userId)
     public void deleteUser(String userId) {
-        userRepository.findByUserId(userId).ifPresent(user -> {
-            userProfileRepository.deleteByUserId(userId);
-            userInfoRepository.deleteByUserId(userId);
-            userDataRepository.deleteByUserId(userId);
-            gameLinkedRepository.deleteByUserId(userId);
-            userRepository.delete(user);
-        });
+        userRepository.findByUserId(userId).ifPresent(user -> userRepository.delete(user));
+        userProfileRepository.findByUserId(userId).ifPresent(profile -> userProfileRepository.delete(profile));
+
+        // Đảm bảo không bị lỗi null nếu bạn chưa dùng tới bảng UserData hoặc GameLinked
+        if (userDataRepository != null) {
+            userDataRepository.findByUserId(userId).ifPresent(data -> userDataRepository.delete(data));
+        }
+        if (gameLinkedRepository != null) {
+            gameLinkedRepository.findByUserId(userId).ifPresent(game -> gameLinkedRepository.delete(game));
+        }
     }
 }

@@ -5,6 +5,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.Optional;
 
 public interface UserDataRepository extends MongoRepository<UserData, String> {
-    Optional<UserData> findByUserId(String userId);
-    void deleteByUserId(String userId);
+    Optional<UserData> findByUserId(String userId); // Đồng bộ 100% bằng userId
 }

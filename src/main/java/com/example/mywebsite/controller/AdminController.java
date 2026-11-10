@@ -5,6 +5,9 @@ import com.example.mywebsite.service.UserService;
 import com.example.mywebsite.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,17 +24,34 @@ public class AdminController {
     @Autowired
     private UserRepository userRepository;
 
+    private String getUserId(Principal principal) {
+        if (principal == null) return null;
+        String identifier;
+
+        if (principal instanceof OAuth2AuthenticationToken) {
+            identifier = (String) ((org.springframework.security.oauth2.core.user.OAuth2User)
+                    ((OAuth2AuthenticationToken) principal).getPrincipal()).getAttribute("email");
+            return userRepository.findByGmail(identifier).map(User::getUserId).orElse(null);
+        } else {
+            identifier = principal.getName();
+            return userRepository.findByUsername(identifier).map(User::getUserId).orElse(null);
+        }
+    }
+
     // 1. Vào thẳng Dashboard hiển thị danh sách người dùng ngay lập tức
     @GetMapping("/dashboard")
     public String dashboard(Principal principal, Model model) {
         List<User> userList = userService.getAllUsers();
         model.addAttribute("users", userList);
-        // Lấy thông tin tài khoản đang thao tác
-        if (principal != null) {
-            userRepository.findByUsername(principal.getName()).ifPresent(currentUser -> {
+
+        // ĐÃ SỬA LỖI: Sử dụng getUserId để lấy chính xác ID dù đăng nhập bằng form hay Google
+        String currentUserId = getUserId(principal);
+        if (currentUserId != null) {
+            userRepository.findByUserId(currentUserId).ifPresent(currentUser -> {
                 model.addAttribute("currentUser", currentUser);
             });
         }
+
         return "admin-dashboard";
     }
 

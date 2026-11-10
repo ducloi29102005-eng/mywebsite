@@ -1,73 +1,35 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UT   F-8">
-    <title>Phương thức đăng nhập| Panthera</title>
+    <meta charset="UTF-8">
+    <title>Phương thức đăng nhập | Panthera</title>
     <style>
         :root {
-            --primary: #ff5a00; /* Màu cam Panthera */
+            --primary: #ff5a00;
             --bg-dark: #050505;
             --surface: #121212;
             --border: #2a2a2a;
             --text-main: #ffffff;
             --text-muted: #888888;
         }
-        body {
-            margin: 0; background-color: var(--bg-dark); color: var(--text-main);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex; min-height: 100vh;
-        }
-        /* Sidebar (Giữ nguyên) */
-        .sidebar {
-            width: 280px; background: var(--surface); border-right: 1px solid var(--border);
-            padding: 30px 20px; box-sizing: border-box; display: flex; flex-direction: column;
-        }
+        body { margin: 0; background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', sans-serif; display: flex; min-height: 100vh; }
+        .sidebar { width: 280px; background: var(--surface); border-right: 1px solid var(--border); padding: 30px 20px; box-sizing: border-box; display: flex; flex-direction: column; }
         .sidebar .logo { width: 160px; height: 160px; display: block; margin: 0 auto 40px auto; border-radius: 50%; object-fit: cover; }
         .nav-menu { list-style: none; padding: 0; margin: 0; }
-        .nav-menu li a {
-            display: flex; align-items: center; padding: 15px 20px; color: var(--text-muted);
-            text-decoration: none; border-radius: 8px; margin-bottom: 10px;
-            font-weight: 500; transition: all 0.3s;
-        }
+        .nav-menu li a { display: flex; align-items: center; padding: 15px 20px; color: var(--text-muted); text-decoration: none; border-radius: 8px; margin-bottom: 10px; font-weight: 500; transition: all 0.3s; }
         .nav-menu li a:hover { background: rgba(255, 90, 0, 0.05); color: var(--primary); }
-        .nav-menu li a.active {
-            background: rgba(255, 90, 0, 0.1); color: var(--primary);
-            border-left: 4px solid var(--primary);
-        }
-
-        /* Main Content - Security Section */
+        .nav-menu li a.active { background: rgba(255, 90, 0, 0.1); color: var(--primary); border-left: 4px solid var(--primary); }
         .main-content { flex: 1; padding: 50px; background: var(--bg-dark); }
         .content-header { margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
-        .content-header h2 { margin: 0; font-weight: 400; font-size: 24px; letter-spacing: 1px; text-transform: uppercase; }
-
-        .security-container { max-width: 700px; }
-        .security-card {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 12px; padding: 25px; margin-bottom: 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            transition: 0.3s;
-        }
-        .security-card:hover { border-color: #444; }
-        .security-info h4 { margin: 0 0 8px 0; font-size: 18px; font-weight: 500; }
-        .security-info p { margin: 0; color: var(--text-muted); font-size: 14px; }
-
-        .btn-action {
-            background: var(--primary); color: #fff; border: none; padding: 12px 24px;
-            font-size: 13px; font-weight: bold; text-transform: uppercase; border-radius: 6px;
-            cursor: pointer; transition: 0.3s;
-        }
-        .btn-action:hover { background: #e04e00; box-shadow: 0 0 15px rgba(255, 90, 0, 0.3); }
-
-        .btn-outline {
-            background: transparent; color: var(--text-main); border: 1px solid var(--border);
-        }
-        .btn-outline:hover { background: rgba(255,255,255,0.05); border-color: var(--text-muted); box-shadow: none;}
-
-        /* Trạng thái đã liên kết */
-        .status-linked { color: #4caf50; font-size: 13px; display: flex; align-items: center; margin-top: 8px;}
-        .status-linked::before {
-            content: "✓"; display: inline-block; margin-right: 5px; font-weight: bold;
-        }
+        .content-header h2 { margin: 0; font-weight: 400; font-size: 24px; text-transform: uppercase; }
+        .security-card { background: #151515; border: 1px solid var(--border); border-radius: 8px; padding: 25px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .security-info h4 { margin: 0 0 8px 0; color: #ffffff; font-size: 16px; }
+        .security-info p { margin: 0; font-size: 13px; color: var(--text-muted); }
+        .status-linked { color: #00c853; font-weight: bold; }
+        .btn-outline { background: transparent; border: 1px solid #333; color: #ffffff; font-weight: bold; padding: 10px 20px; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+        .btn-outline:hover { background: rgba(255, 255, 255, 0.05); }
+        .btn-google { display: inline-block; padding: 10px 20px; background-color: #db4437; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; transition: 0.3s; }
+        .btn-google:hover { background-color: #c23321; }
     </style>
 </head>
 <body>
@@ -75,82 +37,60 @@
     <img th:src="@{/images/logo.jpg}" alt="Panthera Logo" class="logo">
     <ul class="nav-menu">
         <li><a th:href="@{/profile}">Hồ sơ của bạn</a></li>
-        <!-- SỬA LỖI: Đổi href="#" thành th:href="@{/profile/games}" -->
         <li><a th:href="@{/profile/games}">Trò chơi đã liên kết</a></li>
-        <li><a th:href="@{/profile/security}" class="active">Caì đặt tài khoản</a></li>
-        <li style="margin-top: 20px;"th:if="${user != null and user.role == 'ADMIN'}">
+        <li><a th:href="@{/profile/security}" class="active">Cài đặt tài khoản</a></li>
+        <li style="margin-top: 20px;" th:if="${user != null and user.role == 'ADMIN'}">
             <a th:href="@{/admin/dashboard}" style="color: #ff9900; border-left: 2px solid #ff9900; padding-left: 15px;">Trang Quản Trị</a>
-        <li>
+        </li>
         <li style="margin-top: 50px;"><a th:href="@{/logout}" style="color: #ff4d4d;">Đăng xuất</a></li>
     </ul>
 </aside>
 
 <main class="main-content">
-    <div class="content-header">
-        <h2>CÀI ĐẶT TÀI KHOẢN</h2>
+    <div class="content-header"><h2>CÀI ĐẶT TÀI KHOẢN</h2></div>
+
+    <div th:if="${param.linkSuccess}" style="background: rgba(0, 200, 83, 0.1); color: #00c853; padding: 15px; border-radius: 8px; border: 1px solid #00c853; margin-bottom: 25px;">
+        Liên kết tài khoản Google thành công!
+    </div>
+    <div th:if="${param.error != null and param.error[0] == 'email_exists'}" style="background: rgba(255, 77, 77, 0.1); color: #ff4d4d; padding: 15px; border-radius: 8px; border: 1px solid #ff4d4d; margin-bottom: 25px;">
+        Thất bại! Tài khoản Google này đã được sử dụng bởi người khác.
     </div>
 
-    <!-- Thông báo cập nhật thành công -->
-    <div th:if="${param.success}" class="alert-success" style="background: rgba(255, 90, 0, 0.1); color: #ff5a00; padding: 15px; border-radius: 8px; border: 1px solid #ff5a00; margin-bottom: 25px;">
-        Cập nhật thông tin bảo mật thành công!
-    </div>
-
-    <!-- 1. Block Đổi mật khẩu -->
-    <div class="security-card" style="background: #151515; border: 1px solid #2a2a2a; border-radius: 8px; padding: 25px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <!-- 1. Mật khẩu -->
+    <div class="security-card">
         <div class="security-info">
-            <h4 style="margin: 0 0 8px 0; color: #ffffff; font-size: 16px;">Mật khẩu</h4>
-            <p style="margin: 0; font-size: 13px; color: #888888;">Thiết lập mật khẩu mạnh để bảo vệ tài khoản của bạn</p>
+            <h4>Mật khẩu</h4>
+            <p>Thiết lập mật khẩu mạnh để bảo vệ tài khoản của bạn</p>
         </div>
-        <!-- Nút chuyển sang trang đổi mật khẩu -->
-        <a th:href="@{/profile/security/password}" style="background: #ff5a00; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 13px; transition: 0.3s;">ĐỔI MẬT KHẨU</a>
+        <a th:href="@{/profile/security/password}" style="background: #ff5a00; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 13px;">ĐỔI MẬT KHẨU</a>
     </div>
 
-    <!-- 2. Block Địa chỉ Email -->
-    <div class="security-card" style="background: #151515; border: 1px solid #2a2a2a; border-radius: 8px; padding: 25px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <!-- 2. Tài khoản Google -->
+    <!-- 2. Tài khoản Google -->
+    <div class="security-card">
         <div class="security-info">
-            <h4 style="margin: 0 0 8px 0; color: #ffffff; font-size: 16px;">Địa chỉ Email</h4>
-            <p style="margin: 0; font-size: 13px; color: #888888;" th:text="${userData.gmail != null && !#strings.isEmpty(userData.gmail) ? userData.gmail : 'Chưa liên kết email'}">
-                Chưa liên kết email
+            <h4>Tài khoản Google (Gmail)</h4>
+
+            <!-- Hiện "Chưa liên kết" khi: Gặp lỗi trùng email HOẶC tài khoản chưa có Gmail -->
+            <p th:if="${param.error != null or userData == null or userData.gmail == null or #strings.isEmpty(userData.gmail)}">
+                Chưa liên kết
+            </p>
+
+            <!-- Chỉ hiện "Đã liên kết" khi: KHÔNG CÓ LỖI VÀ đã có Gmail trong DB -->
+            <p th:if="${param.error == null and userData != null and userData.gmail != null and !#strings.isEmpty(userData.gmail)}" class="status-linked">
+                ✓ Đã liên kết: <span style="font-weight: normal; color: #ccc;" th:text="${userData.gmail}"></span>
             </p>
         </div>
 
-        <!-- Trạng thái 1: CHƯA CÓ EMAIL -> Hiện ô nhập và nút LIÊN KẾT -->
-        <form th:if="${userData.gmail == null || #strings.isEmpty(userData.gmail)}" th:action="@{/profile/security/link-gmail}" method="post" style="display: flex; gap: 15px; margin: 0;">
-            <input type="email" name="gmail" placeholder="Nhập địa chỉ email..." required
-                   style="padding: 10px 15px; background: #050505; border: 1px solid #2a2a2a; color: #ffffff; border-radius: 6px; width: 250px;">
-            <button type="submit" style="background: transparent; border: 1px solid #333; color: #ffffff; font-weight: bold; padding: 10px 20px; border-radius: 6px; cursor: pointer; transition: 0.3s;">
-                LIÊN KẾT
-            </button>
+        <!-- Nút đỏ "LIÊN KẾT GOOGLE": Luôn giữ nguyên khi gặp lỗi trùng HOẶC khi chưa có Gmail -->
+        <a th:if="${param.error != null or userData == null or userData.gmail == null or #strings.isEmpty(userData.gmail)}"
+           th:href="@{/link-google-start}" class="btn-google">LIÊN KẾT GOOGLE</a>
+
+        <!-- Nút "HỦY LIÊN KẾT": Chỉ hiện khi KHÔNG CÓ LỖI VÀ đã liên kết thành công -->
+        <form th:if="${param.error == null and userData != null and userData.gmail != null and !#strings.isEmpty(userData.gmail)}"
+              th:action="@{/profile/security/unlink-gmail}" method="post" style="margin: 0;">
+            <button type="submit" class="btn-outline">HỦY LIÊN KẾT</button>
         </form>
-
-        <!-- Trạng thái 2: ĐÃ CÓ EMAIL -> Ẩn ô nhập, hiện nút HỦY LIÊN KẾT -->
-        <form th:if="${userData.gmail != null && !#strings.isEmpty(userData.gmail)}" th:action="@{/profile/security/unlink-gmail}" method="post" style="margin: 0;">
-            <button type="submit" style="background: transparent; border: 1px solid #333; color: #ffffff; font-weight: bold; padding: 10px 20px; border-radius: 6px; cursor: pointer; transition: 0.3s;">
-                HỦY LIÊN KẾT
-            </button>
-        </form>
-    </div>
-
-    <!-- 3. Block Tài khoản Google -->
-    <div class="security-card" style="background: #151515; border: 1px solid #2a2a2a; border-radius: 8px; padding: 25px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <div class="security-info">
-            <h4 style="margin: 0 0 8px 0; color: #ffffff; font-size: 16px;">Tài khoản Google</h4>
-            <p style="margin: 0; font-size: 13px; color: #00c853;">✓ Đã liên kết</p>
-        </div>
-        <button type="button" style="background: transparent; border: 1px solid #333; color: #ffffff; font-weight: bold; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
-            HỦY LIÊN KẾT
-        </button>
-    </div>
-
-    <!-- 4. Block Tài khoản Facebook -->
-    <div class="security-card" style="background: #151515; border: 1px solid #2a2a2a; border-radius: 8px; padding: 25px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <div class="security-info">
-            <h4 style="margin: 0 0 8px 0; color: #ffffff; font-size: 16px;">Tài khoản Facebook</h4>
-            <p style="margin: 0; font-size: 13px; color: #888888;">Chưa liên kết</p>
-        </div>
-        <button type="button" style="background: transparent; border: 1px solid #333; color: #ffffff; font-weight: bold; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
-            LIÊN KẾT
-        </button>
     </div>
 </main>
 </body>

@@ -2,7 +2,8 @@ package com.example.mywebsite.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
+import java.time.LocalDateTime;
+import org.springframework.data.mongodb.core.index.Indexed;
 @Document(collection = "users")
 public class User {
     @Id
@@ -13,6 +14,11 @@ public class User {
     private String role; //Khởi tạo mặc định là "user" cho người đăng kí mới
     private String status = "ACTIVE";
     private String banReason;
+    //Gen Getter và Setter cho 2 biến này
+    private String otpCode;
+    private LocalDateTime otpExpiryTime;
+    @Indexed(unique = true)
+    private String gmail;
 
     // Getter và Setter
     public String getId() { return id; }
@@ -39,5 +45,30 @@ public class User {
 
     public void setBanReason(String lockReason) {
         this.banReason = lockReason;
+    }
+
+
+    public String getOtpCode() {
+        return otpCode;
+    }
+
+    public void setOtpCode(String otpCode) {
+        this.otpCode = otpCode;
+    }
+
+    public java.time.LocalDateTime getOtpExpiryTime() {
+        return otpExpiryTime;
+    }
+
+    public void setOtpExpiryTime(java.time.LocalDateTime otpExpiryTime) {
+        this.otpExpiryTime = otpExpiryTime;
+    }
+    //Getter và Setter cho trường gmail
+    public String getGmail(){
+        return gmail;
+    }
+
+    public void setGmail(String gmail){
+        this.gmail = gmail;
     }
 }

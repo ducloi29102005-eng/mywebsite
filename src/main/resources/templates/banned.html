@@ -2,129 +2,118 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Tài khoản bị khóa | BANNED</title>
+    <title>Tài Khoản Bị Khóa | Panthera</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
         body {
-            background-color: #080808;
+            margin: 0;
+            background-color: #0b0b0b;
             color: #ffffff;
-            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
-            text-align: center;
-            overflow: hidden;
+            align-items: center;
+            min-height: 100vh;
         }
 
-        .ban-container {
-            max-width: 650px;
-            padding: 40px;
+        /* Hiệu ứng rung giật / động đậy cho chữ BANNED */
+        @keyframes pulseShake {
+            0% {
+                transform: scale(1) translate(0, 0);
+                text-shadow: 0 0 25px rgba(255, 30, 30, 0.6);
+            }
+            20% {
+                transform: scale(1.02) translate(-1px, 1px);
+                text-shadow: 0 0 35px rgba(255, 42, 42, 0.9);
+            }
+            40% {
+                transform: scale(0.99) translate(1px, -1px);
+                text-shadow: 0 0 20px rgba(255, 20, 20, 0.5);
+            }
+            60% {
+                transform: scale(1.03) translate(-2px, -1px);
+                text-shadow: 0 0 40px rgba(255, 50, 50, 1);
+            }
+            80% {
+                transform: scale(1.01) translate(1px, 1px);
+                text-shadow: 0 0 30px rgba(255, 30, 30, 0.7);
+            }
+            100% {
+                transform: scale(1) translate(0, 0);
+                text-shadow: 0 0 25px rgba(255, 30, 30, 0.6);
+            }
         }
 
-        /* Chữ BAN to đùng giữa màn hình có hiệu ứng phát sáng */
-        .ban-title {
-            font-size: 110px;
+        .banned-title {
+            color: #ff2a2a;
+            font-size: 96px;
             font-weight: 900;
-            color: #ff2222;
-            letter-spacing: 12px;
-            line-height: 1;
-            margin-bottom: 20px;
-            text-shadow: 0 0 25px rgba(255, 34, 34, 0.7), 0 0 50px rgba(255, 34, 34, 0.4);
-            animation: pulse 2s infinite alternate;
+            letter-spacing: 4px;
+            margin: 0 0 10px 0;
+            user-select: none;
+            /* Kích hoạt chuyển động liên tục */
+            animation: pulseShake 1.8s infinite ease-in-out;
         }
 
-        @keyframes pulse {
-            from {
-                text-shadow: 0 0 20px rgba(255, 34, 34, 0.6);
-                transform: scale(1);
-            }
-            to {
-                text-shadow: 0 0 45px rgba(255, 34, 34, 0.95);
-                transform: scale(1.02);
-            }
+        .account-label {
+            font-size: 18px;
+            color: #ffffff;
+            margin-bottom: 25px;
         }
 
-        .user-name {
-            font-size: 20px;
-            color: #aaaaaa;
+        .reason-box {
+            background-color: #141414;
+            border: 1px solid #222222;
+            border-left: 4px solid #ff2a2a;
+            border-radius: 8px;
+            padding: 16px 24px;
+            width: 100%;
+            max-width: 580px;
+            box-sizing: border-box;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #999999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             margin-bottom: 30px;
         }
 
-        .user-name span {
-            color: #ff5a00;
-            font-weight: 700;
-        }
-
-        /* Khung hiển thị nội dung/lý do bị ban */
-        .reason-box {
-            background: #141414;
-            border: 1px solid #2b1717;
-            border-left: 4px solid #ff2222;
-            border-radius: 12px;
-            padding: 22px 28px;
-            margin-bottom: 35px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-        }
-
-        .reason-label {
-            font-size: 13px;
-            font-weight: 700;
-            color: #888888;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .reason-text {
-            font-size: 17px;
-            color: #f1f1f1;
-            font-weight: 500;
-            line-height: 1.5;
-        }
-
-        /* Nút đăng xuất quay lại màn login */
         .btn-logout {
-            display: inline-block;
-            background: #1f1f1f;
+            background-color: #1a1a1a;
             color: #ffffff;
+            border: 1px solid #2a2a2a;
+            padding: 12px 28px;
+            border-radius: 6px;
             text-decoration: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-weight: 600;
             font-size: 14px;
-            border: 1px solid #333;
+            font-weight: 500;
             transition: 0.2s;
         }
 
         .btn-logout:hover {
-            background: #2b2b2b;
-            border-color: #555;
-            color: #ff4444;
+            background-color: #252525;
+            border-color: #3a3a3a;
         }
     </style>
 </head>
 <body>
 
-<div class="ban-container">
-    <h1 class="ban-title">BANNED</h1>
+<!-- Chỉ duy nhất dòng này chuyển động rung lắc và phát sáng -->
+<h1 class="banned-title">BANNED</h1>
 
-    <div class="user-name">
-        Tài khoản: <span th:text="${username}">username</span>
-    </div>
-
-    <div class="reason-box">
-        <div class="reason-label">LÝ DO BỊ KHÓA</div>
-        <div class="reason-text" th:text="${reason}">Vi phạm tiêu chuẩn cộng đồng hoặc gian lận hệ thống.</div>
-    </div>
-
-    <a th:href="@{/logout}" class="btn-logout">Đăng xuất</a>
+<!-- Tên tài khoản -->
+<div class="account-label">
+    Tài khoản: <span style="font-weight: bold;" th:text="${username}"></span>
 </div>
+
+<!-- Khung lý do: Tự động đổi nội dung nếu có truyền reason, không thì giữ chữ mặc định -->
+<div class="reason-box" th:text="${reason != null ? reason : 'Tài khoản của bạn đã bị khóa do vi phạm chính sách tiêu chuẩn cộng đồng.'}">
+    LÝ DO BỊ KHÓA
+</div>
+
+<!-- Nút Đăng xuất tĩnh -->
+<a th:href="@{/login}" class="btn-logout">Đăng xuất</a>
 
 </body>
 </html>

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panthera Games - Cổng Game Trực Tuyến</title>
+    <style>
+        :root {
+            --primary: #ff5a00;
+            --primary-hover: #e04e00;
+            --bg-dark: #050505;
+            --surface: #121212;
+            --border: #242424;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* 1. HEADER CHUẨN VNGGAMES */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 45px;
+            height: 72px;
+            background-color: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-left { display: flex; align-items: center; gap: 40px; }
+
+        /* LOGO VÀ TÊN PANTHERA BẤM VÀO VỀ TRANG CHỦ */
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #fff;
+            font-weight: 800;
+            font-size: 20px;
+            letter-spacing: 1.5px;
+        }
+        .brand-logo img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+        }
+        .brand-logo span { color: var(--primary); }
+
+        .nav-links { display: flex; list-style: none; margin: 0; padding: 0; gap: 26px; }
+        .nav-links li a {
+            text-decoration: none;
+            color: #cccccc;
+            font-size: 14.5px;
+            font-weight: 500;
+            transition: 0.25s;
+        }
+        .nav-links li a:hover, .nav-links li a.active {
+            color: #ffffff;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 6px;
+        }
+
+        /* 2. GÓC PHẢI: ĐĂNG NHẬP / AVATAR DROPDOWN */
+        .nav-right { display: flex; align-items: center; }
+        .btn-auth-group { display: flex; gap: 12px; }
+        .btn-auth {
+            text-decoration: none;
+            padding: 9px 20px;
+            border-radius: 20px;
+            font-size: 13.5px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .btn-reg { background: transparent; color: #fff; border: 1px solid #444; }
+        .btn-reg:hover { border-color: #fff; }
+        .btn-login { background: var(--primary); color: #fff; border: none; }
+        .btn-login:hover { background: var(--primary-hover); }
+
+        /* USER DROPDOWN THEO HÌNH MẪU SỐ 2 */
+        .user-dropdown-wrapper {
+            position: relative;
+            padding: 12px 0;
+            cursor: pointer;
+        }
+        .avatar-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: transparent;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+        .user-avatar-img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #333;
+        }
+        .arrow-down {
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #888;
+            transition: transform 0.2s;
+        }
+
+        .user-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 0;
+            width: 280px;
+            background: #ffffff;
+            color: #222222;
+            border-radius: 12px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.6);
+            padding: 18px;
+            z-index: 1100;
+        }
+
+        .user-dropdown-wrapper:hover .user-dropdown-menu { display: block; }
+        .user-dropdown-wrapper:hover .arrow-down { transform: rotate(180deg); }
+
+        .dropdown-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #e9e9e9;
+        }
+        .dropdown-avatar-img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .dropdown-profile-info h4 {
+            margin: 0;
+            font-size: 15px;
+            color: #111;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 175px;
+        }
+        .dropdown-profile-info p { margin: 4px 0 0 0; font-size: 11.5px; color: #777; }
+
+        .dropdown-links { list-style: none; padding: 10px 0 0 0; margin: 0; }
+        .dropdown-links li a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            text-decoration: none;
+            color: #222;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+        .dropdown-links li a:hover { background-color: #f5f5f5; color: var(--primary); }
+        .dropdown-links li a.logout-link { color: #dc3545; }
+        .dropdown-links li a.logout-link:hover { background-color: #ffeef0; }
+
+        /* 3. HERO BANNER */
+        .hero {
+            position: relative;
+            padding: 60px 20px 40px;
+            text-align: center;
+            background: radial-gradient(circle at center 20%, #22130b 0%, #050505 75%);
+        }
+        .hero-banner-box {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .hero-banner-box img {
+            width: 100%;
+            max-height: 420px;
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.85);
+            border: 1px solid #242424;
+        }
+
+        .hero-content { margin-top: 30px; }
+        .hero-tagline {
+            font-size: 32px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+        .hero-tagline span { color: var(--primary); }
+        .btn-cta {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            font-weight: 700;
+            text-decoration: none;
+            padding: 13px 40px;
+            border-radius: 30px;
+            font-size: 15px;
+            box-shadow: 0 0 25px rgba(255, 90, 0, 0.45);
+            transition: 0.3s;
+        }
+        .btn-cta:hover { transform: scale(1.05); background: var(--primary-hover); }
+
+        /* 4. DẢI TICKER */
+        .marquee-bar {
+            background: #000;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .marquee-content { display: inline-block; animation: scroll-left 25s linear infinite; }
+        .badge {
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 0 10px;
+            color: #fff;
+        }
+        .badge-orange { background: var(--primary); }
+        .badge-purple { background: #6200ea; }
+        .badge-green { background: #00c853; }
+
+        @keyframes scroll-left {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+    </style>
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}"/>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="navbar">
+    <div class="nav-left">
+        <!-- Bấm vào logo hoặc tên quay về trang chủ -->
+        <a th:href="@{/}" class="brand-logo">
+            <img th:src="@{/images/logo.jpg}" alt="Panthera Logo" onerror="this.src='https://placehold.co/100x100/ff5a00/ffffff?text=P'">
+            <div>PANTHERA<span>.GAMES</span></div>
+        </a>
+        <ul class="nav-links">
+            <li><a th:href="@{/}" class="active">Trang chủ</a></li>
+            <li><a href="#games">Games</a></li>
+            <li><a href="#news">Tin tức</a></li>
+            <li><a th:href="@{/shop}" class="active-shop" style="color: #ff5a00; font-weight: 700;">SHOP <span style="font-size: 11px;">↗</span></a></li>
+            <li><a href="#about">Về chúng tôi</a></li>
+        </ul>
+    </div>
+
+    <div class="nav-right">
+        <!-- TRƯỜNG HỢP 1: CHƯA ĐĂNG NHẬP -->
+        <div th:if="${currentUser == null}" class="btn-auth-group">
+            <a th:href="@{/register}" class="btn-auth btn-reg">Đăng ký</a>
+            <a th:href="@{/login}" class="btn-auth btn-login">Đăng nhập</a>
+        </div>
+
+        <!-- TRƯỜNG HỢP 2: ĐÃ ĐĂNG NHẬP (Hiện Avatar + Hover ra Menu như ảnh 2) -->
+        <div th:if="${currentUser != null}" class="user-dropdown-wrapper">
+            <button class="avatar-btn">
+                <img th:src="@{/images/logo.jpg}" class="user-avatar-img" alt="Avatar">
+                <div class="arrow-down"></div>
+            </button>
+
+            <div class="user-dropdown-menu">
+                <div class="dropdown-profile-header">
+                    <img th:src="@{/images/logo.jpg}" class="dropdown-avatar-img" alt="Avatar">
+                    <div class="dropdown-profile-info">
+                        <h4 th:text="${userProfile != null && userProfile.fullName != null && !#strings.isEmpty(userProfile.fullName) ? userProfile.fullName : currentUser.username}">Người dùng</h4>
+                        <p>ID: <span th:text="${#strings.substring(currentUser.userId, 0, 8)}">34e17c94</span> • VN</p>
+                    </div>
+                </div>
+
+                <ul class="dropdown-links">
+                    <!-- 1. DÀNH CHO USER THƯỜNG: Hiện đầy đủ các mục cá nhân -->
+                    <th:block th:if="${currentUser.role != 'ADMIN'}">
+                        <li><a th:href="@{/profile}">👤 Tài khoản</a></li>
+                        <li><a th:href="@{/profile/games}">🎮 Trò chơi đã liên kết</a></li>
+                        <li><a th:href="@{/profile/security}">⚙️ Cài đặt tài khoản</a></li>
+                        <li><a th:href="@{/orders}">📦 Lịch sử đơn hàng</a></li>
+                    </th:block>
+
+                    <!-- 2. DÀNH CHO ADMIN: CHỈ HIỆN DUY NHẤT TRANG QUẢN TRỊ -->
+                    <li th:if="${currentUser.role == 'ADMIN'}">
+                        <a th:href="@{/admin/dashboard}" style="color: #ff5a00; font-weight: 700; background: rgba(255, 90, 0, 0.08);">
+                            🛡️ Trang Quản Trị
+                        </a>
+                    </li>
+
+                    <!-- Nút Đăng xuất dùng chung cho cả 2 vai trò -->
+                    <!-- Nút Đăng xuất dùng chung cho cả 2 vai trò (Đã chuyển sang POST) -->
+                    <li style="border-top: 1px solid #eeeeee; margin-top: 6px; padding-top: 6px;">
+                        <form th:action="@{/logout}" method="post" style="margin: 0; padding: 0;">
+                            <button type="submit" class="logout-link"
+                                    style="width: 100%; text-align: left; background: none; border: none; display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 14px; font-weight: 600; border-radius: 6px; cursor: pointer; font-family: inherit; transition: 0.2s;"
+                                    onmouseover="this.style.backgroundColor='#ffeef0'"
+                                    onmouseout="this.style.backgroundColor='transparent'">
+                                🚪 Đăng xuất
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- HERO SECTION -->
+<section class="hero">
+    <div class="hero-banner-box">
+        <img th:src="@{/images/logo.jpg}" onerror="this.src='https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop'" alt="Banner Game">
+    </div>
+
+    <div class="hero-content">
+        <div class="hero-tagline">MỘT ĐIỂM CHẠM - <span>VẠN TRẢI NGHIỆM GAME</span></div>
+        <a href="#games" class="btn-cta">Khám phá game ngay</a>
+    </div>
+</section>
+
+<!-- TICKER MARQUEE -->
+<div class="marquee-bar">
+    <div class="marquee-content">
+        <span class="badge badge-orange">Panthera Hub</span> Khám phá ngay
+        <span class="badge badge-purple">Level Up</span> Trải nghiệm đỉnh cao
+        <span class="badge badge-green">Bảo Mật Cao</span> Đăng nhập 1 chạm
+        <span class="badge badge-orange">Panthera Hub</span> Khám phá ngay
+        <span class="badge badge-purple">Level Up</span> Trải nghiệm đỉnh cao
+        <span class="badge badge-green">Bảo Mật Cao</span> Đăng nhập 1 chạm
+    </div>
+</div>
+<!-- ==================== WIDGET CHAT HỖ TRỢ KHÁCH HÀNG ==================== -->
+<div id="support-chat-widget" style="position: fixed; bottom: 25px; right: 25px; z-index: 9999; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+
+    <!-- Nút bong bóng mở khung chat -->
+    <button onclick="toggleCustomerChat()" style="background: #ff5a00; color: white; border: none; border-radius: 50px; padding: 14px 22px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 8px 25px rgba(255, 90, 0, 0.4); display: flex; align-items: center; gap: 8px; transition: 0.2s;">
+        💬 Hỗ trợ trực tuyến
+    </button>
+
+    <!-- Cửa sổ chat (Mặc định ẩn) -->
+    <div id="customer-chat-box" style="display: none; width: 340px; height: 440px; background: #141414; border: 1px solid #2c2c2c; border-radius: 16px; margin-bottom: 12px; flex-direction: column; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.85); position: absolute; bottom: 50px; right: 0;">
+
+        <!-- Header cửa sổ chat -->
+        <div style="background: #1f1f1f; padding: 14px 18px; border-bottom: 1px solid #2c2c2c; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong style="color: #ff5a00; font-size: 15px;">PANTHERA SUPPORT</strong>
+                <div style="font-size: 11px; color: #00c851;">● Sẵn sàng hỗ trợ bạn</div>
+            </div>
+            <button onclick="toggleCustomerChat()" style="background: none; border: none; color: #888; font-size: 18px; cursor: pointer;">✕</button>
+        </div>
+
+        <!-- Khu vực hiển thị tin nhắn -->
+        <div id="customer-chat-messages" style="flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #0a0a0a;">
+            <div style="text-align: center; color: #666; font-size: 12px; margin-top: 20px;">Đang tải cuộc trò chuyện...</div>
+        </div>
+
+        <!-- Ô nhập tin nhắn -->
+        <form onsubmit="sendCustomerMsg(event)" style="display: flex; padding: 10px; background: #141414; border-top: 1px solid #262626; gap: 8px;">
+            <input type="text" id="customer-chat-input" placeholder="Nhập câu hỏi của bạn..." autocomplete="off"
+                   style="flex: 1; background: #0a0a0a; border: 1px solid #333; color: white; padding: 9px 12px; border-radius: 8px; outline: none; font-size: 13px;">
+            <button type="submit" style="background: #ff5a00; color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; cursor: pointer;">Gửi</button>
+        </form>
+    </div>
+</div>
+
+<!-- CHỈ GIỮ LẠI MỘT THẺ SCRIPT DUY NHẤT -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script th:inline="javascript">
+    let stompClient = null;
+    // Lấy chính xác userId của tài khoản đang đăng nhập từ Thymeleaf
+    const currentUserId = /*[[${currentUser != null ? currentUser.userId : null}]]*/ null;
+
+    // 1. Mở / Đóng khung chat
+    function toggleCustomerChat() {
+        const box = document.getElementById('customer-chat-box');
+        const isOpening = box.style.display === 'none' || box.style.display === '';
+        box.style.display = isOpening ? 'flex' : 'none';
+
+        if (isOpening) {
+            if (!currentUserId) {
+                document.getElementById('customer-chat-messages').innerHTML =
+                    '<div style="text-align:center; color:#ff4444; font-size:13px; margin-top:40px;">Vui lòng <a href="/login" style="color:#ff5a00;">đăng nhập</a> để sử dụng hỗ trợ trực tuyến!</div>';
+                return;
+            }
+
+            // Tải lịch sử tin nhắn cũ từ MongoDB
+            fetch('/api/chat/my-history')
+                .then(res => res.json())
+                .then(messages => {
+                    renderMessages(messages);
+                    connectWebSocket(); // Kết nối Socket ngay sau khi tải xong lịch sử
+                })
+                .catch(err => console.error("Lỗi tải lịch sử chat:", err));
+        }
+    }
+
+    // 2. Kết nối WebSocket & Lắng nghe kênh riêng của User
+    function connectWebSocket() {
+        if (stompClient !== null && stompClient.connected) return;
+
+        const socket = new SockJS('/ws-chat');
+        stompClient = Stomp.over(socket);
+        stompClient.debug = null; // Tắt log rác trên console
+
+        stompClient.connect({}, function (frame) {
+            // Đăng ký nhận tin nhắn tại kênh riêng của user này
+            if (currentUserId) {
+                stompClient.subscribe('/queue/chat/' + currentUserId, function (payload) {
+                    const msg = JSON.parse(payload.body);
+                    drawMessage(msg);
+                });
+            }
+
+            // Lắng nghe thêm kênh theo Session ID riêng của trình duyệt này
+            const sessionId = socket._transport && socket._transport.url ? socket._transport.url.split('/')[5] : null;
+            if (sessionId) {
+                stompClient.subscribe('/queue/session/' + sessionId, function (payload) {
+                    document.getElementById('customer-chat-box').style.display = 'flex';
+                    drawMessage(JSON.parse(payload.body));
+                });
+            }
+        }, function (error) {
+            console.error("Mất kết nối WebSocket, đang thử lại...", error);
+            stompClient = null;
+            setTimeout(connectWebSocket, 3000);
+        });
+    }
+
+    // 3. Gửi tin nhắn qua Socket khi bấm nút Gửi hoặc nhấn Enter
+    function sendCustomerMsg(e) {
+        e.preventDefault();
+        const input = document.getElementById('customer-chat-input');
+        const content = input.value.trim();
+
+        if (!content) return;
+        if (!currentUserId) {
+            alert("Vui lòng đăng nhập để gửi tin nhắn!");
+            return;
+        }
+        if (!stompClient || !stompClient.connected) {
+            alert("Đang kết nối tới máy chủ hỗ trợ, vui lòng thử lại sau 1 giây!");
+            connectWebSocket();
+            return;
+        }
+
+        // Gửi payload JSON vào @MessageMapping("/chat.send") trong ChatController
+        stompClient.send("/app/chat.send", {}, JSON.stringify({
+            content: content
+        }));
+
+        input.value = '';
+        input.focus();
+    }
+
+    // 4. Vẽ danh sách tin nhắn lịch sử
+    function renderMessages(messages) {
+        const container = document.getElementById('customer-chat-messages');
+        container.innerHTML = '';
+        if (!messages || messages.length === 0) {
+            container.innerHTML = '<div id="empty-chat-hint" style="text-align:center; color:#777; font-size:12px; margin-top:30px;">Xin chào! Chúng tôi có thể giúp gì cho bạn?</div>';
+            return;
+        }
+        messages.forEach(m => drawMessage(m));
+    }
+
+    // 5. Vẽ từng bong bóng tin nhắn lên giao diện
+    function drawMessage(m) {
+        const container = document.getElementById('customer-chat-messages');
+        const emptyHint = document.getElementById('empty-chat-hint');
+        if (emptyHint) emptyHint.remove();
+
+        const isMe = (m.senderId === currentUserId);
+        const bubble = document.createElement('div');
+        bubble.style.cssText = `
+            max-width: 80%;
+            padding: 9px 13px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            align-self: ${isMe ? 'flex-end' : 'flex-start'};
+            background: ${isMe ? '#ff5a00' : '#1f1f1f'};
+            color: #ffffff;
+            border-bottom-right-radius: ${isMe ? '2px' : '12px'};
+            border-bottom-left-radius: ${isMe ? '12px' : '2px'};
+        `;
+        bubble.innerHTML = `<div style="font-size:10px; opacity:0.75; margin-bottom:3px;">${m.senderName}</div>${m.content}`;
+        container.appendChild(bubble);
+        container.scrollTop = container.scrollHeight;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Sản phẩm | Panthera Admin</title>
+    <style>
+        :root {
+            --primary: #ff5a00;
+            --primary-hover: #e04e00;
+            --danger: #ff4444;
+            --bg-dark: #0a0a0a;
+            --surface: #141414;
+            --surface-hover: #1b1b1b;
+            --border: #222222;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 1. SIDEBAR BÊN TRÁI ĐỒNG BỘ */
+        .sidebar {
+            width: 260px;
+            background: transparent;
+            padding: 30px 24px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .sidebar-brand {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 1.5px;
+            margin-bottom: 35px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; height: 100%; }
+        .nav-links li { margin-bottom: 12px; }
+        .nav-links a {
+            display: block;
+            padding: 14px 20px;
+            color: var(--text-main);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            transition: 0.2s;
+            border: 1px solid transparent;
+        }
+        .nav-links a:hover {
+            background: #191919;
+            border-color: #333;
+        }
+        .nav-links a.active {
+            background: rgba(255, 90, 0, 0.12);
+            color: var(--primary);
+            border: 1px solid rgba(255, 90, 0, 0.25);
+        }
+        .logout-btn {
+            color: var(--danger) !important;
+            border: 1px solid rgba(255, 68, 68, 0.35) !important;
+            text-align: center;
+            margin-top: auto;
+        }
+        .logout-btn:hover { background: rgba(255, 68, 68, 0.1) !important; }
+
+        /* 2. MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            padding: 40px 50px;
+            overflow-y: auto;
+        }
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 30px;
+        }
+        .header-section h1 { margin: 0 0 8px 0; font-size: 26px; text-transform: uppercase; font-weight: 700; }
+        .header-section p { margin: 0; color: var(--text-muted); font-size: 14px; }
+
+        .btn-add-main {
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-add-main:hover { background-color: var(--primary-hover); }
+
+        /* 3. THỐNG KÊ 3 Ô */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+            margin-bottom: 35px;
+        }
+        .stat-card {
+            background: #111111;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+        }
+        .stat-card .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .stat-card .number { font-size: 32px; font-weight: 800; line-height: 1; }
+
+        /* 4. BẢNG DỮ LIỆU */
+        .table-container {
+            background: #111111;
+            border: 1px solid #1f1f1f;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th {
+            background: #151515;
+            padding: 16px 20px;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 12.5px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #202020;
+        }
+        td { padding: 14px 20px; border-bottom: 1px solid #1c1c1c; vertical-align: middle; }
+        tr:hover { background-color: var(--surface-hover); }
+
+        .prod-img { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; background: #222; }
+        .tag-badge { background: rgba(255, 90, 0, 0.15); color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+        .action-btns { display: flex; gap: 8px; justify-content: flex-end; }
+
+        .btn-sm {
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid #333;
+            background: #1a1a1a;
+            color: #ddd;
+            transition: 0.2s;
+        }
+        .btn-sm:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-del { border-color: rgba(255, 68, 68, 0.3); color: var(--danger); }
+        .btn-del:hover { background: rgba(255, 68, 68, 0.15); border-color: var(--danger); color: #fff; }
+
+        /* 5. POPUP MODAL */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .modal-card {
+            background: #141414;
+            border: 1px solid #2e2e2e;
+            border-radius: 14px;
+            width: 520px;
+            max-width: 90vw;
+            padding: 30px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.9);
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
+        .modal-header h2 { margin: 0; font-size: 18px; text-transform: uppercase; color: var(--primary); font-weight: 800; }
+        .close-btn { background: none; border: none; color: #888; font-size: 24px; cursor: pointer; }
+        .close-btn:hover { color: #fff; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 6px; text-transform: uppercase; font-weight: 600; }
+        .form-control {
+            width: 100%;
+            padding: 11px 14px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+        .form-control:focus { border-color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="sidebar-brand">PANTHERA ADMIN</div>
+    <ul class="nav-links">
+        <li th:if="${currentUser.role == 'ADMIN'}"><a th:href="@{/admin/dashboard}">Quản lý Tài khoản</a></li>
+        <li><a th:href="@{/admin/products}" class="active">Quản lý Sản phẩm</a></li>
+        <li><a th:href="@{/}">Quay lại Website</a></li>
+        <li><a th:href="@{/admin/sockets}">🔌 Giám sát Socket</a></li>
+        <li style="margin-top: auto;">
+            <form th:action="@{/logout}" method="post" style="margin: 0; padding: 0;">
+                <button type="submit" class="logout-btn" style="width: 100%; background: transparent; cursor: pointer; display: block; padding: 14px 20px; font-weight: 600; font-size: 15px; border-radius: 12px; transition: 0.2s; font-family: inherit;">
+                    Đăng xuất
+                </button>
+            </form>
+        </li>
+    </ul>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+    <div class="header-section">
+        <div>
+            <h1>DANH SÁCH SẢN PHẨM</h1>
+            <p>Quản lý toàn bộ kho vật phẩm, mô hình và trang phục trong cửa hàng</p>
+        </div>
+        <button th:if="${currentUser.role == 'ADMIN' or currentUser.role == 'SHOP_MANAGER'}"
+                type="button" class="btn-add-main" onclick="openModal()">+ THÊM SẢN PHẨM</button>
+    </div>
+
+    <!-- KHỐI THỐNG KÊ -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="label">Tổng số sản phẩm</div>
+            <div class="number" style="color: #ffffff;" th:text="${totalProducts}">8</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Sản phẩm nổi bật / HOT</div>
+            <div class="number" style="color: var(--primary);" th:text="${hotProducts}">7</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Thời trang & Phụ kiện</div>
+            <div class="number" style="color: #00c851;" th:text="${apparelProducts}">2</div>
+        </div>
+    </div>
+
+    <!-- BẢNG SẢN PHẨM (ĐÃ CHUẨN HÓA CỘT KÍCH CỠ VÀ HÀNH ĐỘNG) -->
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>Ảnh</th>
+                <th>Tên sản phẩm</th>
+                <th>Danh mục</th>
+                <th>Tựa game</th>
+                <th>Đơn giá</th>
+                <th>Huy hiệu</th>
+                <th>Kích cỡ</th>
+                <th style="text-align: right;">Hành động</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${products}">
+                <td>
+                    <img th:src="${p.image}" class="prod-img" onerror="this.src='https://placehold.co/100x100?text=None'">
+                </td>
+                <td><strong th:text="${p.name}">Tên SP</strong></td>
+                <td style="color: #aaa;" th:text="${p.category}">accessories</td>
+                <td th:text="${p.game}">Valorant</td>
+                <td style="color: var(--primary); font-weight: 700;" th:text="${#numbers.formatDecimal(p.price, 0, 'POINT', 0, 'POINT')} + ' đ'">220.000 đ</td>
+                <td>
+                    <span th:if="${p.tag != null && p.tag != ''}" class="tag-badge" th:text="${p.tag}">MỚI</span>
+                    <span th:unless="${p.tag != null && p.tag != ''}" style="color: #555;">—</span>
+                </td>
+                <td>
+                    <span th:if="${p.sizes == null || (p.sizes.size() == 1 && p.sizes[0] == 'Freesize')}" style="color: #888; font-size: 13px;">Freesize</span>
+                    <span th:unless="${p.sizes == null || (p.sizes.size() == 1 && p.sizes[0] == 'Freesize')}" style="color: #00c851; font-weight: 600; font-size: 13px;" th:text="${#strings.listJoin(p.sizes, ', ')}">S, M, L</span>
+                </td>
+                <td>
+                    <span th:if="${p.stockQuantity <= 0}" style="color: #ff4444; font-weight: bold;">0 (Hết)</span>
+                    <span th:unless="${p.stockQuantity <= 0}" style="color: #00c851; font-weight: bold;" th:text="${p.stockQuantity}">10</span>
+                </td>
+                <td style="text-align: right;">
+                    <div class="action-btns">
+                        <button type="button" class="btn-sm"
+                                th:data-id="${p.id}"
+                                th:data-name="${p.name}"
+                                th:data-stock="${p.stockQuantity}"
+                                th:data-category="${p.category}"
+                                th:data-game="${p.game}"
+                                th:data-price="${p.price}"
+                                th:data-tag="${p.tag}"
+                                th:data-image="${p.image}"
+                                th:data-sizes="${p.sizes != null ? #strings.listJoin(p.sizes, ',') : 'Freesize'}"
+                                onclick="editProduct(this)">Sửa</button>
+                        <form th:if="${currentUser.role == 'ADMIN' or currentUser.role == 'SHOP_MANAGER'}"
+                              th:action="@{/admin/products/delete/{id}(id=${p.id})}" method="post" ...>
+                            <button type="submit" class="btn-sm btn-del">Xóa</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<!-- MODAL POPUP THÊM & SỬA SẢN PHẨM -->
+<div id="productModal" class="modal-backdrop">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2 id="modalTitle">Thêm Sản Phẩm Mới</h2>
+            <button type="button" class="close-btn" onclick="closeModal()">×</button>
+        </div>
+        <form th:action="@{/admin/products/save}" method="post">
+            <input type="hidden" id="prodId" name="id">
+
+            <div class="form-group">
+                <label>Tên sản phẩm</label>
+                <input type="text" id="prodName" name="name" class="form-control" required placeholder="Ví dụ: Áo Hoodie Panthera">
+            </div>
+
+            <div style="display: flex; gap: 15px;">
+                <div class="form-group" style="flex: 1;">
+                    <label>Danh mục</label>
+                    <select id="prodCategory" name="category" class="form-control" required>
+                        <option value="apparel">Trang phục (apparel)</option>
+                        <option value="statue">Tượng mô hình (statue)</option>
+                        <option value="accessories">Phụ kiện (accessories)</option>
+                        <option value="replica">Vũ khí (replica)</option>
+                        <option value="art">Tranh ảnh & Âm nhạc (art)</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Tựa game</label>
+                    <input type="text" id="prodGame" name="game" class="form-control" required placeholder="Valorant / LOL">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 15px;">
+                <div class="form-group" style="flex: 1;">
+                    <label>Đơn giá (VNĐ)</label>
+                    <input type="number" id="prodPrice" name="price" class="form-control" required placeholder="500000">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Huy hiệu (Tag)</label>
+                    <input type="text" id="prodTag" name="tag" class="form-control" placeholder="MỚI / BÁN CHẠY">
+                </div>
+            </div>
+
+            <!-- PHÂN LOẠI KÍCH CỠ -->
+            <div class="form-group">
+                <label>Phân loại kích cỡ</label>
+                <select id="prodSizeType" name="sizeType" class="form-control" onchange="handleSizeTypeChange(this.value)">
+                    <option value="FREESIZE">Freesize (Mô hình, tranh, phụ kiện, móc khóa...)</option>
+                    <option value="CLOTHING">Quần áo / Trang phục (Có size: S, M, L, XL, 2XL)</option>
+                    <option value="CUSTOM">Tùy chỉnh kích cỡ khác...</option>
+                </select>
+            </div>
+
+            <!-- Ô NHẬP SIZE TÙY CHỌN -->
+            <div class="form-group" id="customSizeGroup" style="display: none;">
+                <label>Nhập các Size (Cách nhau bởi dấu phẩy)</label>
+                <input type="text" id="prodCustomSizes" name="customSizes" class="form-control" placeholder="Ví dụ: 39, 40, 41, 42">
+            </div>
+
+            <div class="form-group">
+                <label>Đường dẫn ảnh (Image URL)</label>
+                <input type="text" id="prodImage" name="image" class="form-control" required placeholder="https://...">
+            </div>
+            <!-- Thêm vào trong Form của Modal -->
+            <div class="form-group">
+                <label>Số lượng trong kho (Stock)</label>
+                <input type="number" id="prodStock" name="stockQuantity" class="form-control" required value="10">
+            </div>
+
+            <button type="submit" class="btn-add-main" style="width: 100%; margin-top: 10px; padding: 13px;">LƯU VÀO MONGODB</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function handleSizeTypeChange(val) {
+        const customBox = document.getElementById('customSizeGroup');
+        if (customBox) {
+            customBox.style.display = (val === 'CUSTOM') ? 'block' : 'none';
+        }
+    }
+
+    function openModal() {
+        document.getElementById('modalTitle').innerText = 'Thêm Sản Phẩm Mới';
+        document.getElementById('prodId').value = '';
+        document.getElementById('prodName').value = '';
+        document.getElementById('prodCategory').value = 'apparel';
+        document.getElementById('prodGame').value = '';
+        document.getElementById('prodPrice').value = '';
+        document.getElementById('prodTag').value = '';
+        document.getElementById('prodImage').value = '';
+
+        const sizeSelect = document.getElementById('prodSizeType');
+        if (sizeSelect) sizeSelect.value = 'FREESIZE';
+        const customGroup = document.getElementById('customSizeGroup');
+        if (customGroup) customGroup.style.display = 'none';
+        const customInput = document.getElementById('prodCustomSizes');
+        if (customInput) customInput.value = '';
+
+        document.getElementById('productModal').style.display = 'flex';
+    }
+
+    function editProduct(btn) {
+        document.getElementById('modalTitle').innerText = 'Chỉnh Sửa Sản Phẩm';
+        document.getElementById('prodId').value = btn.getAttribute('data-id') || '';
+        document.getElementById('prodName').value = btn.getAttribute('data-name') || '';
+        document.getElementById('prodCategory').value = btn.getAttribute('data-category') || 'apparel';
+        document.getElementById('prodGame').value = btn.getAttribute('data-game') || '';
+        document.getElementById('prodPrice').value = btn.getAttribute('data-price') || '';
+        document.getElementById('prodTag').value = btn.getAttribute('data-tag') || '';
+        document.getElementById('prodImage').value = btn.getAttribute('data-image') || '';
+        document.getElementById('prodStock').value = btn.getAttribute('data-stock') || '0';
+
+        const rawSizes = btn.getAttribute('data-sizes') || 'Freesize';
+        const sizeSelect = document.getElementById('prodSizeType');
+        const customGroup = document.getElementById('customSizeGroup');
+        const customInput = document.getElementById('prodCustomSizes');
+        // Lấy Role từ biến Thymeleaf truyền xuống JS (bạn có thể set biến ẩn hoặc nhúng trực tiếp)
+        const userRole = '[[${currentUser.role}]]';
+
+        if (userRole === 'EMPLOYEE') {
+            // Employee chỉ được phép nhập số lượng, khóa toàn bộ thẻ khác (readOnly)
+            document.getElementById('prodName').readOnly = true;
+            document.getElementById('prodCategory').disabled = true;
+            document.getElementById('prodGame').readOnly = true;
+            document.getElementById('prodPrice').readOnly = true;
+            document.getElementById('prodTag').readOnly = true;
+            document.getElementById('prodImage').readOnly = true;
+            document.getElementById('prodSizeType').disabled = true;
+        }
+
+        if (rawSizes === 'Freesize') {
+            if (sizeSelect) sizeSelect.value = 'FREESIZE';
+            if (customGroup) customGroup.style.display = 'none';
+            if (customInput) customInput.value = '';
+        } else if (rawSizes === 'S,M,L,XL,2XL') {
+            if (sizeSelect) sizeSelect.value = 'CLOTHING';
+            if (customGroup) customGroup.style.display = 'none';
+            if (customInput) customInput.value = '';
+        } else {
+            if (sizeSelect) sizeSelect.value = 'CUSTOM';
+            if (customGroup) customGroup.style.display = 'block';
+            if (customInput) customInput.value = rawSizes;
+        }
+
+        document.getElementById('productModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('productModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('productModal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    };
+<!-- ==================== RADAR BÁO CÓ TIN NHẮN MỚI CHO ADMIN ==================== -->
+<script th:inline="javascript">
+    // Lấy số lượng tin nhắn cuối cùng từ bộ nhớ tạm của trình duyệt
+    let lastCustomerMessageCount = localStorage.getItem('globalCustomerMsgCount') || 0;
+
+    setInterval(() => {
+        fetch('/admin/api/chat/check-new')
+            .then(res => res.text())
+            .then(countStr => {
+                let currentCount = parseInt(countStr);
+
+                // NẾU CÓ TIN NHẮN TĂNG LÊN
+                if (currentCount > lastCustomerMessageCount) {
+                    localStorage.setItem('globalCustomerMsgCount', currentCount);
+
+                    // 1. Phát âm thanh Ting!
+                    let audio = new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3');
+                    audio.play().catch(e => console.log("Trình duyệt chặn auto-play âm thanh"));
+
+                    // 2. Làm Nút Menu đỏ chót để gây chú ý
+                    let chatMenuLink = document.querySelector('a[href="/admin/chat"]');
+                    if(chatMenuLink) {
+                        chatMenuLink.style.background = '#ff4444';
+                        chatMenuLink.style.color = '#ffffff';
+                        chatMenuLink.style.boxShadow = '0 0 15px rgba(255, 68, 68, 0.8)';
+                        chatMenuLink.innerHTML = '💬 HỖ TRỢ KHÁCH (Có tin mới!)';
+                    }
+                } else if (currentCount < lastCustomerMessageCount) {
+                    // Reset nếu lỡ có ai xóa lịch sử
+                    localStorage.setItem('globalCustomerMsgCount', currentCount);
+                }
+            })
+            .catch(err => {});
+    }, 4000); // 4 giây quét hệ thống 1 lần
+</script>
+
+</body>
+</html>

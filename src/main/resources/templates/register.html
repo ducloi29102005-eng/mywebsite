@@ -16,6 +16,8 @@
         }
         .logo { width: 140px; margin-bottom: 25px; }
         h3 { margin-top: 0; color: #d4af37; font-weight: 400; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;}
+
+        /* Input Styles */
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; font-size: 12px; color: #888; text-transform: uppercase; margin-bottom: 8px; }
         .input-group input {
@@ -23,12 +25,36 @@
             color: #fff; border-radius: 8px; box-sizing: border-box; transition: 0.3s;
         }
         .input-group input:focus { outline: none; border-color: #d4af37; box-shadow: 0 0 8px rgba(212, 175, 55, 0.2); }
+
+        /* Nút Đăng Ký Thường */
         .btn-submit {
             width: 100%; padding: 15px; background: transparent; color: #d4af37;
             border: 1px solid #d4af37; border-radius: 8px; font-weight: bold; font-size: 15px;
             text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 10px;
         }
         .btn-submit:hover { background: #d4af37; color: #000; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+
+        /* CSS cho nút Google (Có hiệu ứng Hover) */
+        .btn-google {
+            display: flex; align-items: center; justify-content: center;
+            background-color: #1a1a1a; color: #fff; padding: 12px;
+            border: 1px solid #333; border-radius: 8px; text-decoration: none;
+            font-size: 14px; transition: 0.3s; width: 100%; box-sizing: border-box;
+        }
+        .btn-google:hover {
+            background-color: #2a2a2a; border-color: #555; box-shadow: 0 0 10px rgba(255,255,255,0.1);
+        }
+
+        /* Chữ Hoặc có đường kẻ ngang */
+        .divider {
+            color: #555; font-size: 12px; margin: 25px 0 20px 0; text-transform: uppercase; position: relative;
+        }
+        .divider::before, .divider::after {
+            content: ""; position: absolute; top: 50%; width: 38%; height: 1px; background: #333;
+        }
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+
         .footer-link { margin-top: 25px; font-size: 14px; color: #888; }
         .footer-link a { color: #d4af37; text-decoration: none; font-weight: bold; }
     </style>
@@ -38,6 +64,12 @@
     <img th:src="@{/images/logo.jpg}" alt="Panthera Logo" class="logo">
     <h3>Tạo Tài Khoản Mới</h3>
 
+    <!-- KHỐI BÁO LỖI (Đã được đưa vào trong card) -->
+    <div th:if="${error}" style="color: #ff4d4f; background-color: rgba(255, 77, 79, 0.1); border: 1px solid #ff4d4f; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 20px; font-size: 14px; box-sizing: border-box;">
+        <span th:text="${error}"></span>
+    </div>
+
+    <!-- FORM ĐĂNG KÝ -->
     <form th:action="@{/register}" th:object="${user}" method="post">
         <div class="input-group">
             <label>Tên đăng nhập</label>
@@ -50,6 +82,14 @@
         <button type="submit" class="btn-submit">Đăng Ký Mở Tài Khoản</button>
     </form>
 
+    <!-- NÚT GOOGLE VÀ DÒNG KẺ HOẶC (Đã được đưa vào trong card) -->
+    <div class="divider">Hoặc</div>
+    <a href="/oauth2/authorization/google" class="btn-google">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" style="width: 18px; margin-right: 10px;">
+        Đăng ký bằng Google
+    </a>
+
+    <!-- LINK ĐĂNG NHẬP -->
     <div class="footer-link">
         Đã có tài khoản? <a th:href="@{/login}">Đăng nhập ngay</a>
     </div>

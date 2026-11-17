@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hỗ Trợ Khách Hàng | Panthera Admin</title>
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}"/>
+    <style>
+        :root {
+            --primary: #ff5a00;
+            --danger: #ff4444;
+            --success: #00c851;
+            --bg-dark: #0a0a0a;
+            --surface: #141414;
+            --surface-hover: #1b1b1b;
+            --border: #262626;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+        }
+
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden;}
+
+        /* Sidebar */
+        .sidebar { width: 260px; padding: 30px 24px; border-right: 1px solid var(--border); display: flex; flex-direction: column; background: transparent; }
+        .sidebar-brand { font-size: 20px; font-weight: 800; color: var(--primary); letter-spacing: 1.5px; margin-bottom: 35px; }
+        .nav-links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; height: 100%; }
+        .nav-links li { margin-bottom: 12px; }
+        .nav-links a { display: block; padding: 14px 20px; color: var(--text-main); text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 15px; transition: 0.2s; border: 1px solid transparent; }
+        .nav-links a:hover { background: #191919; border-color: #333; }
+        .nav-links a.active { background: rgba(255, 90, 0, 0.12); color: var(--primary); border: 1px solid rgba(255, 90, 0, 0.25); }
+        .logout-btn { color: var(--danger) !important; border: 1px solid rgba(255, 68, 68, 0.35) !important; text-align: center; }
+        .logout-btn:hover { background: rgba(255, 68, 68, 0.1) !important; }
+
+        /* Giao diện Chat chia đôi */
+        .chat-layout { flex: 1; display: flex; height: 100%; }
+
+        /* Cột trái: Danh sách phòng chat */
+        .room-list { width: 300px; background: #111111; border-right: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column;}
+        .room-item { padding: 16px 20px; border-bottom: 1px solid #1c1c1c; cursor: pointer; transition: 0.2s; }
+        .room-item:hover { background: #1a1a1a; }
+        .room-item.active { background: #1e1e1e; border-left: 4px solid var(--primary); }
+
+        /* Cột phải: Nội dung chat */
+        .chat-area { flex: 1; display: flex; flex-direction: column; background: var(--bg-dark); }
+        .chat-header { padding: 20px 25px; background: #141414; border-bottom: 1px solid var(--border); font-weight: bold; display: flex; justify-content: space-between; align-items: center;}
+
+        /* Hộp hiển thị tin nhắn */
+        .messages-box { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .messages-box::-webkit-scrollbar { width: 6px; }
+        .messages-box::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
+        .msg-bubble { max-width: 65%; padding: 12px 16px; border-radius: 14px; font-size: 14px; line-height: 1.4; word-wrap: break-word;}
+        .msg-user { align-self: flex-start; background: #1f1f1f; color: #eee; border-bottom-left-radius: 4px;}
+        .msg-admin { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px;}
+
+        /* Ô nhập liệu */
+        .reply-form { display: flex; padding: 18px 25px; background: #141414; border-top: 1px solid var(--border); gap: 12px; }
+        .reply-input { flex: 1; background: #0a0a0a; border: 1px solid #333; color: white; padding: 14px 18px; border-radius: 10px; outline: none; font-size: 14px;}
+        .reply-input:focus { border-color: var(--primary); }
+        .reply-btn { background: var(--primary); color: white; border: none; padding: 0 24px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s;}
+        .reply-btn:hover { background: #e65200; }
+    </style>
+</head>
+<body>
+
+<!-- THANH MENU BÊN TRÁI -->
+<aside class="sidebar">
+    <div class="sidebar-brand">PANTHERA ADMIN</div>
+    <ul class="nav-links">
+        <li><a th:href="@{/admin/dashboard}">Quản lý Tài khoản</a></li>
+        <li><a th:href="@{/admin/products}">Quản lý Sản phẩm</a></li>
+        <li><a th:href="@{/admin/chat}" class="active">💬 Hỗ trợ Khách hàng</a></li>
+        <li><a th:href="@{/admin/sockets}">🔌 Giám sát Socket</a></li>
+        <li><a th:href="@{/}">Quay lại Website</a></li>
+        <!-- ĐÃ SỬA: Dùng form POST để không bị 404 khi đăng xuất -->
+        <li style="margin-top: auto;">
+            <form th:action="@{/logout}" method="post" style="margin: 0; padding: 0;">
+                <button type="submit" class="logout-btn" style="width: 100%; background: transparent; cursor: pointer; display: block; padding: 14px 20px; font-weight: 600; font-size: 15px; border-radius: 12px; transition: 0.2s; font-family: inherit;">
+                    Đăng xuất
+                </button>
+            </form>
+        </li>
+    </ul>
+</aside>
+
+<div class="chat-layout">
+    <!-- CỘT TRÁI: DANH SÁCH KHÁCH HÀNG NHẮN TIN -->
+    <div class="room-list" id="roomListContainer">
+        <div style="padding: 20px; text-align: center; color: #666; font-size: 13px;">Đang tải danh sách...</div>
+    </div>
+
+    <!-- CỘT PHẢI: KHUNG CHAT CHÍNH -->
+    <div class="chat-area">
+        <div class="chat-header">
+            <span id="activeRoomTitle" style="font-size: 18px;">Chọn một khách hàng bên trái để bắt đầu hỗ trợ</span>
+            <span id="socketStatus" style="font-size: 12px; color: #888;">● Đang kết nối...</span>
+        </div>
+
+        <div class="messages-box" id="adminMessagesBox"></div>
+
+        <form class="reply-form" id="adminReplyForm" style="display: none;" onsubmit="sendAdminReply(event)">
+            <input type="text" id="adminReplyInput" class="reply-input" placeholder="Nhập câu trả lời cho khách hàng..." required autocomplete="off">
+            <button type="submit" class="reply-btn">Gửi phản hồi</button>
+        </form>
+    </div>
+</div>
+
+<!-- THƯ VIỆN WEBSOCKET (CHỈ NHÚNG 1 LẦN DUY NHẤT) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script th:inline="javascript">
+    let currentRoomId = null;
+    let stompClient = null;
+
+    function playNotificationSound() {
+        new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3').play().catch(() => {});
+    }
+
+    // 1. Kết nối WebSocket cho Admin
+    function connectAdminWebSocket() {
+        const socket = new SockJS('/ws-chat');
+        stompClient = Stomp.over(socket);
+        stompClient.debug = null;
+
+        stompClient.connect({}, function () {
+            const statusEl = document.getElementById('socketStatus');
+            statusEl.innerText = '● Trực tuyến (Real-time)';
+            statusEl.style.color = '#00c851';
+
+            // Lắng nghe toàn bộ tin nhắn gửi đến hệ thống
+            stompClient.subscribe('/topic/admin-chat', function (payload) {
+                const msg = JSON.parse(payload.body);
+
+                // Nếu khách nhắn -> Kêu Ting và cập nhật danh sách hội thoại bên trái
+                if (msg.senderRole === 'USER') {
+                    playNotificationSound();
+                    loadRooms();
+                }
+
+                // Nếu tin nhắn thuộc về phòng đang mở -> Vẽ thẳng lên khung chat
+                if (currentRoomId === msg.roomId) {
+                    drawAdminMessage(msg);
+                }
+            });
+        }, function () {
+            const statusEl = document.getElementById('socketStatus');
+            statusEl.innerText = '● Mất kết nối, đang thử lại...';
+            statusEl.style.color = '#ff4444';
+            stompClient = null;
+            setTimeout(connectAdminWebSocket, 3000);
+        });
+    }
+
+    // 2. Tải danh sách phòng chat bên trái
+    function loadRooms() {
+        fetch('/admin/api/chat/rooms-data')
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('roomListContainer');
+                let html = '<div style="padding: 20px; font-size: 12px; color: #888; font-weight: bold; border-bottom: 1px solid #222;">DANH SÁCH HỘI THOẠI</div>';
+                let hasRooms = false;
+
+                for (const [rId, rName] of Object.entries(data)) {
+                    hasRooms = true;
+                    const activeClass = (rId === currentRoomId) ? 'active' : '';
+                    html += `
+                        <div class="room-item ${activeClass}" data-room="${rId}" data-name="${rName}" onclick="selectRoom(this)">
+                            <div style="font-weight: bold; color: #fff; font-size: 15px;">${rName}</div>
+                            <div style="font-size: 12px; color: #777; margin-top: 6px;">Mã phòng: <span style="font-family: monospace;">${rId.substring(0, 8)}...</span></div>
+                        </div>
+                    `;
+                }
+
+                if (!hasRooms) {
+                    html += '<div style="padding: 30px 20px; text-align: center; color: #555; font-size: 14px;">Chưa có tin nhắn nào từ khách hàng.</div>';
+                }
+                container.innerHTML = html;
+            })
+            .catch(err => console.error("Lỗi tải danh sách phòng:", err));
+    }
+
+    // 3. Khi Admin bấm chọn một khách hàng bên trái
+    function selectRoom(elem) {
+        currentRoomId = elem.getAttribute('data-room');
+        document.getElementById('activeRoomTitle').innerText = 'Đang hỗ trợ khách hàng: ' + elem.getAttribute('data-name');
+
+        // Đánh dấu active trên giao diện
+        document.querySelectorAll('.room-item').forEach(item => item.classList.remove('active'));
+        elem.classList.add('active');
+
+        // Hiện form nhập liệu
+        document.getElementById('adminReplyForm').style.display = 'flex';
+        document.getElementById('adminReplyInput').focus();
+
+        // Tải lịch sử tin nhắn cũ của phòng này
+        fetch('/admin/api/chat/history/' + currentRoomId)
+            .then(res => res.json())
+            .then(messages => {
+                const box = document.getElementById('adminMessagesBox');
+                box.innerHTML = '';
+                messages.forEach(m => drawAdminMessage(m));
+            });
+    }
+
+    // 4. Vẽ từng tin nhắn lên khung chat
+    function drawAdminMessage(m) {
+        const box = document.getElementById('adminMessagesBox');
+        const isUser = m.senderRole === 'USER';
+        const div = document.createElement('div');
+        div.className = 'msg-bubble ' + (isUser ? 'msg-user' : 'msg-admin');
+        div.innerHTML = `<div style="font-size:11px; font-weight:bold; opacity:0.6; margin-bottom:5px;">${m.senderName}</div>${m.content}`;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    // 5. Gửi câu trả lời của Admin qua WebSocket
+    function sendAdminReply(e) {
+        e.preventDefault();
+        const input = document.getElementById('adminReplyInput');
+        const content = input.value.trim();
+        if (!content || !currentRoomId) return;
+
+        if (!stompClient || !stompClient.connected) {
+            alert("Chưa kết nối được WebSocket, vui lòng đợi 1 giây!");
+            connectAdminWebSocket();
+            return;
+        }
+
+        stompClient.send("/app/chat.reply", {}, JSON.stringify({
+            roomId: currentRoomId,
+            content: content
+        }));
+
+        input.value = '';
+        input.focus();
+    }
+
+    // Khởi chạy khi mở trang
+    loadRooms();
+    connectAdminWebSocket();
+</script>
+</body>
+</html>

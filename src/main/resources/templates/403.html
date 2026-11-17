@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>403 - Không Có Quyền Truy Cập | Panthera</title>
+    <style>
+        body {
+            margin: 0; background-color: #050505; color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex; justify-content: center; align-items: center; height: 100vh;
+        }
+        .error-card {
+            background: #121212; border: 1px solid #2a2a2a; border-radius: 16px;
+            padding: 45px 40px; width: 100%; max-width: 420px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8); text-align: center;
+            border-top: 4px solid #ff4d4f; /* Viền đỏ cảnh báo */
+        }
+        .error-icon {
+            font-size: 55px; margin-bottom: 10px; line-height: 1;
+        }
+        .error-code {
+            font-size: 75px; font-weight: 900; color: #ff4d4f;
+            margin: 0; line-height: 1; text-shadow: 0 0 25px rgba(255, 77, 79, 0.3);
+        }
+        h3 {
+            color: #e2e2e2; font-weight: 600; margin: 25px 0 12px 0; text-transform: uppercase; letter-spacing: 1px;
+        }
+        p {
+            color: #888; font-size: 14px; margin-bottom: 35px; line-height: 1.6;
+        }
+        .btn-back {
+            display: inline-block; padding: 14px 28px; background: transparent; color: #d4af37;
+            border: 1px solid #d4af37; border-radius: 8px; font-weight: bold; font-size: 14px;
+            text-transform: uppercase; cursor: pointer; transition: 0.3s; text-decoration: none;
+        }
+        .btn-back:hover {
+            background: #d4af37; color: #000; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+    </style>
+</head>
+<body>
+<div class="error-card">
+    <div class="error-icon">🔒</div>
+    <h1 class="error-code">403</h1>
+    <h3>Truy Cập Bị Từ Chối</h3>
+    <p>Xin lỗi, tài khoản của bạn chưa được cấp quyền để xem nội dung này hoặc thực hiện thao tác này. Vui lòng liên hệ Quản trị viên nếu đây là sự nhầm lẫn.</p>
+
+    <!-- Nút bấm lùi lại trang trước đó thay vì ép về trang chủ -->
+    <a href="javascript:history.back()" class="btn-back">Quay lại trang trước</a>
+</div>
+</body>
+</html>

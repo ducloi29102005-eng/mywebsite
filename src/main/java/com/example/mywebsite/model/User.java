@@ -2,14 +2,20 @@ package com.example.mywebsite.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.time.LocalDateTime;
 import org.springframework.data.mongodb.core.index.Indexed;
+import java.time.LocalDateTime;
 @Document(collection = "users")
 public class User {
     @Id
     private String id;
     private String userId;
+
+    @Indexed(unique = true)
     private String username;
+
+    @Indexed(unique = true)
+    private String gmail;
+
     private String password;
     private String role; //Khởi tạo mặc định là "user" cho người đăng kí mới
     private String status = "ACTIVE";
@@ -17,8 +23,6 @@ public class User {
     //Gen Getter và Setter cho 2 biến này
     private String otpCode;
     private LocalDateTime otpExpiryTime;
-    @Indexed(unique = true)
-    private String gmail;
 
     // Getter và Setter
     public String getId() { return id; }

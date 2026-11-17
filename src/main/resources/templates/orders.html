@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Sử Mua Hàng | Panthera Merch</title>
+    <style>
+        :root {
+            --primary: #ff5a00;
+            --primary-hover: #e04e00;
+            --bg-dark: #080808;
+            --card-bg: #121212;
+            --border: #222222;
+            --text-muted: #888888;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; background-color: var(--bg-dark); color: #fff; font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+
+        .navbar { display: flex; align-items: center; justify-content: space-between; padding: 0 45px; height: 68px; background-color: #000; border-bottom: 1px solid var(--border); }
+        .brand-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; font-weight: 800; font-size: 19px; }
+        .brand-logo img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary); }
+        .brand-logo span { color: var(--primary); }
+        .nav-links a { text-decoration: none; color: #ccc; margin-left: 20px; font-size: 14px; }
+        .nav-links a:hover { color: #fff; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 18px; margin-bottom: 30px; }
+        .page-header h1 { margin: 0; font-size: 26px; text-transform: uppercase; }
+
+        .order-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        .order-card-header {
+            background: #171717;
+            padding: 16px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            font-size: 13.5px;
+        }
+        .order-id { font-weight: 700; color: #ccc; }
+        .order-status { background: rgba(0, 200, 83, 0.15); color: #00c853; border: 1px solid #00c853; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; }
+
+        .order-items { padding: 15px 22px; }
+        .order-item-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #1c1c1c;
+        }
+        .order-item-row:last-child { border-bottom: none; }
+        .order-item-row img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; margin-right: 18px; }
+        .item-info { flex: 1; }
+        .item-info h4 { margin: 0 0 5px 0; font-size: 15px; color: #f0f0f0; }
+        .item-info span { color: var(--text-muted); font-size: 12.5px; }
+        .item-cost { font-weight: 700; color: #ff5a00; font-size: 15px; }
+
+        .order-card-footer {
+            background: #0d0d0d;
+            padding: 15px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            font-size: 14px;
+        }
+        .order-card-footer strong { color: var(--primary); font-size: 17px; }
+
+        .empty-history { text-align: center; padding: 70px 20px; color: var(--text-muted); }
+        .empty-history a { color: var(--primary); text-decoration: none; font-weight: 600; margin-top: 10px; display: inline-block; }
+    </style>
+</head>
+<body>
+
+<header class="navbar">
+    <a th:href="@{/}" class="brand-logo">
+        <img th:src="@{/images/logo.jpg}" alt="Logo" onerror="this.src='https://placehold.co/100x100/ff5a00/ffffff?text=P'">
+        <div>PANTHERA<span>.GAMES</span></div>
+    </a>
+    <div class="nav-links">
+        <a th:href="@{/shop}">← Quay lại cửa hàng</a>
+        <a th:href="@{/cart}">🛒 Giỏ hàng (<span th:text="${cartCount}">0</span>)</a>
+    </div>
+</header>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Lịch Sử Mua Hàng</h1>
+        <span th:text="${orders.size()} + ' đơn hàng đã đặt'" style="color: var(--text-muted); font-size: 14px;"></span>
+    </div>
+
+    <div th:if="${orders.empty}" class="empty-history">
+        <p>Bạn chưa thực hiện đơn đặt hàng nào.</p>
+        <a th:href="@{/shop}">Khám phá cửa hàng ngay →</a>
+    </div>
+
+    <!-- DANH SÁCH CÁC ĐƠN HÀNG LẤY TỪ MONGODB -->
+    <div th:each="order : ${orders}" class="order-card">
+        <div class="order-card-header">
+            <div>
+                <span class="order-id">ĐƠN HÀNG #<span th:text="${order.id}"></span></span>
+                <span style="color: #666; margin-left: 12px;" th:text="${#temporals.format(order.orderDate, 'HH:mm dd/MM/yyyy')}"></span>
+            </div>
+            <span class="order-status" th:text="${order.status == 'PAID' ? 'ĐÃ THANH TOÁN' : order.status}">ĐÃ THANH TOÁN</span>
+        </div>
+
+        <div class="order-items">
+            <div th:each="item : ${order.items}" class="order-item-row">
+                <img th:src="${item.image}" th:alt="${item.name}">
+                <div class="item-info">
+                    <h4 th:text="${item.name}">Tên sản phẩm</h4>
+                    <span>Phân loại: <strong th:text="${item.size}">Freesize</strong> | Số lượng: <strong th:text="${item.quantity}">1</strong></span>
+                </div>
+                <div class="item-cost" th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'POINT', 0, 'POINT')} + ' đ'"></div>
+            </div>
+        </div>
+
+        <div class="order-card-footer">
+            <span>Tổng thanh toán:</span>
+            <strong th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'POINT')} + ' đ'">3.390.000 đ</strong>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

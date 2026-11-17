@@ -43,9 +43,28 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute User user) {
-        userService.registerUser(user);
-        return "redirect:/login?registered";
+    public String registerUser(@ModelAttribute User user, Model model) {
+
+        // KIỂM TRA TRÙNG LẶP TÊN ĐĂNG NHẬP
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            // Truyền thông báo lỗi chuẩn theo yêu cầu của bạn xuống giao diện
+            model.addAttribute("error", "Tài khoản mật khẩu của bạn đã tồn tại, hãy kiểm tra lại!");
+            return "register"; // Giữ người dùng ở lại trang register
+        }
+
+        // KIỂM TRA TRÙNG LẶP GMAIL (Nếu bạn có ô nhập email)
+        if (user.getGmail() != null && userRepository.findByGmail(user.getGmail()).isPresent()) {
+            model.addAttribute("error", "Email này đã được sử dụng, hãy kiểm tra lại!");
+            return "register";
+        }
+
+        // Nếu qua được các bước trên thì mới tiến hành mã hóa mật khẩu và lưu
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole("USER");
+        user.setStatus("ACTIVE");
+        userRepository.save(user);
+
+        return "redirect:/login?success";
     }
 
     // ĐÃ GỘP 2 HÀM BANNED LÀM 1 ĐỂ TRÁNH LỖI

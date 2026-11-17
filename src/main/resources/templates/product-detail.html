@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${product.name} + ' | Panthera Merch'">Chi tiết sản phẩm</title>
+    <style>
+        body { margin: 0; background-color: #080808; color: #fff; font-family: 'Segoe UI', sans-serif; }
+        .navbar { display: flex; align-items: center; justify-content: space-between; padding: 0 45px; height: 68px; background-color: #000; border-bottom: 1px solid #222; }
+        .nav-left { display: flex; align-items: center; gap: 35px; }
+        .brand-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; font-weight: 800; font-size: 19px; }
+        .brand-logo img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #ff5a00; }
+        .brand-logo span { color: #ff5a00; }
+        .nav-links { display: flex; list-style: none; gap: 26px; }
+        .nav-links a { text-decoration: none; color: #ccc; font-size: 14px; font-weight: 500; }
+        .nav-right { display: flex; gap: 20px; align-items: center; }
+        .cart-btn { border: 1px solid #333; color: #fff; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 13.5px; }
+        .cart-count { background: #ff5a00; color: #fff; font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 700; }
+
+        /* LAYOUT CHI TIẾT SẢN PHẨM */
+        .breadcrumb { padding: 30px 50px 10px; font-size: 13px; color: #888; }
+        .breadcrumb a { color: #888; text-decoration: none; }
+        .breadcrumb a:hover { color: #ff5a00; }
+
+        .product-split {
+            display: flex;
+            padding: 20px 50px 60px;
+            gap: 60px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* TRÁI: ẢNH SẢN PHẨM */
+        .product-image-col {
+            flex: 1;
+            background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
+            border: 1px solid #222;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            min-height: 480px;
+        }
+        .product-image-col img { max-width: 100%; max-height: 450px; object-fit: contain; }
+
+        /* PHẢI: THÔNG SỐ VÀ MUA HÀNG */
+        .product-info-col { flex: 1; padding-top: 20px; }
+        .p-category { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #888; letter-spacing: 1px; }
+        .p-title { font-size: 38px; font-weight: 800; margin: 10px 0 20px; text-transform: uppercase; line-height: 1.2; }
+
+        .p-price-box { margin-bottom: 30px; display: flex; align-items: baseline; gap: 15px; }
+        .p-price-old { text-decoration: line-through; color: #666; font-size: 20px; }
+        .p-price-current { font-size: 28px; font-weight: 800; color: #ff5a00; }
+
+        /* BẢNG CHỌN SIZE */
+        .size-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 15px; }
+        .size-header span { color: #ccc; text-transform: uppercase; font-weight: 600; }
+        .size-header a { color: #888; text-decoration: underline; }
+
+        .size-selector { display: flex; gap: 10px; margin-bottom: 35px; flex-wrap: wrap; }
+        .size-selector input[type="radio"] { display: none; }
+        .size-selector label {
+            display: inline-block;
+            min-width: 52px;
+            height: 48px;
+            line-height: 48px;
+            padding: 0 14px;
+            text-align: center;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #ccc;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            box-sizing: border-box;
+        }
+        .size-selector label:hover { border-color: #ff5a00; }
+        .size-selector input[type="radio"]:checked + label {
+            background-color: #ff5a00;
+            border-color: #ff5a00;
+            color: #fff;
+        }
+
+        /* KHỐI HIỂN THỊ FREESIZE */
+        .freesize-box {
+            display: inline-block;
+            background: #141414;
+            border: 1px solid #282828;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: #ddd;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 35px;
+        }
+        .freesize-box span { color: #ff5a00; font-weight: 700; margin-left: 6px; }
+
+        /* CỤM NÚT MUA HÀNG */
+        .action-buttons { display: flex; gap: 15px; }
+        .btn {
+            flex: 1;
+            padding: 18px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+        }
+        .btn-add { background: #1a1a1a; color: #fff; border: 1px solid #333; }
+        .btn-add:hover { background: #222; border-color: #ff5a00; color: #ff5a00; }
+        .btn-buy { background: #ff5a00; color: #fff; }
+        .btn-buy:hover { background: #e04e00; }
+
+        .alert-success { background: rgba(0, 200, 83, 0.1); color: #00c853; padding: 15px; margin-bottom: 20px; border: 1px solid #00c853; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+<header class="navbar">
+    <div class="nav-left">
+        <a th:href="@{/}" class="brand-logo">
+            <img th:src="@{/images/logo.jpg}" alt="Panthera" onerror="this.src='https://placehold.co/100x100?text=P'">
+            <div>PANTHERA<span>.GAMES</span></div>
+        </a>
+        <ul class="nav-links">
+            <li><a th:href="@{/}">Trang chủ</a></li>
+            <li><a th:href="@{/shop}" style="color: #ff5a00;">SHOP ↗</a></li>
+        </ul>
+    </div>
+    <div class="nav-right">
+        <a th:href="@{/cart}" class="cart-btn">🛒 Giỏ hàng <span class="cart-count" th:text="${cartCount != null ? cartCount : 0}">0</span></a>
+    </div>
+</header>
+
+<div class="breadcrumb">
+    <a th:href="@{/shop}">Cửa hàng</a> / <span th:text="${product.category}">Category</span> / <span th:text="${product.name}" style="color: #fff;">Product</span>
+</div>
+
+<div class="product-split">
+    <!-- CỘT TRÁI: ẢNH SẢN PHẨM -->
+    <div class="product-image-col">
+        <img th:src="${product.image}" th:alt="${product.name}" onerror="this.src='https://placehold.co/400x400?text=Panthera+Merch'">
+    </div>
+
+    <!-- CỘT PHẢI: THÔNG TIN VÀ NÚT BẤM -->
+    <div class="product-info-col">
+        <div th:if="${param.added}" class="alert-success">✓ Đã thêm sản phẩm vào giỏ hàng thành công!</div>
+
+        <div class="p-category" th:text="${product.game}">VALORANT</div>
+        <h1 class="p-title" th:text="${product.name}">Tên sản phẩm</h1>
+
+        <div class="p-price-box">
+            <span class="p-price-old" th:text="${#numbers.formatDecimal(product.price * 1.2, 0, 'POINT', 0, 'POINT')} + ' đ'"></span>
+            <span class="p-price-current" th:text="${#numbers.formatDecimal(product.price, 0, 'POINT', 0, 'POINT')} + ' đ'"></span>
+        </div>
+
+        <form th:action="@{/cart/add}" method="post">
+            <input type="hidden" name="productId" th:value="${product.id}">
+            <input type="hidden" name="quantity" value="1">
+
+            <!-- TRƯỜNG HỢP 1: SẢN PHẨM CÓ NHIỀU SIZE (Áo, giày, quần...) -->
+            <div th:if="${product.sizes != null and (product.sizes.size() > 1 or product.sizes[0] != 'Freesize')}">
+                <div class="size-header">
+                    <span>Chọn Kích Cỡ:</span>
+                    <a href="#">Hướng dẫn chọn kích cỡ</a>
+                </div>
+                <div class="size-selector">
+                    <th:block th:each="s, iter : ${product.sizes}">
+                        <input type="radio" name="size" th:value="${s}" th:id="'size-' + ${iter.index}" th:checked="${iter.index == 0}" required>
+                        <label th:for="'size-' + ${iter.index}" th:text="${s}">S</label>
+                    </th:block>
+                </div>
+            </div>
+
+            <!-- TRƯỜNG HỢP 2: SẢN PHẨM FREESIZE (Mô hình, tranh ảnh, phụ kiện...) -->
+            <div th:unless="${product.sizes != null and (product.sizes.size() > 1 or product.sizes[0] != 'Freesize')}">
+                <div class="freesize-box">
+                    Kích thước: <span>Tiêu chuẩn (Freesize)</span>
+                </div>
+                <input type="hidden" name="size" value="Freesize">
+            </div>
+
+            <div class="action-buttons">
+                <button type="submit" name="action" value="add" class="btn btn-add">THÊM VÀO GIỎ</button>
+                <button type="submit" name="action" value="buy_now" class="btn btn-buy">MUA HÀNG NGAY</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

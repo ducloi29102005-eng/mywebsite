@@ -4,6 +4,7 @@ import com.example.mywebsite.model.User;
 import com.example.mywebsite.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,7 +51,7 @@ public class CustomAuthenticationSuccessHandlerTest {
     }
 
     @Test
-    void onAuthenticationSuccess_NewGoogleUser_ShouldSaveAndRedirectToProfile() throws IOException {
+    void onAuthenticationSuccess_NewGoogleUser_ShouldSaveAndRedirectToProfile() throws IOException, ServletException {
         // Giả lập user chưa tồn tại trong DB
         when(userRepository.findByUsername("test@gmail.com")).thenReturn(Optional.empty());
 
@@ -63,7 +64,7 @@ public class CustomAuthenticationSuccessHandlerTest {
     }
 
     @Test
-    void onAuthenticationSuccess_ExistingAdminUser_ShouldRedirectToAdminDashboard() throws IOException {
+    void onAuthenticationSuccess_ExistingAdminUser_ShouldRedirectToAdminDashboard() throws IOException, ServletException {
         // Giả lập user đã tồn tại và có quyền ADMIN
         User adminUser = new User();
         adminUser.setUsername("test@gmail.com");
@@ -81,7 +82,8 @@ public class CustomAuthenticationSuccessHandlerTest {
     }
 
     @Test
-    void onAuthenticationSuccess_BannedUser_ShouldRedirectToBannedPage() throws IOException {
+    void onAuthenticationSuccess_BannedUser_ShouldRedirectToBannedPage() throws IOException, ServletException {
+
         // Giả lập user đã tồn tại nhưng bị khoá (BANNED)
         User bannedUser = new User();
         bannedUser.setUsername("test@gmail.com");
@@ -97,7 +99,7 @@ public class CustomAuthenticationSuccessHandlerTest {
     }
 
     @Test
-    void onAuthenticationSuccess_FormLogin_NormalUser_ShouldRedirectToProfile() throws IOException {
+    void onAuthenticationSuccess_FormLogin_NormalUser_ShouldRedirectToProfile() throws IOException, ServletException {
         // Giả lập đăng nhập bằng Form bình thường (không phải OAuth2)
         Authentication normalAuth = mock(Authentication.class);
         when(normalAuth.getName()).thenReturn("normal_user");

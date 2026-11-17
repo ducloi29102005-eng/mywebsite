@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Giỏ Hàng | Panthera</title>
+    <style>
+        body { margin: 0; background-color: #080808; color: #fff; font-family: 'Segoe UI', sans-serif; }
+        .navbar { display: flex; align-items: center; justify-content: space-between; padding: 0 45px; height: 68px; background-color: #000; border-bottom: 1px solid #222; }
+        .brand-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; font-weight: 800; font-size: 19px; }
+        .brand-logo img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #ff5a00; }
+        .brand-logo span { color: #ff5a00; }
+        .nav-links a { text-decoration: none; color: #ccc; margin-left: 20px; }
+
+        .cart-container { max-width: 1000px; margin: 50px auto; padding: 0 20px; }
+        .cart-title { font-size: 28px; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 30px; }
+
+        .cart-item { display: flex; align-items: center; background: #111; padding: 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #222; }
+        .cart-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; margin-right: 20px; }
+        .item-info { flex: 1; }
+        .item-info h4 { margin: 0 0 5px 0; font-size: 16px; }
+        .item-info p { margin: 0; color: #888; font-size: 13px; }
+
+        .item-price { font-size: 16px; font-weight: bold; color: #ff5a00; width: 120px; text-align: right; }
+        .item-remove { background: transparent; color: #ff4d4d; border: 1px solid #ff4d4d; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: 20px; }
+
+        .cart-summary { background: #111; padding: 25px; border-radius: 8px; margin-top: 30px; text-align: right; border: 1px solid #ff5a00; }
+        .cart-total { font-size: 22px; margin-bottom: 20px; }
+        .cart-total span { font-weight: 800; color: #ff5a00; font-size: 28px; margin-left: 15px; }
+        .btn-checkout { background: #ff5a00; color: #fff; border: none; padding: 15px 40px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<header class="navbar">
+    <a th:href="@{/}" class="brand-logo"><img th:src="@{/images/logo.jpg}" alt="Logo"><div>PANTHERA<span>.GAMES</span></div></a>
+    <div class="nav-links"><a th:href="@{/shop}">← Tiếp tục mua sắm</a></div>
+</header>
+
+<div class="cart-container">
+    <h1 class="cart-title">Giỏ hàng của bạn (<span th:text="${cartCount}">0</span>)</h1>
+
+    <div th:if="${cart.items.empty}" style="text-align: center; padding: 50px; color: #888;">
+        Giỏ hàng đang trống. <a th:href="@{/shop}" style="color: #ff5a00;">Khám phá ngay</a>
+    </div>
+
+    <div th:each="item : ${cart.items}" class="cart-item">
+        <img th:src="${item.image}" alt="Product">
+        <div class="item-info">
+            <h4 th:text="${item.name}">Tên sản phẩm</h4>
+            <p>Phân loại (Size): <span th:text="${item.size}">M</span> | Số lượng: <span th:text="${item.quantity}">1</span></p>
+        </div>
+        <div class="item-price" th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'POINT', 0, 'POINT')} + ' đ'"></div>
+
+        <form th:action="@{/cart/remove}" method="post">
+            <input type="hidden" name="productId" th:value="${item.productId}">
+            <input type="hidden" name="size" th:value="${item.size}">
+            <button type="submit" class="item-remove">Xóa</button>
+        </form>
+    </div>
+    <div class="cart-summary" th:unless="${cart.items.empty}">
+        <div class="cart-total">
+            TỔNG THANH TOÁN:
+            <span th:text="${#numbers.formatDecimal(total, 0, 'POINT', 0, 'POINT')} + ' đ'">0 đ</span>
+        </div>
+        <!-- BỌC FORM GỬI YÊU CẦU ĐẶT HÀNG -->
+        <form th:action="@{/checkout}" method="post">
+            <button type="submit" class="btn-checkout">TIẾN HÀNH ĐẶT HÀNG</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

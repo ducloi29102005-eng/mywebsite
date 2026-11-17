@@ -14,6 +14,15 @@ public class UserProfile {
     private String phoneNumber;
     private String address;
 
+    // 1. CONSTRUCTOR MẶC ĐỊNH (Bắt buộc phải có cho Spring Data & Spring MVC)
+    public UserProfile() {
+    }
+
+    // 2. CONSTRUCTOR NHẬN USERID
+    public UserProfile(String userId) {
+        this.userId = userId;
+    }
+
     // Getter và Setter
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -24,8 +33,17 @@ public class UserProfile {
     public void setFullName(String fullName) { this.fullName = fullName; }
     public String getDateOfBirth() { return dateOfBirth; }
     public void setDateOfBirth(String dateOfBirth) { this.dateOfBirth = dateOfBirth; }
+
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
+
+    // 4. GETTER/SETTER PHỤ (Tránh xung đột tên giữa birthDate/phone và dateOfBirth/phoneNumber)
+    public String getBirthDate() { return dateOfBirth; }
+    public void setBirthDate(String birthDate) { this.dateOfBirth = birthDate; }
+
+    public String getPhone() { return phoneNumber; }
+    public void setPhone(String phone) { this.phoneNumber = phone; }
 }

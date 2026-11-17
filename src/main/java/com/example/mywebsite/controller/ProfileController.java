@@ -38,6 +38,8 @@ public class ProfileController {
     private UserDataRepository userDataRepository;
     @Autowired
     private GameLinkedRepository gameLinkedRepository;
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     // ========================================================
     // HÀM QUAN TRỌNG: Lấy đúng username dù đăng nhập bằng Google hay Form
@@ -107,6 +109,7 @@ public class ProfileController {
         if (userId != null) {
             currentGameLinked = gameLinkedRepository.findByUserId(userId)
                     .orElse(new GameLinked());
+            userRepository.findByUserId(userId).ifPresent(user -> model.addAttribute("user", user));
         }
 
         model.addAttribute("appList", currentGameLinked.getApp());
@@ -160,6 +163,8 @@ public class ProfileController {
         String userId = getUserId(principal);
         if (userId != null) {
             session.setAttribute("linkingUserId", userId);
+            // Thêm prompt=select_account để ép Google luôn hiện bảng chọn tài khoản
+            session.setAttribute("originalAuth", org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication());
             return "redirect:/oauth2/authorization/google";
         }
         return "redirect:/login";
@@ -184,4 +189,57 @@ public class ProfileController {
         }
         return "redirect:/profile/security?unlinkSuccess";
     }
+    // 2. Xử lý đổi mật khẩu
+    @GetMapping("/profile/security/password") // Đã thêm /profile
+    public String showChangePasswordPage(Principal principal, Model model) {
+        String userId = getUserId(principal);
+        if (userId == null) {
+            return "redirect:/login";
+        }
+        userRepository.findByUserId(userId).ifPresent(user -> model.addAttribute("user", user));
+        return "password";
+    }
+
+    // 2. Xử lý đổi mật khẩu
+    @PostMapping("/profile/security/password") // Đã thêm /profile
+    public String processChangePassword(@RequestParam("currentPassword") String currentPassword,
+                                        @RequestParam("newPassword") String newPassword,
+                                        @RequestParam("confirmPassword") String confirmPassword,
+                                        Principal principal,
+                                        Model model) {
+        String userId = getUserId(principal);
+        if (userId == null) {
+            return "redirect:/login";
+        }
+
+        User user = userRepository.findByUserId(userId).orElse(null);
+        if (user == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("user", user);
+
+        // Kiểm tra khớp mật khẩu xác nhận
+        if (!newPassword.equals(confirmPassword)) {
+            model.addAttribute("error", "Mật khẩu xác nhận không trùng khớp!");
+            return "password"; // Đã sửa thành password
+        }
+
+        // Kiểm tra mật khẩu hiện tại (dùng passwordEncoder để so sánh mã băm)
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+                model.addAttribute("error", "Mật khẩu hiện tại không chính xác!");
+                return "password"; // Đã sửa thành password
+            }
+        }
+
+        // Cập nhật và mã hóa mật khẩu mới
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        return "redirect:/profile/security?passwordSuccess";
+    }
+    // ========================================================
+    // TRANG CHỦ PANTHERA (MỞ FILE index.html)
+    // ========================================================
+
 }

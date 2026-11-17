@@ -20,11 +20,52 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Tắt CSRF để nhận form POST đăng ký
+                .csrf(csrf -> csrf.disable()) // Tắt CSRF để nhận form POST
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/ws-chat/**"))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/login","/banned", "/forgot-password","/verify-otp", "/reset-password", "/error", "/css/**","/images/**","/js/**").permitAll()
-                        .requestMatchers("/admin/**", "/profile/**").authenticated()
+                        // 1. Công khai cho khách
+                        .requestMatchers(
+                                "/",
+                                "/shop",
+                                "/register",
+                                "/login",
+                                "/banned",
+                                "/forgot-password",
+                                "/verify-otp",
+                                "/reset-password",
+                                "/ws-chat/**",
+                                "/error",
+                                "/403",
+                                "/css/**",
+                                "/images/**",
+                                "/js/**"
+                        ).permitAll()
+
+                        // 2. PHÂN QUYỀN KHU VỰC QUẢN TRỊ (/admin/**)
+                        // 2.1. Quản lý tài khoản: CHỈ ADMIN được phép truy cập
+                        .requestMatchers("/admin/dashboard", "/admin/users/**")
+                        .hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+
+                        // 2.2. Xóa sản phẩm: CHỈ ADMIN và SHOP_MANAGER được phép xóa (EMPLOYEE bị chặn)
+                        .requestMatchers("/admin/products/delete/**")
+                        .hasAnyAuthority("ADMIN", "ROLE_ADMIN", "SHOP_MANAGER", "ROLE_SHOP_MANAGER")
+
+                        // 2.3. Xem kho hàng & Lưu/Cập nhật sản phẩm: ADMIN, SHOP_MANAGER và EMPLOYEE
+                        // (Quyền của EMPLOYEE chỉ được sửa tồn kho đã được khóa chặt trong AdminController)
+                        .requestMatchers("/admin/products", "/admin/products/save")
+                        .hasAnyAuthority("ADMIN", "ROLE_ADMIN", "SHOP_MANAGER", "ROLE_SHOP_MANAGER", "EMPLOYEE", "ROLE_EMPLOYEE")
+
+                        // 2.4. Chặn toàn bộ tài khoản role USER truy cập vào các đường dẫn /admin/** còn lại
+                        .requestMatchers("/admin/**")
+                        .hasAnyAuthority("ADMIN", "ROLE_ADMIN", "SHOP_MANAGER", "ROLE_SHOP_MANAGER", "EMPLOYEE", "ROLE_EMPLOYEE")
+
+                        // 3. Các trang yêu cầu đăng nhập của người dùng thông thường
+                        .requestMatchers("/profile/**", "/link-google-start").authenticated()
+
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(ex -> ex
+                        .accessDeniedPage("/403")
                 )
                 .formLogin(form -> form
                         .loginPage("/login")

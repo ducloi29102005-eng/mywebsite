@@ -36,7 +36,7 @@
         body {
             margin: 0; font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
             background-color: var(--bg-dark); color: var(--text-main);
-            display: flex; min-height: 100vh; overflow: hidden;
+            display: flex; height: 100vh; overflow: hidden;
             background-image: radial-gradient(circle at top right, rgba(255, 90, 0, 0.05) 0%, transparent 40%);
         }
 
@@ -122,12 +122,13 @@
 
         .prod-img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-light); background: #000; }
 
-        .tag-badge {
-            background: linear-gradient(135deg, var(--primary), #ff7a00); color: #fff;
-            padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; letter-spacing: 0.5px;
-            box-shadow: 0 2px 8px var(--primary-glow);
-        }
-
+       .tag-badge {
+    background: linear-gradient(135deg, var(--primary), #ff7a00); color: #fff;
+    padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px var(--primary-glow);
+    white-space: nowrap; /* Ngăn chữ bị rớt dòng */
+    display: inline-block; /* Giữ khung luôn bọc đều nội dung */
+}
         .action-btns { display: flex; gap: 10px; justify-content: flex-end; align-items: center; }
         .action-btns form { margin: 0; }
 
@@ -264,7 +265,7 @@
                     <span th:unless="${p.sizes == null || (p.sizes.size() == 1 && p.sizes[0] == 'Freesize')}" style="color: var(--success); font-weight: 700; font-size: 13px;" th:text="${#strings.listJoin(p.sizes, ', ')}">S, M, L</span>
                 </td>
                 <td>
-                    <span th:if="${p.stockQuantity <= 0}" style="color: #fca5a5; font-weight: bold; background: rgba(239, 68, 68, 0.15); padding: 4px 8px; border-radius: 4px;">0 (Hết)</span>
+                    <span th:if="${p.stockQuantity <= 0}" style="color: #fca5a5; font-weight: bold; background: rgba(239, 68, 68, 0.15); padding: 4px 8px; border-radius: 4px; white-space: nowrap; display: inline-block;">0 (Hết)</span>
                     <span th:unless="${p.stockQuantity <= 0}" style="color: #34d399; font-weight: bold; background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 4px;" th:text="${p.stockQuantity}">10</span>
                 </td>
                 <td style="text-align: right;">
@@ -280,8 +281,7 @@
                                 th:data-image="${p.image}"
                                 th:data-sizes="${p.sizes != null ? #strings.listJoin(p.sizes, ',') : 'Freesize'}"
                                 onclick="editProduct(this)">Sửa</button>
-                        <form th:if="${currentUser.role == 'ADMIN' or currentUser.role == 'SHOP_MANAGER'}"
-                              th:action="@{/admin/products/delete/{id}(id=${p.id})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">
+                        <form th:action="@{/admin/products/delete/{id}(id=${p.id})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">
                             <button type="submit" class="btn-sm btn-del">Xóa</button>
                         </form>
                     </div>

@@ -1,168 +1,248 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panthera Games - Cổng Game Trực Tuyến</title>
+    <title>Panthera Games - Cổng Game Trực Tuyến Hàng Đầu</title>
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #ff5a00;
+            --primary-light: #ff7b33;
             --primary-hover: #e04e00;
-            --bg-dark: #050505;
-            --surface: #121212;
-            --border: #242424;
-            --text-main: #ffffff;
-            --text-muted: #888888;
+            --primary-glow: rgba(255, 90, 0, 0.35);
+            --bg-dark: #07080a;
+            --bg-elevated: #0f1116;
+            --surface: #14171f;
+            --surface-hover: #1b1f2a;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 90, 0, 0.45);
+            --text-main: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; scroll-behavior: smooth; }
+
         body {
             margin: 0;
             background-color: var(--bg-dark);
             color: var(--text-main);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
             overflow-x: hidden;
+            line-height: 1.5;
+            background-image:
+                radial-gradient(circle at 15% 0%, rgba(255, 90, 0, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);
         }
 
-        /* 1. HEADER CHUẨN VNGGAMES */
+        /* ==================== 1. HEADER & NAVBAR ==================== */
         .navbar {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 45px;
-            height: 72px;
-            background-color: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(12px);
+            padding: 0 48px;
+            height: 76px;
+            background: rgba(7, 8, 10, 0.82);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
             border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
             z-index: 1000;
+            transition: all 0.3s ease;
         }
 
-        .nav-left { display: flex; align-items: center; gap: 40px; }
+        .nav-left { display: flex; align-items: center; gap: 48px; }
 
-        /* LOGO VÀ TÊN PANTHERA BẤM VÀO VỀ TRANG CHỦ */
         .brand-logo {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 13px;
             text-decoration: none;
             color: #fff;
-            font-weight: 800;
-            font-size: 20px;
-            letter-spacing: 1.5px;
+            font-weight: 900;
+            font-size: 21px;
+            letter-spacing: 1.2px;
         }
         .brand-logo img {
             width: 44px;
             height: 44px;
-            border-radius: 50%;
+            border-radius: 12px;
             object-fit: cover;
             border: 2px solid var(--primary);
+            box-shadow: 0 0 16px var(--primary-glow);
+            transition: transform 0.3s ease;
         }
+        .brand-logo:hover img { transform: scale(1.06) rotate(-2deg); }
         .brand-logo span { color: var(--primary); }
 
-        .nav-links { display: flex; list-style: none; margin: 0; padding: 0; gap: 26px; }
+        .nav-links { display: flex; list-style: none; margin: 0; padding: 0; gap: 32px; align-items: center; }
         .nav-links li a {
             text-decoration: none;
-            color: #cccccc;
+            color: var(--text-secondary);
             font-size: 14.5px;
-            font-weight: 500;
-            transition: 0.25s;
+            font-weight: 600;
+            padding: 26px 0;
+            position: relative;
+            transition: color 0.25s;
         }
-        .nav-links li a:hover, .nav-links li a.active {
-            color: #ffffff;
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 6px;
+        .nav-links li a:hover, .nav-links li a.active { color: #ffffff; }
+        .nav-links li a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), #ff944d);
+            border-radius: 3px 3px 0 0;
+            transition: width 0.25s ease;
+        }
+        .nav-links li a:hover::after, .nav-links li a.active::after { width: 100%; }
+
+        .nav-shop-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 90, 0, 0.14);
+            color: var(--primary-light) !important;
+            padding: 7px 14px !important;
+            border-radius: 99px;
+            border: 1px solid rgba(255, 90, 0, 0.3);
+            font-weight: 700 !important;
+        }
+        .nav-shop-badge::after { display: none !important; }
+        .nav-shop-badge:hover {
+            background: var(--primary);
+            color: #fff !important;
+            box-shadow: 0 4px 18px var(--primary-glow);
         }
 
-        /* 2. GÓC PHẢI: ĐĂNG NHẬP / AVATAR DROPDOWN */
+        /* AUTH & USER DROPDOWN */
         .nav-right { display: flex; align-items: center; }
-        .btn-auth-group { display: flex; gap: 12px; }
+        .btn-auth-group { display: flex; gap: 12px; align-items: center; }
         .btn-auth {
             text-decoration: none;
-            padding: 9px 20px;
-            border-radius: 20px;
+            padding: 10px 22px;
+            border-radius: 10px;
             font-size: 13.5px;
-            font-weight: 600;
-            transition: 0.3s;
+            font-weight: 700;
+            transition: all 0.25s ease;
         }
-        .btn-reg { background: transparent; color: #fff; border: 1px solid #444; }
-        .btn-reg:hover { border-color: #fff; }
-        .btn-login { background: var(--primary); color: #fff; border: none; }
-        .btn-login:hover { background: var(--primary-hover); }
+        .btn-reg {
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            border: 1px solid var(--border);
+        }
+        .btn-reg:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+        .btn-login {
+            background: linear-gradient(135deg, var(--primary), #ff7700);
+            color: #fff;
+            box-shadow: 0 4px 16px var(--primary-glow);
+        }
+        .btn-login:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 22px rgba(255, 90, 0, 0.5);
+        }
 
-        /* USER DROPDOWN THEO HÌNH MẪU SỐ 2 */
         .user-dropdown-wrapper {
             position: relative;
-            padding: 12px 0;
+            padding: 10px 0;
             cursor: pointer;
         }
         .avatar-btn {
             display: flex;
             align-items: center;
             gap: 10px;
-            background: transparent;
-            border: none;
-            padding: 0;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            padding: 5px 12px 5px 6px;
+            border-radius: 99px;
             cursor: pointer;
+            transition: 0.25s;
+        }
+        .avatar-btn:hover {
+            border-color: var(--primary);
+            background: rgba(255, 90, 0, 0.08);
         }
         .user-avatar-img {
-            width: 42px;
-            height: 42px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #333;
+            border: 2px solid var(--primary);
         }
         .arrow-down {
             width: 0;
             height: 0;
             border-left: 5px solid transparent;
             border-right: 5px solid transparent;
-            border-top: 5px solid #888;
+            border-top: 5px solid #94a3b8;
             transition: transform 0.2s;
         }
 
         .user-dropdown-menu {
             display: none;
             position: absolute;
-            top: 60px;
+            top: 62px;
             right: 0;
-            width: 280px;
-            background: #ffffff;
-            color: #222222;
-            border-radius: 12px;
-            box-shadow: 0 12px 35px rgba(0,0,0,0.6);
+            width: 290px;
+            background: #14171f;
+            color: #f8fafc;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
             padding: 18px;
             z-index: 1100;
+            animation: dropdownFade 0.2s ease;
         }
-
+        @keyframes dropdownFade {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .user-dropdown-wrapper:hover .user-dropdown-menu { display: block; }
         .user-dropdown-wrapper:hover .arrow-down { transform: rotate(180deg); }
 
         .dropdown-profile-header {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 13px;
             padding-bottom: 14px;
-            border-bottom: 1px solid #e9e9e9;
+            border-bottom: 1px solid var(--border);
         }
         .dropdown-avatar-img {
             width: 48px;
             height: 48px;
-            border-radius: 50%;
+            border-radius: 12px;
             object-fit: cover;
+            border: 2px solid var(--primary);
         }
         .dropdown-profile-info h4 {
             margin: 0;
             font-size: 15px;
-            color: #111;
+            color: #fff;
             font-weight: 700;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 175px;
+            max-width: 180px;
         }
-        .dropdown-profile-info p { margin: 4px 0 0 0; font-size: 11.5px; color: #777; }
+        .dropdown-profile-info p {
+            margin: 4px 0 0 0;
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
 
         .dropdown-links { list-style: none; padding: 10px 0 0 0; margin: 0; }
         .dropdown-links li a {
@@ -171,97 +251,477 @@
             gap: 10px;
             padding: 10px 12px;
             text-decoration: none;
-            color: #222;
-            font-size: 14px;
+            color: #cbd5e1;
+            font-size: 13.5px;
             font-weight: 600;
-            border-radius: 6px;
+            border-radius: 10px;
             transition: 0.2s;
         }
-        .dropdown-links li a:hover { background-color: #f5f5f5; color: var(--primary); }
-        .dropdown-links li a.logout-link { color: #dc3545; }
-        .dropdown-links li a.logout-link:hover { background-color: #ffeef0; }
+        .dropdown-links li a:hover {
+            background-color: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            transform: translateX(3px);
+        }
+        .logout-link { color: #f87171 !important; }
 
-        /* 3. HERO BANNER */
+        /* ==================== 2. HERO SHOWCASE ==================== */
         .hero {
             position: relative;
-            padding: 60px 20px 40px;
-            text-align: center;
-            background: radial-gradient(circle at center 20%, #22130b 0%, #050505 75%);
-        }
-        .hero-banner-box {
-            max-width: 900px;
+            padding: 56px 48px 64px;
+            max-width: 1320px;
             margin: 0 auto;
-            position: relative;
-        }
-        .hero-banner-box img {
-            width: 100%;
-            max-height: 420px;
-            object-fit: cover;
-            border-radius: 20px;
-            box-shadow: 0 15px 45px rgba(0,0,0,0.85);
-            border: 1px solid #242424;
         }
 
-        .hero-content { margin-top: 30px; }
-        .hero-tagline {
-            font-size: 32px;
-            font-weight: 800;
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.05fr 1fr;
+            gap: 48px;
+            align-items: center;
+        }
+
+        .hero-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 90, 0, 0.12);
+            border: 1px solid rgba(255, 90, 0, 0.3);
+            color: var(--primary-light);
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-size: 12.5px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.8px;
             margin-bottom: 20px;
         }
-        .hero-tagline span { color: var(--primary); }
-        .btn-cta {
-            display: inline-block;
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
             background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary);
+            animation: pulse 1.8s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.3); }
+        }
+
+        .hero-tagline {
+            font-size: 46px;
+            font-weight: 900;
+            line-height: 1.15;
+            letter-spacing: -0.5px;
+            margin: 0 0 18px 0;
+            text-transform: uppercase;
+        }
+        .hero-tagline span {
+            background: linear-gradient(90deg, #ff5a00, #ff9e44);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin: 0 0 32px 0;
+            max-width: 520px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, var(--primary), #ff7a00);
+            color: #fff;
+            font-weight: 800;
+            text-decoration: none;
+            padding: 15px 34px;
+            border-radius: 12px;
+            font-size: 15px;
+            box-shadow: 0 10px 30px var(--primary-glow);
+            transition: all 0.25s ease;
+        }
+        .btn-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 36px rgba(255, 90, 0, 0.55);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface);
             color: #fff;
             font-weight: 700;
             text-decoration: none;
-            padding: 13px 40px;
-            border-radius: 30px;
+            padding: 15px 28px;
+            border-radius: 12px;
             font-size: 15px;
-            box-shadow: 0 0 25px rgba(255, 90, 0, 0.45);
-            transition: 0.3s;
+            border: 1px solid var(--border);
+            transition: all 0.25s ease;
         }
-        .btn-cta:hover { transform: scale(1.05); background: var(--primary-hover); }
+        .btn-secondary:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
 
-        /* 4. DẢI TICKER */
+        .hero-stats {
+            display: flex;
+            gap: 36px;
+            margin-top: 40px;
+            padding-top: 28px;
+            border-top: 1px solid var(--border);
+        }
+        .stat-item h3 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 900;
+            color: #fff;
+        }
+        .stat-item p {
+            margin: 4px 0 0 0;
+            font-size: 12.5px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .hero-banner-box {
+            position: relative;
+            border-radius: 24px;
+            padding: 10px;
+            background: linear-gradient(145deg, rgba(255, 90, 0, 0.35), rgba(255, 255, 255, 0.05));
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+        }
+        .hero-banner-box img {
+            width: 100%;
+            height: 410px;
+            object-fit: cover;
+            border-radius: 16px;
+            display: block;
+        }
+        .hero-floating-card {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            right: 24px;
+            background: rgba(12, 14, 19, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .floating-title { font-weight: 800; font-size: 14px; color: #fff; }
+        .floating-sub { font-size: 12px; color: var(--text-secondary); }
+        .floating-tag {
+            background: rgba(16, 185, 129, 0.16);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 5px 12px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* ==================== 3. TICKER MARQUEE ==================== */
         .marquee-bar {
-            background: #000;
+            background: #0b0d12;
             border-top: 1px solid var(--border);
             border-bottom: 1px solid var(--border);
-            padding: 12px 0;
+            padding: 14px 0;
             overflow: hidden;
             white-space: nowrap;
         }
-        .marquee-content { display: inline-block; animation: scroll-left 25s linear infinite; }
+        .marquee-content {
+            display: inline-block;
+            animation: scroll-left 28s linear infinite;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+        .marquee-bar:hover .marquee-content { animation-play-state: paused; }
         .badge {
             display: inline-block;
-            padding: 5px 14px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: bold;
-            margin: 0 10px;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            font-weight: 800;
+            margin: 0 10px 0 28px;
             color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .badge-orange { background: var(--primary); }
-        .badge-purple { background: #6200ea; }
-        .badge-green { background: #00c853; }
+        .badge-purple { background: #7c3aed; }
+        .badge-green { background: #059669; }
 
         @keyframes scroll-left {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
         }
+
+        /* ==================== 4. SECTIONS CHUNG ==================== */
+        .container {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 72px 48px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 36px;
+        }
+        .section-title-group span {
+            color: var(--primary);
+            font-size: 12.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .section-title-group h2 {
+            margin: 0;
+            font-size: 30px;
+            font-weight: 900;
+            letter-spacing: -0.3px;
+        }
+        .view-all-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 700;
+            transition: 0.2s;
+        }
+        .view-all-link:hover { color: var(--primary); }
+
+        /* ==================== 5. DANH MỤC GAME NỔI BẬT ==================== */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 26px;
+        }
+        .game-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .game-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--border-hover);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.75);
+        }
+        .game-thumb {
+            position: relative;
+            height: 210px;
+            overflow: hidden;
+        }
+        .game-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .game-card:hover .game-thumb img { transform: scale(1.07); }
+        .game-genre {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            background: rgba(7, 8, 10, 0.8);
+            backdrop-filter: blur(8px);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        .game-hot {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: var(--primary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            color: #fff;
+        }
+        .game-body {
+            padding: 22px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .game-body h3 {
+            margin: 0 0 8px 0;
+            font-size: 19px;
+            font-weight: 800;
+        }
+        .game-body p {
+            margin: 0 0 20px 0;
+            font-size: 13.5px;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+        .game-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        .game-rating {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fbbf24;
+        }
+        .btn-game-play {
+            background: rgba(255, 90, 0, 0.14);
+            color: var(--primary-light);
+            text-decoration: none;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            border: 1px solid rgba(255, 90, 0, 0.3);
+            transition: 0.25s;
+        }
+        .btn-game-play:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        /* ==================== 6. TIN TỨC & SỰ KIỆN ==================== */
+        .news-section {
+            background: var(--bg-elevated);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        .news-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: 0.25s;
+        }
+        .news-card:hover {
+            border-color: rgba(255, 255, 255, 0.18);
+            background: var(--surface-hover);
+        }
+        .news-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .news-tag {
+            color: var(--primary-light);
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .news-card h4 {
+            margin: 0 0 10px 0;
+            font-size: 16.5px;
+            font-weight: 700;
+            line-height: 1.4;
+            color: #fff;
+        }
+        .news-card p {
+            margin: 0;
+            font-size: 13.5px;
+            color: var(--text-secondary);
+        }
+
+        /* ==================== 7. VỀ CHÚNG TÔI & FOOTER ==================== */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        .feature-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+        .feature-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 90, 0, 0.12);
+            border: 1px solid rgba(255, 90, 0, 0.25);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+        .feature-box h4 { margin: 0 0 8px 0; font-size: 16px; font-weight: 800; }
+        .feature-box p { margin: 0; font-size: 13px; color: var(--text-secondary); }
+
+        .site-footer {
+            background: #050608;
+            border-top: 1px solid var(--border);
+            padding: 48px 48px 32px;
+            color: var(--text-muted);
+            font-size: 13.5px;
+        }
+        .footer-inner {
+            max-width: 1320px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .footer-links { display: flex; gap: 24px; }
+        .footer-links a { color: var(--text-secondary); text-decoration: none; transition: 0.2s; }
+        .footer-links a:hover { color: var(--primary); }
+
+        @media (max-width: 1024px) {
+            .hero-grid { grid-template-columns: 1fr; }
+            .games-grid, .news-grid { grid-template-columns: repeat(2, 1fr); }
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .navbar { padding: 0 20px; }
+            .nav-links { display: none; }
+            .hero, .container { padding: 40px 20px; }
+            .hero-tagline { font-size: 32px; }
+            .games-grid, .news-grid, .features-grid { grid-template-columns: 1fr; }
+        }
     </style>
-    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}"/>
 </head>
 <body>
 
-<!-- HEADER -->
+<!-- ==================== HEADER ==================== -->
 <header class="navbar">
     <div class="nav-left">
-        <!-- Bấm vào logo hoặc tên quay về trang chủ -->
         <a th:href="@{/}" class="brand-logo">
             <img th:src="@{/images/logo.jpg}" alt="Panthera Logo" onerror="this.src='https://placehold.co/100x100/ff5a00/ffffff?text=P'">
             <div>PANTHERA<span>.GAMES</span></div>
@@ -270,28 +730,28 @@
             <li><a th:href="@{/}" class="active">Trang chủ</a></li>
             <li><a href="#games">Games</a></li>
             <li><a href="#news">Tin tức</a></li>
-            <li><a th:href="@{/shop}" class="active-shop" style="color: #ff5a00; font-weight: 700;">SHOP <span style="font-size: 11px;">↗</span></a></li>
+            <li><a th:href="@{/shop}" class="nav-shop-badge">SHOP ↗</a></li>
             <li><a href="#about">Về chúng tôi</a></li>
         </ul>
     </div>
 
     <div class="nav-right">
-        <!-- TRƯỜNG HỢP 1: CHƯA ĐĂNG NHẬP -->
+        <!-- CHƯA ĐĂNG NHẬP -->
         <div th:if="${currentUser == null}" class="btn-auth-group">
             <a th:href="@{/register}" class="btn-auth btn-reg">Đăng ký</a>
             <a th:href="@{/login}" class="btn-auth btn-login">Đăng nhập</a>
         </div>
 
-        <!-- TRƯỜNG HỢP 2: ĐÃ ĐĂNG NHẬP (Hiện Avatar + Hover ra Menu như ảnh 2) -->
+        <!-- ĐÃ ĐĂNG NHẬP -->
         <div th:if="${currentUser != null}" class="user-dropdown-wrapper">
-            <button class="avatar-btn">
-                <img th:src="@{/images/logo.jpg}" class="user-avatar-img" alt="Avatar">
+            <button class="avatar-btn" type="button">
+                <img th:src="@{/images/logo.jpg}" class="user-avatar-img" alt="Avatar" onerror="this.src='https://placehold.co/100x100/ff5a00/ffffff?text=U'">
                 <div class="arrow-down"></div>
             </button>
 
             <div class="user-dropdown-menu">
                 <div class="dropdown-profile-header">
-                    <img th:src="@{/images/logo.jpg}" class="dropdown-avatar-img" alt="Avatar">
+                    <img th:src="@{/images/logo.jpg}" class="dropdown-avatar-img" alt="Avatar" onerror="this.src='https://placehold.co/100x100/ff5a00/ffffff?text=U'">
                     <div class="dropdown-profile-info">
                         <h4 th:text="${userProfile != null && userProfile.fullName != null && !#strings.isEmpty(userProfile.fullName) ? userProfile.fullName : currentUser.username}">Người dùng</h4>
                         <p>ID: <span th:text="${#strings.substring(currentUser.userId, 0, 8)}">34e17c94</span> • VN</p>
@@ -299,7 +759,6 @@
                 </div>
 
                 <ul class="dropdown-links">
-                    <!-- 1. DÀNH CHO USER THƯỜNG: Hiện đầy đủ các mục cá nhân -->
                     <th:block th:if="${currentUser.role != 'ADMIN'}">
                         <li><a th:href="@{/profile}">👤 Tài khoản</a></li>
                         <li><a th:href="@{/profile/games}">🎮 Trò chơi đã liên kết</a></li>
@@ -307,20 +766,17 @@
                         <li><a th:href="@{/orders}">📦 Lịch sử đơn hàng</a></li>
                     </th:block>
 
-                    <!-- 2. DÀNH CHO ADMIN: CHỈ HIỆN DUY NHẤT TRANG QUẢN TRỊ -->
                     <li th:if="${currentUser.role == 'ADMIN'}">
-                        <a th:href="@{/admin/dashboard}" style="color: #ff5a00; font-weight: 700; background: rgba(255, 90, 0, 0.08);">
+                        <a th:href="@{/admin/dashboard}" style="color: #ff7b33; font-weight: 700; background: rgba(255, 90, 0, 0.12);">
                             🛡️ Trang Quản Trị
                         </a>
                     </li>
 
-                    <!-- Nút Đăng xuất dùng chung cho cả 2 vai trò -->
-                    <!-- Nút Đăng xuất dùng chung cho cả 2 vai trò (Đã chuyển sang POST) -->
-                    <li style="border-top: 1px solid #eeeeee; margin-top: 6px; padding-top: 6px;">
+                    <li style="border-top: 1px solid rgba(255,255,255,0.08); margin-top: 8px; padding-top: 8px;">
                         <form th:action="@{/logout}" method="post" style="margin: 0; padding: 0;">
                             <button type="submit" class="logout-link"
-                                    style="width: 100%; text-align: left; background: none; border: none; display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 14px; font-weight: 600; border-radius: 6px; cursor: pointer; font-family: inherit; transition: 0.2s;"
-                                    onmouseover="this.style.backgroundColor='#ffeef0'"
+                                    style="width: 100%; text-align: left; background: none; border: none; display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 13.5px; font-weight: 600; border-radius: 10px; cursor: pointer; font-family: inherit; transition: 0.2s;"
+                                    onmouseover="this.style.backgroundColor='rgba(239, 68, 68, 0.12)'"
                                     onmouseout="this.style.backgroundColor='transparent'">
                                 🚪 Đăng xuất
                             </button>
@@ -332,70 +788,257 @@
     </div>
 </header>
 
-<!-- HERO SECTION -->
+<!-- ==================== HERO SECTION ==================== -->
 <section class="hero">
-    <div class="hero-banner-box">
-        <img th:src="@{/images/logo.jpg}" onerror="this.src='https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop'" alt="Banner Game">
-    </div>
+    <div class="hero-grid">
+        <div>
+            <div class="hero-pill">
+                <span class="pulse-dot"></span> Hệ sinh thái giải trí thế hệ mới
+            </div>
+            <h1 class="hero-tagline">MỘT ĐIỂM CHẠM - <span>VẠN TRẢI NGHIỆM GAME</span></h1>
+            <p class="hero-desc">
+                Kết nối hàng triệu game thủ với kho tựa game bom tấn, cổng nạp vật phẩm chính thức siêu tốc và hệ thống bảo mật tài khoản Panthera ID chuẩn quốc tế.
+            </p>
+            <div class="hero-actions">
+                <a href="#games" class="btn-cta">Khám phá game ngay →</a>
+                <a th:href="@{/shop}" class="btn-secondary">🛒 Cửa hàng vật phẩm</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <h3>2.5M+</h3>
+                    <p>Game thủ hoạt động</p>
+                </div>
+                <div class="stat-item">
+                    <h3>24/7</h3>
+                    <p>Hỗ trợ trực tuyến</p>
+                </div>
+                <div class="stat-item">
+                    <h3>99.9%</h3>
+                    <p>Máy chủ ổn định</p>
+                </div>
+            </div>
+        </div>
 
-    <div class="hero-content">
-        <div class="hero-tagline">MỘT ĐIỂM CHẠM - <span>VẠN TRẢI NGHIỆM GAME</span></div>
-        <a href="#games" class="btn-cta">Khám phá game ngay</a>
+        <div class="hero-banner-box">
+            <img th:src="@{/images/logo.jpg}" onerror="this.src='https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop'" alt="Banner Game">
+            <div class="hero-floating-card">
+                <div>
+                    <div class="floating-title">PANTHERA HUB • MÙA GIẢI MỚI</div>
+                    <div class="floating-sub">Đăng nhập 1 chạm • Nhận gói tân thủ độc quyền</div>
+                </div>
+                <span class="floating-tag">● Máy chủ Online</span>
+            </div>
+        </div>
     </div>
 </section>
 
-<!-- TICKER MARQUEE -->
+<!-- ==================== TICKER MARQUEE ==================== -->
 <div class="marquee-bar">
     <div class="marquee-content">
-        <span class="badge badge-orange">Panthera Hub</span> Khám phá ngay
-        <span class="badge badge-purple">Level Up</span> Trải nghiệm đỉnh cao
-        <span class="badge badge-green">Bảo Mật Cao</span> Đăng nhập 1 chạm
-        <span class="badge badge-orange">Panthera Hub</span> Khám phá ngay
-        <span class="badge badge-purple">Level Up</span> Trải nghiệm đỉnh cao
-        <span class="badge badge-green">Bảo Mật Cao</span> Đăng nhập 1 chạm
+        <span class="badge badge-orange">Panthera Hub</span> Khám phá ngay kho game bản quyền
+        <span class="badge badge-purple">Level Up</span> Trải nghiệm đồ họa đỉnh cao 120FPS
+        <span class="badge badge-green">Bảo Mật Cao</span> Đăng nhập 1 chạm với Panthera ID
+        <span class="badge badge-orange">Ưu Đãi Shop</span> Giảm 20% gói nạp đầu tiên trong tuần
+        <span class="badge badge-orange">Panthera Hub</span> Khám phá ngay kho game bản quyền
+        <span class="badge badge-purple">Level Up</span> Trải nghiệm đồ họa đỉnh cao 120FPS
+        <span class="badge badge-green">Bảo Mật Cao</span> Đăng nhập 1 chạm với Panthera ID
+        <span class="badge badge-orange">Ưu Đãi Shop</span> Giảm 20% gói nạp đầu tiên trong tuần
     </div>
 </div>
+
+<!-- ==================== DANH MỤC GAME NỔI BẬT ==================== -->
+<section id="games" class="container">
+    <div class="section-header">
+        <div class="section-title-group">
+            <span>Thư viện trò chơi</span>
+            <h2>TỰA GAME NỔI BẬT</h2>
+        </div>
+        <a th:href="@{/shop}" class="view-all-link">Ghé thăm cửa hàng vật phẩm →</a>
+    </div>
+
+    <div class="games-grid">
+        <div class="game-card">
+            <div class="game-thumb">
+                <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=800&auto=format&fit=crop" alt="Cyber Arena">
+                <span class="game-genre">MOBA • Esports</span>
+                <span class="game-hot">HOT</span>
+            </div>
+            <div class="game-body">
+                <h3>Panthera: Cyber Arena</h3>
+                <p>Đấu trường chiến thuật 5v5 nhịp độ cao với hệ thống tướng đa dạng và giải đấu xếp hạng chuyên nghiệp.</p>
+                <div class="game-footer">
+                    <span class="game-rating">★ 4.9 (120K)</span>
+                    <a th:href="@{/shop}" class="btn-game-play">Nạp & Vật phẩm</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-card">
+            <div class="game-thumb">
+                <img src="https://images.unsplash.com/photo-1538481199705-c710c4e965fc?q=80&w=800&auto=format&fit=crop" alt="Shadow Protocol">
+                <span class="game-genre">FPS • Hành động</span>
+                <span class="game-hot">MỚI</span>
+            </div>
+            <div class="game-body">
+                <h3>Shadow Protocol: Strike</h3>
+                <p>Bắn súng góc nhìn thứ nhất thế hệ mới với cơ chế vật lý chân thực và kho vũ khí tùy biến không giới hạn.</p>
+                <div class="game-footer">
+                    <span class="game-rating">★ 4.8 (85K)</span>
+                    <a th:href="@{/shop}" class="btn-game-play">Nạp & Vật phẩm</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-card">
+            <div class="game-thumb">
+                <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=800&auto=format&fit=crop" alt="Aether Chronicles">
+                <span class="game-genre">MMORPG • Thế giới mở</span>
+            </div>
+            <div class="game-body">
+                <h3>Aether Chronicles</h3>
+                <p>Khám phá lục địa huyền bí rộng lớn, săn boss liên server và xây dựng bang hội hùng mạnh cùng đồng đội.</p>
+                <div class="game-footer">
+                    <span class="game-rating">★ 4.9 (210K)</span>
+                    <a th:href="@{/shop}" class="btn-game-play">Nạp & Vật phẩm</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== TIN TỨC & SỰ KIỆN ==================== -->
+<section id="news" class="news-section">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-title-group">
+                <span>Cập nhật liên tục</span>
+                <h2>TIN TỨC & SỰ KIỆN</h2>
+            </div>
+        </div>
+
+        <div class="news-grid">
+            <article class="news-card">
+                <div class="news-meta">
+                    <span class="news-tag">Giải đấu</span>
+                    <span>•</span>
+                    <span>Hôm nay</span>
+                </div>
+                <h4>Khởi tranh giải đấu Panthera Championship Mùa Đông 2026</h4>
+                <p>Tổng giải thưởng lên tới 500 triệu đồng dành cho các đội tuyển xuất sắc nhất khu vực Đông Nam Á.</p>
+            </article>
+
+            <article class="news-card">
+                <div class="news-meta">
+                    <span class="news-tag">Cập nhật</span>
+                    <span>•</span>
+                    <span>2 ngày trước</span>
+                </div>
+                <h4>Ra mắt hệ thống hỗ trợ khách hàng trực tuyến thời gian thực</h4>
+                <p>Kết nối trực tiếp với đội ngũ kỹ thuật viên Panthera ngay tại trang chủ để xử lý mọi sự cố trong 30 giây.</p>
+            </article>
+
+            <article class="news-card">
+                <div class="news-meta">
+                    <span class="news-tag">Khuyến mãi</span>
+                    <span>•</span>
+                    <span>4 ngày trước</span>
+                </div>
+                <h4>Ưu đãi đặc quyền thành viên Panthera Shop tháng 11</h4>
+                <p>Tích lũy điểm thưởng trên mỗi đơn hàng và đổi ngay các gói trang phục giới hạn chỉ có tại Shop.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== VỀ CHÚNG TÔI ==================== -->
+<section id="about" class="container">
+    <div class="section-header">
+        <div class="section-title-group">
+            <span>Tại sao chọn Panthera</span>
+            <h2>HỆ SINH THÁI TOÀN DIỆN</h2>
+        </div>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-box">
+            <div class="feature-icon">⚡</div>
+            <h4>Giao dịch tức thì</h4>
+            <p>Vật phẩm và gói nạp được chuyển thẳng vào tài khoản game chỉ sau vài giây xác nhận.</p>
+        </div>
+        <div class="feature-box">
+            <div class="feature-icon">🛡️</div>
+            <h4>Bảo mật đa lớp</h4>
+            <p>Tích hợp xác thực OAuth2, mã hóa CSRF và quản lý phiên đăng nhập an toàn tuyệt đối.</p>
+        </div>
+        <div class="feature-box">
+            <div class="feature-icon">💬</div>
+            <h4>Hỗ trợ trực tuyến</h4>
+            <p>Đội ngũ CSKH túc trực 24/7 qua kênh chat thời gian thực ngay góc dưới màn hình.</p>
+        </div>
+        <div class="feature-box">
+            <div class="feature-icon">🏆</div>
+            <h4>Cộng đồng sôi động</h4>
+            <p>Hàng loạt sự kiện offline, giải đấu cộng đồng và quà tặng tri ân diễn ra hàng tháng.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div>
+            <strong style="color: #fff; letter-spacing: 1px;">PANTHERA<span style="color: var(--primary);">.GAMES</span></strong>
+            <span style="margin-left: 12px;">© 2026 Panthera Entertainment. Bảo lưu mọi quyền.</span>
+        </div>
+        <div class="footer-links">
+            <a th:href="@{/}">Trang chủ</a>
+            <a href="#games">Trò chơi</a>
+            <a th:href="@{/shop}">Cửa hàng</a>
+            <a th:href="@{/profile}">Tài khoản</a>
+        </div>
+    </div>
+</footer>
+
 <!-- ==================== WIDGET CHAT HỖ TRỢ KHÁCH HÀNG ==================== -->
-<div id="support-chat-widget" style="position: fixed; bottom: 25px; right: 25px; z-index: 9999; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+<div id="support-chat-widget" style="position: fixed; bottom: 25px; right: 25px; z-index: 9999; font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;">
 
     <!-- Nút bong bóng mở khung chat -->
-    <button onclick="toggleCustomerChat()" style="background: #ff5a00; color: white; border: none; border-radius: 50px; padding: 14px 22px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 8px 25px rgba(255, 90, 0, 0.4); display: flex; align-items: center; gap: 8px; transition: 0.2s;">
+    <button onclick="toggleCustomerChat()" style="background: linear-gradient(135deg, #ff5a00, #ff7a00); color: white; border: none; border-radius: 50px; padding: 14px 22px; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 10px 28px rgba(255, 90, 0, 0.45); display: flex; align-items: center; gap: 8px; transition: 0.2s;">
         💬 Hỗ trợ trực tuyến
     </button>
 
     <!-- Cửa sổ chat (Mặc định ẩn) -->
-    <div id="customer-chat-box" style="display: none; width: 340px; height: 440px; background: #141414; border: 1px solid #2c2c2c; border-radius: 16px; margin-bottom: 12px; flex-direction: column; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.85); position: absolute; bottom: 50px; right: 0;">
+    <div id="customer-chat-box" style="display: none; width: 350px; height: 460px; background: #14171f; border: 1px solid rgba(255,255,255,0.12); border-radius: 18px; margin-bottom: 12px; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.9); position: absolute; bottom: 56px; right: 0;">
 
         <!-- Header cửa sổ chat -->
-        <div style="background: #1f1f1f; padding: 14px 18px; border-bottom: 1px solid #2c2c2c; display: flex; justify-content: space-between; align-items: center;">
+        <div style="background: #1b1f2a; padding: 15px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
             <div>
-                <strong style="color: #ff5a00; font-size: 15px;">PANTHERA SUPPORT</strong>
-                <div style="font-size: 11px; color: #00c851;">● Sẵn sàng hỗ trợ bạn</div>
+                <strong style="color: #ff5a00; font-size: 15px; letter-spacing: 0.5px;">PANTHERA SUPPORT</strong>
+                <div style="font-size: 11.5px; color: #10b981; font-weight: 600;">● Sẵn sàng hỗ trợ bạn</div>
             </div>
-            <button onclick="toggleCustomerChat()" style="background: none; border: none; color: #888; font-size: 18px; cursor: pointer;">✕</button>
+            <button onclick="toggleCustomerChat()" style="background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer;">✕</button>
         </div>
 
         <!-- Khu vực hiển thị tin nhắn -->
-        <div id="customer-chat-messages" style="flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #0a0a0a;">
-            <div style="text-align: center; color: #666; font-size: 12px; margin-top: 20px;">Đang tải cuộc trò chuyện...</div>
+        <div id="customer-chat-messages" style="flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #0b0d12;">
+            <div style="text-align: center; color: #64748b; font-size: 12px; margin-top: 20px;">Đang tải cuộc trò chuyện...</div>
         </div>
 
         <!-- Ô nhập tin nhắn -->
-        <form onsubmit="sendCustomerMsg(event)" style="display: flex; padding: 10px; background: #141414; border-top: 1px solid #262626; gap: 8px;">
+        <form onsubmit="sendCustomerMsg(event)" style="display: flex; padding: 12px; background: #14171f; border-top: 1px solid rgba(255,255,255,0.08); gap: 8px;">
             <input type="text" id="customer-chat-input" placeholder="Nhập câu hỏi của bạn..." autocomplete="off"
-                   style="flex: 1; background: #0a0a0a; border: 1px solid #333; color: white; padding: 9px 12px; border-radius: 8px; outline: none; font-size: 13px;">
-            <button type="submit" style="background: #ff5a00; color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: bold; cursor: pointer;">Gửi</button>
+                   style="flex: 1; background: #0b0d12; border: 1px solid rgba(255,255,255,0.12); color: white; padding: 10px 13px; border-radius: 10px; outline: none; font-size: 13px; font-family: inherit;">
+            <button type="submit" style="background: #ff5a00; color: white; border: none; padding: 0 16px; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit;">Gửi</button>
         </form>
     </div>
 </div>
 
-<!-- CHỈ GIỮ LẠI MỘT THẺ SCRIPT DUY NHẤT -->
+<!-- WEBSOCKET SCRIPTS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
 <script th:inline="javascript">
     let stompClient = null;
-    // Lấy chính xác userId của tài khoản đang đăng nhập từ Thymeleaf
     const currentUserId = /*[[${currentUser != null ? currentUser.userId : null}]]*/ null;
 
     // 1. Mở / Đóng khung chat
@@ -407,16 +1050,15 @@
         if (isOpening) {
             if (!currentUserId) {
                 document.getElementById('customer-chat-messages').innerHTML =
-                    '<div style="text-align:center; color:#ff4444; font-size:13px; margin-top:40px;">Vui lòng <a href="/login" style="color:#ff5a00;">đăng nhập</a> để sử dụng hỗ trợ trực tuyến!</div>';
+                    '<div style="text-align:center; color:#f87171; font-size:13px; margin-top:40px;">Vui lòng <a href="/login" style="color:#ff5a00; font-weight:bold;">đăng nhập</a> để sử dụng hỗ trợ trực tuyến!</div>';
                 return;
             }
 
-            // Tải lịch sử tin nhắn cũ từ MongoDB
             fetch('/api/chat/my-history')
                 .then(res => res.json())
                 .then(messages => {
                     renderMessages(messages);
-                    connectWebSocket(); // Kết nối Socket ngay sau khi tải xong lịch sử
+                    connectWebSocket();
                 })
                 .catch(err => console.error("Lỗi tải lịch sử chat:", err));
         }
@@ -428,10 +1070,9 @@
 
         const socket = new SockJS('/ws-chat');
         stompClient = Stomp.over(socket);
-        stompClient.debug = null; // Tắt log rác trên console
+        stompClient.debug = null;
 
         stompClient.connect({}, function (frame) {
-            // Đăng ký nhận tin nhắn tại kênh riêng của user này
             if (currentUserId) {
                 stompClient.subscribe('/queue/chat/' + currentUserId, function (payload) {
                     const msg = JSON.parse(payload.body);
@@ -439,7 +1080,6 @@
                 });
             }
 
-            // Lắng nghe thêm kênh theo Session ID riêng của trình duyệt này
             const sessionId = socket._transport && socket._transport.url ? socket._transport.url.split('/')[5] : null;
             if (sessionId) {
                 stompClient.subscribe('/queue/session/' + sessionId, function (payload) {
@@ -454,7 +1094,7 @@
         });
     }
 
-    // 3. Gửi tin nhắn qua Socket khi bấm nút Gửi hoặc nhấn Enter
+    // 3. Gửi tin nhắn qua Socket
     function sendCustomerMsg(e) {
         e.preventDefault();
         const input = document.getElementById('customer-chat-input');
@@ -471,7 +1111,6 @@
             return;
         }
 
-        // Gửi payload JSON vào @MessageMapping("/chat.send") trong ChatController
         stompClient.send("/app/chat.send", {}, JSON.stringify({
             content: content
         }));
@@ -485,7 +1124,7 @@
         const container = document.getElementById('customer-chat-messages');
         container.innerHTML = '';
         if (!messages || messages.length === 0) {
-            container.innerHTML = '<div id="empty-chat-hint" style="text-align:center; color:#777; font-size:12px; margin-top:30px;">Xin chào! Chúng tôi có thể giúp gì cho bạn?</div>';
+            container.innerHTML = '<div id="empty-chat-hint" style="text-align:center; color:#64748b; font-size:12.5px; margin-top:30px;">Xin chào! Chúng tôi có thể giúp gì cho bạn?</div>';
             return;
         }
         messages.forEach(m => drawMessage(m));
@@ -501,18 +1140,19 @@
         const bubble = document.createElement('div');
         bubble.style.cssText = `
             max-width: 80%;
-            padding: 9px 13px;
-            border-radius: 12px;
+            padding: 10px 14px;
+            border-radius: 14px;
             font-size: 13px;
-            line-height: 1.4;
+            line-height: 1.45;
             word-wrap: break-word;
             align-self: ${isMe ? 'flex-end' : 'flex-start'};
-            background: ${isMe ? '#ff5a00' : '#1f1f1f'};
+            background: ${isMe ? 'linear-gradient(135deg, #ff5a00, #ff7700)' : '#1b1f2a'};
             color: #ffffff;
-            border-bottom-right-radius: ${isMe ? '2px' : '12px'};
-            border-bottom-left-radius: ${isMe ? '12px' : '2px'};
+            border: ${isMe ? 'none' : '1px solid rgba(255,255,255,0.08)'};
+            border-bottom-right-radius: ${isMe ? '3px' : '14px'};
+            border-bottom-left-radius: ${isMe ? '14px' : '3px'};
         `;
-        bubble.innerHTML = `<div style="font-size:10px; opacity:0.75; margin-bottom:3px;">${m.senderName}</div>${m.content}`;
+        bubble.innerHTML = `<div style="font-size:10.5px; opacity:0.75; margin-bottom:3px; font-weight:600;">${m.senderName}</div>${m.content}`;
         container.appendChild(bubble);
         container.scrollTop = container.scrollHeight;
     }

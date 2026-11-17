@@ -1,98 +1,204 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng Ký | Panthera</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Ký | Panthera Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #ff5a00;
+            --primary-glow: rgba(255, 90, 0, 0.35);
+            --bg-dark: #050608;
+            --surface: rgba(14, 16, 21, 0.75);
+            --border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { box-sizing: border-box; }
+
         body {
-            margin: 0; background-color: #050505; color: #fff;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex; justify-content: center; align-items: center; height: 100vh;
+            margin: 0;
+            font-family: 'Be Vietnam Pro', sans-serif;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* Cùng một nền với trang Login để tạo sự liền mạch */
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(255, 90, 0, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
+                url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1920&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
         }
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(5, 6, 8, 0.85);
+            z-index: 0;
+        }
+
+        .auth-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+        }
+
         .auth-card {
-            background: #121212; border: 1px solid #2a2a2a; border-radius: 16px;
-            padding: 40px; width: 100%; max-width: 380px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8); text-align: center;
+            background: var(--surface);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px 40px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255,255,255,0.1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
         }
-        .logo { width: 140px; margin-bottom: 25px; }
-        h3 { margin-top: 0; color: #d4af37; font-weight: 400; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;}
+        /* Hiệu ứng viền trên thẻ (Chuyển sang màu Xanh hoặc giữ Cam) */
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+            opacity: 0.8;
+        }
 
-        /* Input Styles */
-        .input-group { margin-bottom: 20px; text-align: left; }
-        .input-group label { display: block; font-size: 12px; color: #888; text-transform: uppercase; margin-bottom: 8px; }
+        .logo-box { margin-bottom: 28px; }
+        .logo-box img {
+            width: 54px; height: 54px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid #3b82f6;
+            box-shadow: 0 0 16px rgba(59, 130, 246, 0.4);
+            margin-bottom: 12px;
+        }
+        .logo-box h2 {
+            margin: 0; font-size: 20px; font-weight: 800; letter-spacing: 0.5px;
+        }
+        .logo-box p {
+            margin: 6px 0 0 0; font-size: 13px; color: var(--text-muted);
+        }
+
+        /* Khối báo lỗi trả về từ Spring Boot */
+        .alert-error {
+            padding: 14px; border-radius: 12px; margin-bottom: 24px;
+            font-size: 13.5px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: rgba(239, 68, 68, 0.12); color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* Form Inputs */
+        .input-group { margin-bottom: 22px; text-align: left; }
+        .input-group label {
+            display: block; font-size: 12.5px; color: var(--text-muted);
+            font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+        }
         .input-group input {
-            width: 100%; padding: 14px; background: #0a0a0a; border: 1px solid #333;
-            color: #fff; border-radius: 8px; box-sizing: border-box; transition: 0.3s;
+            width: 100%; padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #fff; border-radius: 12px; font-size: 14.5px; font-family: inherit;
+            transition: all 0.3s ease; outline: none;
         }
-        .input-group input:focus { outline: none; border-color: #d4af37; box-shadow: 0 0 8px rgba(212, 175, 55, 0.2); }
+        .input-group input:focus {
+            background: rgba(59, 130, 246, 0.05);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
 
-        /* Nút Đăng Ký Thường */
+        /* Nút Submit */
         .btn-submit {
-            width: 100%; padding: 15px; background: transparent; color: #d4af37;
-            border: 1px solid #d4af37; border-radius: 8px; font-weight: bold; font-size: 15px;
-            text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 10px;
+            width: 100%; padding: 16px;
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa; border: 1px solid #3b82f6; border-radius: 12px;
+            font-weight: 800; font-size: 14.5px; letter-spacing: 0.5px; text-transform: uppercase;
+            cursor: pointer; transition: all 0.3s ease; margin-top: 6px;
         }
-        .btn-submit:hover { background: #d4af37; color: #000; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+        .btn-submit:hover {
+            background: #3b82f6; color: #fff;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+        }
 
-        /* CSS cho nút Google (Có hiệu ứng Hover) */
+        /* Nút Google */
         .btn-google {
-            display: flex; align-items: center; justify-content: center;
-            background-color: #1a1a1a; color: #fff; padding: 12px;
-            border: 1px solid #333; border-radius: 8px; text-decoration: none;
-            font-size: 14px; transition: 0.3s; width: 100%; box-sizing: border-box;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            background-color: rgba(255, 255, 255, 0.05); color: #fff; padding: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 12px; text-decoration: none;
+            font-size: 14.5px; font-weight: 600; transition: 0.3s; width: 100%;
         }
         .btn-google:hover {
-            background-color: #2a2a2a; border-color: #555; box-shadow: 0 0 10px rgba(255,255,255,0.1);
+            background-color: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
         }
 
-        /* Chữ Hoặc có đường kẻ ngang */
         .divider {
-            color: #555; font-size: 12px; margin: 25px 0 20px 0; text-transform: uppercase; position: relative;
+            display: flex; align-items: center; text-align: center;
+            color: #475569; font-size: 12px; font-weight: 700; text-transform: uppercase; margin: 24px 0;
         }
         .divider::before, .divider::after {
-            content: ""; position: absolute; top: 50%; width: 38%; height: 1px; background: #333;
+            content: ""; flex: 1; border-bottom: 1px solid rgba(255,255,255,0.08);
         }
-        .divider::before { left: 0; }
-        .divider::after { right: 0; }
+        .divider::before { margin-right: 12px; }
+        .divider::after { margin-left: 12px; }
 
-        .footer-link { margin-top: 25px; font-size: 14px; color: #888; }
-        .footer-link a { color: #d4af37; text-decoration: none; font-weight: bold; }
+        .footer-link { margin-top: 32px; font-size: 14px; color: var(--text-muted); font-weight: 500; }
+        .footer-link a { color: #60a5fa; text-decoration: none; font-weight: 700; transition: 0.2s; }
+        .footer-link a:hover { color: #93c5fd; text-decoration: underline; }
     </style>
 </head>
 <body>
-<div class="auth-card">
-    <img th:src="@{/images/logo.jpg}" alt="Panthera Logo" class="logo">
-    <h3>Tạo Tài Khoản Mới</h3>
 
-    <!-- KHỐI BÁO LỖI (Đã được đưa vào trong card) -->
-    <div th:if="${error}" style="color: #ff4d4f; background-color: rgba(255, 77, 79, 0.1); border: 1px solid #ff4d4f; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 20px; font-size: 14px; box-sizing: border-box;">
-        <span th:text="${error}"></span>
-    </div>
-
-    <!-- FORM ĐĂNG KÝ -->
-    <form th:action="@{/register}" th:object="${user}" method="post">
-        <div class="input-group">
-            <label>Tên đăng nhập</label>
-            <input type="text" th:field="*{username}" placeholder="Chọn tên tài khoản" required>
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="logo-box">
+            <img th:src="@{/images/logo.jpg}" alt="Panthera Logo" onerror="this.src='https://placehold.co/100x100/3b82f6/ffffff?text=P'">
+            <h2>MỞ KHÓA VŨ TRỤ GAME</h2>
+            <p>Tạo một Panthera ID duy nhất cho mọi trò chơi</p>
         </div>
-        <div class="input-group">
-            <label>Mật khẩu</label>
-            <input type="password" th:field="*{password}" placeholder="Tạo mật khẩu" required>
+
+        <div th:if="${error}" class="alert-error">
+            ⚠️ <span th:text="${error}"></span>
         </div>
-        <button type="submit" class="btn-submit">Đăng Ký Mở Tài Khoản</button>
-    </form>
 
-    <!-- NÚT GOOGLE VÀ DÒNG KẺ HOẶC (Đã được đưa vào trong card) -->
-    <div class="divider">Hoặc</div>
-    <a href="/oauth2/authorization/google" class="btn-google">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" style="width: 18px; margin-right: 10px;">
-        Đăng ký bằng Google
-    </a>
+        <form th:action="@{/register}" th:object="${user}" method="post">
+            <div class="input-group">
+                <label>Tên đăng nhập</label>
+                <input type="text" th:field="*{username}" placeholder="Chọn định danh của bạn" required autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label>Mật khẩu an toàn</label>
+                <input type="password" th:field="*{password}" placeholder="••••••••" required autocomplete="new-password">
+            </div>
 
-    <!-- LINK ĐĂNG NHẬP -->
-    <div class="footer-link">
-        Đã có tài khoản? <a th:href="@{/login}">Đăng nhập ngay</a>
+            <button type="submit" class="btn-submit">Đăng Ký Mở Tài Khoản</button>
+        </form>
+
+        <div class="divider">Cách Đăng Ký Nhanh</div>
+
+        <a href="/oauth2/authorization/google" class="btn-google">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" style="width: 18px;">
+            Tiếp tục với Google
+        </a>
+
+        <div class="footer-link">
+            Đã là thành viên? <a th:href="@{/login}">Đăng nhập ngay</a>
+        </div>
     </div>
 </div>
+
 </body>
 </html>

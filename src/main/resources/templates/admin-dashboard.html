@@ -1,129 +1,239 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bảng Quản Trị Hệ Thống | Panthera Admin</title>
     <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}"/>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --primary: #ff5a00;
-            --danger: #ff4444;
-            --success: #00c851;
-            --bg-dark: #0a0a0a;
-            --surface: #141414;
-            --surface-hover: #1b1b1b;
-            --border: #262626;
-            --text-main: #ffffff;
-            --text-muted: #888888;
+            --primary-hover: #e04e00;
+            --primary-glow: rgba(255, 90, 0, 0.25);
+            --danger: #ef4444;
+            --success: #10b981;
+            --bg-dark: #07080a;
+            --bg-sidebar: #0b0d12;
+            --surface: #14171f;
+            --surface-hover: #1b1f2a;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-light: rgba(255, 255, 255, 0.15);
+            --text-main: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
         }
 
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-dark); color: var(--text-main); display: flex; min-height: 100vh; }
+        * { box-sizing: border-box; }
 
-        /* Sidebar */
-        .sidebar { width: 260px; background: transparent; padding: 30px 24px; display: flex; flex-direction: column; }
-        .sidebar-brand { font-size: 20px; font-weight: 800; color: var(--primary); letter-spacing: 1.5px; margin-bottom: 35px; display: flex; align-items: center; gap: 10px; }
-        .nav-links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; height: 100%; }
-        .nav-links li { margin-bottom: 12px; }
-        .nav-links a { display: block; padding: 14px 20px; color: var(--text-main); text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 15px; transition: 0.2s; border: 1px solid transparent; }
-        .nav-links a:hover { background: #191919; border-color: #333; }
-        .nav-links a.active { background: rgba(255, 90, 0, 0.12); color: var(--primary); border: 1px solid rgba(255, 90, 0, 0.25); }
-        .logout-btn { color: var(--danger) !important; border: 1px solid rgba(255, 68, 68, 0.35) !important; text-align: center; margin-top: 20px; }
-        .logout-btn:hover { background: rgba(255, 68, 68, 0.1) !important; }
+        body {
+            margin: 0; font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+            background-color: var(--bg-dark); color: var(--text-main);
+            display: flex; min-height: 100vh; overflow: hidden;
+            background-image: radial-gradient(circle at top right, rgba(255, 90, 0, 0.05) 0%, transparent 40%);
+        }
 
-        /* Main Content */
-        .main-content { flex: 1; padding: 40px 50px; overflow-y: auto; }
-        .header-title { margin-bottom: 30px; }
-        .header-title h2 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: 0.5px; }
-        .header-title p { margin: 8px 0 0 0; color: var(--text-muted); font-size: 14px; }
+        /* ==================== 1. SIDEBAR ==================== */
+        .sidebar {
+            width: 280px; background: var(--bg-sidebar); padding: 32px 24px;
+            display: flex; flex-direction: column; border-right: 1px solid var(--border);
+            box-shadow: 10px 0 30px rgba(0,0,0,0.3); z-index: 10;
+        }
+        .sidebar-brand {
+            font-size: 20px; font-weight: 900; color: #fff; letter-spacing: 1px;
+            margin-bottom: 40px; display: flex; align-items: center; gap: 12px;
+        }
+        .sidebar-brand span { color: var(--primary); }
+        .sidebar-brand-icon {
+            width: 36px; height: 36px; background: rgba(255, 90, 0, 0.15);
+            border: 1px solid var(--primary); border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
+        }
 
-        /* Stats */
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-bottom: 35px; }
-        .stat-card { background: #111111; border: 1px solid #222222; border-radius: 14px; padding: 24px; }
-        .stat-card span { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-        .stat-card h3 { margin: 14px 0 0 0; font-size: 32px; font-weight: 800; color: var(--text-main); }
+        .nav-links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; flex: 1; }
+        .nav-links li { margin-bottom: 10px; }
+        .nav-links a {
+            display: flex; align-items: center; gap: 12px; padding: 14px 18px;
+            color: var(--text-secondary); text-decoration: none; border-radius: 12px;
+            font-weight: 600; font-size: 14.5px; transition: all 0.25s; border: 1px solid transparent;
+        }
+        .nav-links a:hover { background: rgba(255, 255, 255, 0.03); color: #fff; }
+        .nav-links a.active {
+            background: linear-gradient(90deg, rgba(255, 90, 0, 0.15) 0%, transparent 100%);
+            color: var(--primary); font-weight: 700; border-left: 3px solid var(--primary);
+            border-radius: 0 12px 12px 0;
+        }
 
-        /* Table */
-        .table-container { background: #111111; border: 1px solid #1f1f1f; border-radius: 14px; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
-        th { background: #151515; padding: 18px 24px; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid #202020; }
-        td { padding: 18px 24px; border-bottom: 1px solid #1c1c1c; vertical-align: middle; }
+        .logout-btn {
+            color: #fca5a5 !important; background: rgba(239, 68, 68, 0.08) !important;
+            border: 1px solid rgba(239, 68, 68, 0.2) !important; text-align: center;
+            display: block; width: 100%; padding: 14px 20px; border-radius: 12px;
+            font-weight: 700; cursor: pointer; transition: 0.2s; font-family: inherit; margin-top: 20px;
+        }
+        .logout-btn:hover { background: var(--danger) !important; color: #fff !important; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); }
+
+        /* ==================== 2. MAIN CONTENT ==================== */
+        .main-content { flex: 1; padding: 48px; overflow-y: auto; }
+
+        .header-title { margin-bottom: 36px; }
+        .header-title h2 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; color: #fff; }
+        .header-title p { margin: 8px 0 0 0; color: var(--text-muted); font-size: 14.5px; }
+
+        /* Khối Thống kê (Stats) */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 40px; }
+        .stat-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 28px; display: flex; flex-direction: column; position: relative; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-4px); border-color: var(--border-light); }
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; right: 0; width: 120px; height: 120px;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%); border-radius: 50%;
+        }
+        .stat-card span { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 12px; }
+        .stat-card h3 { margin: 0; font-size: 38px; font-weight: 900; line-height: 1; color: var(--text-main); }
+
+        /* Bảng Dữ Liệu */
+        .table-container {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25); overflow: visible;
+        }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14.5px; }
+        th { background: rgba(0,0,0,0.2); padding: 20px 24px; color: var(--text-muted); font-weight: 700; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+        td { padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
         tr:hover { background: var(--surface-hover); }
 
         /* Badges */
-        .badge-role { padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; letter-spacing: 0.5px; }
-        .badge-admin { background: #2b1708; color: #ff6a00; }
-        .badge-shop-manager { background: #3b2a00; color: #ffb300; }
-        .badge-employee { background: #002b3d; color: #00b4d8; }
-        .badge-user { background: #242424; color: #8c8c8c; }
-        .badge-status { padding: 5px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; }
-        .badge-active { background: #0d2818; color: #00c851; }
-        .badge-banned { background: #2d1010; color: #ff4444; }
+        .badge-role { padding: 6px 14px; border-radius: 8px; font-size: 11.5px; font-weight: 800; display: inline-flex; letter-spacing: 0.5px; }
+        .badge-admin { background: rgba(212, 175, 55, 0.15); color: #d4af37; border: 1px solid rgba(212, 175, 55, 0.3); }
+        .badge-shop-manager { background: rgba(255, 179, 0, 0.15); color: #ffb300; border: 1px solid rgba(255, 179, 0, 0.3); }
+        .badge-employee { background: rgba(0, 180, 216, 0.15); color: #00b4d8; border: 1px solid rgba(0, 180, 216, 0.3); }
+        .badge-user { background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.15); }
 
-        /* Actions */
+        .badge-status { padding: 6px 16px; border-radius: 99px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+        .badge-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+        .badge-active { background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .badge-active::before { background: #34d399; box-shadow: 0 0 8px #34d399; }
+        .badge-banned { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+        .badge-banned::before { background: #f87171; box-shadow: 0 0 8px #f87171; }
+
+        /* Dropdown Hành Động */
         .action-dropdown { position: relative; display: inline-block; }
-        .action-btn { background: #1f1f1f; color: #ffffff; border: 1px solid #2f2f2f; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; transition: 0.2s; }
-        .action-btn:hover { background: #2a2a2a; }
-        .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; margin-top: 6px; background: #181818; border: 1px solid #2c2c2c; border-radius: 10px; min-width: 190px; box-shadow: 0 12px 30px rgba(0,0,0,0.8); z-index: 1000; padding: 6px 0; }
-        .dropdown-menu form { margin: 0; }
-        .dropdown-menu button { width: 100%; text-align: left; background: none; border: none; color: #e5e5e5; padding: 10px 18px; font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.15s; }
-        .dropdown-menu button:hover { background: #242424; color: #ffffff; }
-        .dropdown-menu .btn-delete { color: #ff5252 !important; }
-        .dropdown-menu .btn-delete:hover { background: rgba(255, 82, 82, 0.12); }
+        .action-btn {
+            background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--border-light);
+            padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;
+            transition: 0.2s; display: flex; align-items: center; gap: 6px;
+        }
+        .action-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
 
-        /* MODALS */
-        .modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.82); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 9999; }
-        .modal-card { position: relative; width: 100%; max-width: 540px; max-height: 95vh; overflow-y: auto; background: #111111; border: 1px solid #ff444455; border-radius: 18px; padding: 26px 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.9); box-sizing: border-box; }
+        .dropdown-menu {
+            display: none; position: absolute; right: 0; top: 100%; margin-top: 8px;
+            background: #1b1f2a; border: 1px solid var(--border-light); border-radius: 12px;
+            min-width: 220px; box-shadow: 0 15px 40px rgba(0,0,0,0.8); z-index: 1000; padding: 8px;
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        .dropdown-menu form { margin: 0; }
+        .dropdown-menu button {
+            width: 100%; text-align: left; background: none; border: none; color: #cbd5e1;
+            padding: 12px 14px; font-size: 13.5px; font-weight: 600; cursor: pointer;
+            transition: 0.2s; border-radius: 8px; display: flex; align-items: center; gap: 8px; font-family: inherit;
+        }
+        .dropdown-menu button:hover { background: rgba(255,255,255,0.06); color: #fff; transform: translateX(3px); }
+        .dropdown-menu .btn-delete { color: #fca5a5 !important; }
+        .dropdown-menu .btn-delete:hover { background: rgba(239, 68, 68, 0.15) !important; color: #fff !important; }
+
+        /* ==================== 3. MODALS (CHUNG) ==================== */
+        .modal-backdrop {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center; z-index: 9999;
+        }
+        .modal-card {
+            position: relative; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+            background: #14171f; border: 1px solid var(--border-light); border-radius: 20px;
+            padding: 32px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); box-sizing: border-box;
+        }
         .modal-card::-webkit-scrollbar { width: 6px; }
         .modal-card::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-        .modal-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2.5px; background: linear-gradient(90deg, #ff5a00, #ff2222); }
-        .modal-header { display: flex; align-items: center; gap: 15px; margin-bottom: 22px; position: relative; }
-        .modal-icon { width: 44px; height: 44px; background: #261717; border: 1px solid #4a2121; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-        .modal-header h3 { margin: 0; font-size: 19px; font-weight: 700; color: #ffffff; }
-        .modal-header p { margin: 4px 0 0; font-size: 13px; color: #888888; }
-        .btn-close { position: absolute; right: 0; top: 2px; background: transparent; border: none; color: #777777; font-size: 20px; cursor: pointer; }
-        .btn-close:hover { color: #ffffff; }
-        .section-label { display: block; font-size: 11px; font-weight: 800; color: #7a7a7a; letter-spacing: 0.8px; margin-bottom: 12px; }
+        .modal-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; position: relative; }
+        .modal-icon {
+            width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center;
+            justify-content: center; font-size: 22px; flex-shrink: 0;
+        }
+        .modal-header h3 { margin: 0; font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+        .modal-header p { margin: 6px 0 0; font-size: 13.5px; color: var(--text-secondary); }
+        .btn-close { position: absolute; right: 0; top: 0; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 50%; width: 32px; height: 32px; color: #aaa; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn-close:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .section-label { display: block; font-size: 11.5px; font-weight: 800; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 14px; text-transform: uppercase; }
 
-        /* Radios */
-        .radio-group { display: flex; flex-direction: column; gap: 10px; }
-        .radio-option { display: flex; align-items: center; gap: 14px; background: #171717; border: 1px solid #262626; padding: 14px 18px; border-radius: 12px; cursor: pointer; transition: 0.2s; }
-        .radio-option:hover { background: #1e1e1e; border-color: #383838; }
+        .radio-group { display: flex; flex-direction: column; gap: 12px; }
+        .radio-option {
+            display: flex; align-items: center; gap: 16px; background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border); padding: 16px 20px; border-radius: 12px;
+            cursor: pointer; transition: 0.25s;
+        }
+        .radio-option:hover { background: rgba(255,255,255,0.06); border-color: var(--border-light); }
         .radio-option input[type="radio"] { display: none; }
-        .custom-radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #555555; display: inline-block; transition: 0.2s; box-sizing: border-box; flex-shrink: 0; }
-        .radio-option input[type="radio"]:checked + .custom-radio { border-color: #ff3b30; background: #ff3b30; box-shadow: 0 0 12px rgba(255, 59, 48, 0.8); }
-        .role-radio:checked + .custom-radio { border-color: #d4af37 !important; background: #d4af37 !important; box-shadow: 0 0 12px rgba(212, 175, 55, 0.6) !important; }
-        .radio-text { font-size: 14px; font-weight: 500; color: #e2e2e2; }
+        .custom-radio { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #555; display: inline-block; transition: 0.2s; box-sizing: border-box; flex-shrink: 0; }
 
-        /* Phân quyền Động CSS */
-        .rbac-box { background: #161616; border: 1px solid #2a2a2a; padding: 14px; border-radius: 10px; flex: 1; }
-        .rbac-input { width: 100%; box-sizing: border-box; background: #0a0a0a; border: 1px solid #333; color: white; padding: 8px 12px; border-radius: 6px; font-size: 13px; margin-bottom: 10px; outline: none; }
+        .radio-text { font-size: 14.5px; font-weight: 600; color: #fff; }
+
+        /* Modal Phân Quyền (Màu Vàng Đồng) */
+        .modal-role { border-color: rgba(212, 175, 55, 0.3); }
+        .modal-role::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, transparent, #d4af37, transparent); }
+        .modal-role .modal-icon { background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.3); color: #d4af37; }
+        .role-radio:checked + .custom-radio { border-color: #d4af37 !important; background: #d4af37 !important; box-shadow: 0 0 12px rgba(212, 175, 55, 0.5) !important; }
+        .role-radio:checked ~ div .radio-text { color: #d4af37 !important; }
+
+        /* Modal Khóa (Màu Đỏ) */
+        .modal-ban { border-color: rgba(239, 68, 68, 0.3); }
+        .modal-ban::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, transparent, #ef4444, transparent); }
+        .modal-ban .modal-icon { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; }
+        .ban-radio:checked + .custom-radio { border-color: #ef4444 !important; background: #ef4444 !important; box-shadow: 0 0 12px rgba(239, 68, 68, 0.5) !important; }
+        .custom-reason-box textarea { width: 100%; background: #0a0a0a; border: 1px solid #333; border-radius: 12px; padding: 14px; color: #fff; font-family: inherit; font-size: 14px; margin-top: 12px; outline: none; box-sizing: border-box; resize: none; transition: 0.2s; }
+        .custom-reason-box textarea:focus { border-color: #ef4444; }
+
+        /* RBAC Box */
+        .rbac-box { background: rgba(0,0,0,0.3); border: 1px solid var(--border); padding: 18px; border-radius: 14px; flex: 1; }
+        .perm-checkbox { width: 18px; height: 18px; accent-color: #d4af37; cursor: pointer; }
+        .rbac-input { width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: white; padding: 10px 14px; border-radius: 8px; font-size: 13.5px; font-family: inherit; outline: none; transition: 0.2s; }
         .rbac-input:focus { border-color: #d4af37; }
-        .rbac-btn { width: 100%; padding: 8px; border-radius: 6px; border: none; font-weight: 600; font-size: 12px; cursor: pointer; transition: 0.2s; }
-        .btn-create { background: #d4af3722; color: #d4af37; border: 1px solid #d4af3755; width: auto; padding: 8px 16px;}
-        .btn-create:hover { background: #d4af3744; }
-        .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 26px; }
-        .btn-cancel { background: #242424; color: #cccccc; border: 1px solid #363636; padding: 10px 22px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
-        .btn-cancel:hover { background: #2d2d2d; color: #ffffff; }
-        .btn-submit-lock { background: #ff2a2a; color: #ffffff; border: none; padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 18px rgba(255, 42, 42, 0.5); transition: 0.2s; }
-        .btn-submit-lock:hover { background: #ff1515; box-shadow: 0 4px 24px rgba(255, 42, 42, 0.7); }
+        .btn-create { background: rgba(212, 175, 55, 0.15); color: #d4af37; border: 1px solid rgba(212, 175, 55, 0.3); padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; transition: 0.2s; white-space: nowrap; }
+        .btn-create:hover { background: rgba(212, 175, 55, 0.25); color: #fff; }
+
+        .modal-footer { display: flex; justify-content: flex-end; gap: 14px; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
+        .btn-cancel { background: rgba(255,255,255,0.05); color: #cbd5e1; border: 1px solid var(--border-light); padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-cancel:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-submit-role { background: linear-gradient(135deg, #d4af37, #f3e5ab); color: #000; border: none; padding: 12px 28px; border-radius: 10px; font-size: 14.5px; font-weight: 800; cursor: pointer; box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3); transition: 0.2s; }
+        .btn-submit-role:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5); }
+        .btn-submit-ban { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; border: none; padding: 12px 28px; border-radius: 10px; font-size: 14.5px; font-weight: 800; cursor: pointer; box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3); transition: 0.2s; }
+        .btn-submit-ban:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5); }
+
     </style>
 </head>
 <body>
 
 <aside class="sidebar">
     <div class="sidebar-brand">
-        <span>PANTHERA ADMIN</span>
+        <div class="sidebar-brand-icon">P</div>
+        <span>ADMIN</span>
     </div>
     <ul class="nav-links">
-        <li><a th:href="@{/admin/dashboard}" class="active">Quản lý Tài khoản</a></li>
-        <li><a th:href="@{/admin/products}">Quản lý Sản phẩm</a></li>
-        <li><a th:href="@{/}">Quay lại Website</a></li>
+        <li><a th:href="@{/admin/dashboard}" class="active">🛡 Quản lý Tài khoản</a></li>
+        <li><a th:href="@{/admin/products}">📦 Quản lý Sản phẩm</a></li>
         <li><a th:href="@{/admin/sockets}">🔌 Giám sát Socket</a></li>
+        <li><a th:href="@{/}">🏠 Quay lại Website</a></li>
         <li style="margin-top: auto;">
             <form th:action="@{/logout}" method="post" style="margin: 0; padding: 0;">
-                <button type="submit" class="logout-btn" style="width: 100%; background: transparent; cursor: pointer; display: block; padding: 14px 20px; font-weight: 600; font-size: 15px; border-radius: 12px; transition: 0.2s; font-family: inherit;">
-                    Đăng xuất
+                <button type="submit" class="logout-btn">
+                    ĐĂNG XUẤT
                 </button>
             </form>
         </li>
@@ -133,7 +243,7 @@
 <main class="main-content">
     <div class="header-title">
         <h2>DANH SÁCH NGƯỜI DÙNG</h2>
-        <p>Quản lý toàn bộ tài khoản đã đăng ký trên hệ thống</p>
+        <p>Quản lý toàn bộ tài khoản và phân quyền trên hệ thống Panthera Hub</p>
     </div>
 
     <div class="stats-grid">
@@ -142,11 +252,11 @@
             <h3 th:text="${users != null ? users.size() : 0}">0</h3>
         </div>
         <div class="stat-card">
-            <span>QUYỀN QUẢN TRỊ</span>
+            <span>QUYỀN QUẢN TRỊ (ADMIN)</span>
             <h3 style="color: var(--primary);" th:text="${users != null ? users.?[role == 'ADMIN'].size() : 0}">0</h3>
         </div>
         <div class="stat-card">
-            <span>TRẠNG THÁI BÌNH THƯỜNG</span>
+            <span>TÀI KHOẢN HOẠT ĐỘNG</span>
             <h3 style="color: var(--success);" th:text="${users != null ? users.?[status != 'BANNED'].size() : 0}">0</h3>
         </div>
     </div>
@@ -164,16 +274,16 @@
             </thead>
             <tbody>
             <tr th:each="u : ${users}">
-                <td style="font-weight: 700;" th:text="${u.username}">admin</td>
+                <td style="font-weight: 700; color: #fff; font-size: 15px;" th:text="${u.username}">admin</td>
                 <td style="font-family: monospace; color: var(--text-muted);" th:text="${u.userId}">uuid</td>
                 <td>
-                    <span th:if="${u.role == 'ADMIN'}" class="badge-role badge-admin">ADMIN</span>
-                    <span th:if="${u.role == 'SHOP_MANAGER'}" class="badge-role badge-shop-manager">QUẢN LÝ SHOP</span>
-                    <span th:if="${u.role == 'EMPLOYEE'}" class="badge-role badge-employee">NHÂN VIÊN KHO</span>
+                    <span th:if="${u.role == 'ADMIN'}" class="badge-role badge-admin">ADMINISTRATOR</span>
+                    <span th:if="${u.role == 'SHOP_MANAGER'}" class="badge-role badge-shop-manager">SHOP MANAGER</span>
+                    <span th:if="${u.role == 'EMPLOYEE'}" class="badge-role badge-employee">EMPLOYEE</span>
                     <span th:if="${u.role == 'USER' or u.role == null}" class="badge-role badge-user">USER</span>
                 </td>
                 <td>
-                    <span th:if="${u.status == 'BANNED'}" class="badge-status badge-banned">Đã Ban</span>
+                    <span th:if="${u.status == 'BANNED'}" class="badge-status badge-banned">Đã khóa</span>
                     <span th:unless="${u.status == 'BANNED'}" class="badge-status badge-active">Hoạt động</span>
                 </td>
                 <td style="text-align: right;">
@@ -182,28 +292,26 @@
                         <button type="button" class="action-btn" onclick="toggleDropdown(this, event)">Tuỳ chọn ▼</button>
 
                         <div class="dropdown-menu">
-                            <!-- Nút Phân quyền hệ thống: Truyền biến trực tiếp bằng Thymeleaf inline -->
-                            <button type="button"
-                                    th:onclick="openRoleModal([[${u.userId}]], [[${u.username}]], [[${u.role != null ? u.role : 'USER'}]])">
-                                👑 Phân quyền hệ thống
+                            <!-- Nút Phân quyền hệ thống -->
+                            <button type="button" th:onclick="openRoleModal([[${u.userId}]], [[${u.username}]], [[${u.role != null ? u.role : 'USER'}]])">
+                                👑 Cấu hình Phân quyền
                             </button>
 
                             <!-- Nút Khóa tài khoản -->
-                            <button type="button" th:if="${u.status != 'BANNED'}"
-                                    th:onclick="openBanModal([[${u.userId}]], [[${u.username}]])">
-                                🔒 Khóa tài khoản
+                            <button type="button" th:if="${u.status != 'BANNED'}" th:onclick="openBanModal([[${u.userId}]], [[${u.username}]])">
+                                🔒 Khóa tài khoản (Ban)
                             </button>
 
                             <!-- Nút Mở khóa -->
                             <form th:action="@{/admin/users/toggle-ban}" method="post" th:if="${u.status == 'BANNED'}">
                                 <input type="hidden" name="userId" th:value="${u.userId}">
-                                <button type="submit" style="color: var(--success);">✅ Mở khóa tài khoản</button>
+                                <button type="submit" style="color: #34d399;">✅ Mở khóa tài khoản</button>
                             </form>
 
                             <!-- Nút Xóa -->
-                            <form th:action="@{/admin/users/delete}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tài khoản này?');">
+                            <form th:action="@{/admin/users/delete}" method="post" onsubmit="return confirm('Hành động này không thể hoàn tác! Bạn có chắc chắn muốn xóa tài khoản này?');">
                                 <input type="hidden" name="userId" th:value="${u.userId}">
-                                <button type="submit" class="btn-delete">❌ Xóa tài khoản</button>
+                                <button type="submit" class="btn-delete">❌ Xóa vĩnh viễn</button>
                             </form>
                         </div>
                     </div>
@@ -216,14 +324,12 @@
 
 <!-- MODAL 1: PHÂN QUYỀN HỆ THỐNG & CẤU HÌNH RBAC -->
 <div id="roleModal" class="modal-backdrop">
-    <div class="modal-card" style="border-color: #d4af3755;">
-        <div style="content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2.5px; background: linear-gradient(90deg, #d4af37, #f3e5ab); border-top-left-radius: 18px; border-top-right-radius: 18px;"></div>
-
+    <div class="modal-card modal-role">
         <div class="modal-header">
-            <div class="modal-icon" style="border-color: #d4af37; background: #2a220c; color: #d4af37;">👑</div>
+            <div class="modal-icon">👑</div>
             <div>
-                <h3>Phân quyền hệ thống</h3>
-                <p>Thiết lập vai trò cho: <strong id="roleModalTargetUser" style="color: var(--primary);">username</strong></p>
+                <h3>Phân Quyền Hệ Thống</h3>
+                <p>Cấp vai trò truy cập cho tài khoản: <strong id="roleModalTargetUser" style="color: #d4af37;">username</strong></p>
             </div>
             <button type="button" class="btn-close" onclick="closeRoleModal()">✕</button>
         </div>
@@ -231,14 +337,14 @@
         <form th:action="@{/admin/users/update-role}" method="post" id="updateUserRoleForm">
             <input type="hidden" name="userId" id="roleModalUserId">
 
-            <div class="modal-body">
-                <label class="section-label">CHỌN VAI TRÒ MỚI</label>
+            <div>
+                <label class="section-label">CHỌN VAI TRÒ</label>
                 <div class="radio-group">
                     <label class="radio-option">
                         <input type="radio" name="role" value="ADMIN" id="role_ADMIN" class="role-radio" onchange="showRbacConfig(this.value)">
                         <span class="custom-radio"></span>
                         <div style="display: flex; flex-direction: column;">
-                            <span class="radio-text" style="color: #ff5a00; font-weight: bold;">Quản trị viên (ADMIN)</span>
+                            <span class="radio-text">Quản trị viên Hệ thống (ADMIN)</span>
                         </div>
                     </label>
 
@@ -246,7 +352,7 @@
                         <input type="radio" name="role" value="SHOP_MANAGER" id="role_SHOP_MANAGER" class="role-radio" onchange="showRbacConfig(this.value)">
                         <span class="custom-radio"></span>
                         <div style="display: flex; flex-direction: column;">
-                            <span class="radio-text" style="color: #ffb300; font-weight: bold;">Quản lý cửa hàng (SHOP_MANAGER)</span>
+                            <span class="radio-text">Quản lý Cửa hàng (SHOP_MANAGER)</span>
                         </div>
                     </label>
 
@@ -254,7 +360,7 @@
                         <input type="radio" name="role" value="EMPLOYEE" id="role_EMPLOYEE" class="role-radio" onchange="showRbacConfig(this.value)">
                         <span class="custom-radio"></span>
                         <div style="display: flex; flex-direction: column;">
-                            <span class="radio-text" style="color: #00b4d8; font-weight: bold;">Nhân viên kho (EMPLOYEE)</span>
+                            <span class="radio-text">Nhân viên Kho (EMPLOYEE)</span>
                         </div>
                     </label>
 
@@ -262,45 +368,45 @@
                         <input type="radio" name="role" value="USER" id="role_USER" class="role-radio" onchange="showRbacConfig(this.value)">
                         <span class="custom-radio"></span>
                         <div style="display: flex; flex-direction: column;">
-                            <span class="radio-text" style="color: #ccc; font-weight: bold;">Khách hàng (USER)</span>
+                            <span class="radio-text" style="color: var(--text-secondary);">Thành viên thông thường (USER)</span>
                         </div>
                     </label>
                 </div>
             </div>
 
-            <div class="modal-footer" style="margin-top: 15px; padding-bottom: 15px; border-bottom: 1px dashed #333;">
-                <button type="button" class="btn-cancel" onclick="closeRoleModal()">Hủy bỏ</button>
-                <button type="submit" class="btn-submit-lock" style="background: #d4af37; color: #000; box-shadow: 0 4px 18px rgba(212, 175, 55, 0.4);">Lưu Chức Danh Này</button>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeRoleModal()">Hủy</button>
+                <button type="submit" class="btn-submit-role">LƯU THAY ĐỔI</button>
             </div>
         </form>
 
-        <div id="rbacSection" style="display: none; padding-top: 15px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <p style="font-size: 12px; color: #888; font-weight: bold; margin: 0; text-transform: uppercase;">
-                    🛠️ Bật/Tắt chìa khóa cho: <span id="rbacRoleNameDisplay" style="color: #d4af37;">...</span>
+        <div id="rbacSection" style="display: none; padding-top: 24px; margin-top: 24px; border-top: 1px dashed var(--border-light);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <p style="font-size: 12.5px; color: #cbd5e1; font-weight: 700; margin: 0; text-transform: uppercase;">
+                    🛠️ Bật/Tắt quyền hạn cho: <span id="rbacRoleNameDisplay" style="color: #d4af37;">...</span>
                 </p>
             </div>
 
-            <div class="rbac-box" style="margin-bottom: 15px;">
+            <div class="rbac-box" style="margin-bottom: 16px;">
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;" id="permissionsGrid">
-                    <label th:each="perm : ${allPermissions}" class="permission-toggle-label" style="display: flex; align-items: center; gap: 10px; background: #0a0a0a; padding: 10px 14px; border: 1px solid #333; border-radius: 8px; cursor: pointer; transition: 0.2s;">
-                        <input type="checkbox" class="perm-checkbox" style="width: 16px; height: 16px; accent-color: #d4af37;"
+                    <label th:each="perm : ${allPermissions}" style="display: flex; align-items: flex-start; gap: 12px; background: rgba(0,0,0,0.4); padding: 12px 14px; border: 1px solid var(--border-light); border-radius: 10px; cursor: pointer; transition: 0.2s;">
+                        <input type="checkbox" class="perm-checkbox" style="margin-top: 2px;"
                                th:data-perm-name="${perm.name}"
                                onchange="togglePermissionViaAjax(this)">
                         <div style="display: flex; flex-direction: column;">
-                            <span style="font-size: 13px; font-weight: 700; color: #e2e2e2;" th:text="${perm.name}">USER_READ</span>
-                            <span style="font-size: 11px; color: #777;" th:text="${perm.description}">Mô tả quyền...</span>
+                            <span style="font-size: 13.5px; font-weight: 700; color: #fff; margin-bottom: 4px;" th:text="${perm.name}">USER_READ</span>
+                            <span style="font-size: 11.5px; color: var(--text-muted); line-height: 1.3;" th:text="${perm.description}">Mô tả quyền...</span>
                         </div>
                     </label>
                 </div>
             </div>
 
-            <form class="rbac-box" th:action="@{/admin/permissions/add}" method="post" style="display: flex; align-items: center; gap: 10px; padding: 10px 14px;">
-                <div style="flex: 1;">
-                    <input type="text" name="name" class="rbac-input" placeholder="Mã Quyền Mới (VD: EXPORT_EXCEL)" style="margin-bottom: 5px;" required>
-                    <input type="text" name="description" class="rbac-input" placeholder="Mô tả ngắn gọn..." style="margin-bottom: 0;" required>
+            <form class="rbac-box" th:action="@{/admin/permissions/add}" method="post" style="display: flex; align-items: center; gap: 12px;">
+                <div style="flex: 1; display: flex; gap: 10px;">
+                    <input type="text" name="name" class="rbac-input" placeholder="Mã Quyền (VD: EXPORT_EXCEL)" required>
+                    <input type="text" name="description" class="rbac-input" placeholder="Mô tả..." required>
                 </div>
-                <button type="submit" class="rbac-btn btn-create">Tạo Mới</button>
+                <button type="submit" class="btn-create">+ Tạo Quyền Mới</button>
             </form>
         </div>
     </div>
@@ -308,39 +414,46 @@
 
 <!-- MODAL 2: KHÓA TÀI KHOẢN -->
 <div id="banModal" class="modal-backdrop">
-    <div class="modal-card">
+    <div class="modal-card modal-ban">
         <div class="modal-header">
             <div class="modal-icon">🔒</div>
             <div>
-                <h3>Xác nhận khóa tài khoản</h3>
-                <p>Khóa quyền truy cập của: <strong id="modalTargetUser" style="color: var(--primary);">username</strong></p>
+                <h3>Khóa Tài Khoản</h3>
+                <p>Đình chỉ quyền truy cập của: <strong id="modalTargetUser" style="color: #ef4444;">username</strong></p>
             </div>
             <button type="button" class="btn-close" onclick="closeBanModal()">✕</button>
         </div>
         <form id="banForm" th:action="@{/admin/users/toggle-ban}" method="post">
             <input type="hidden" name="userId" id="banModalUserId">
             <input type="hidden" name="reason" id="finalBanReason">
-            <div class="modal-body">
-                <label class="section-label">LÝ DO KHÓA</label>
+
+            <div>
+                <label class="section-label">CHỌN LÝ DO KHÓA</label>
                 <div class="radio-group">
-                    <label class="radio-option"><input type="radio" name="presetReason" value="Gian lận" checked onchange="toggleCustomReason(false)"><span class="custom-radio"></span><span class="radio-text">⚔️ Gian lận</span></label>
-                    <label class="radio-option"><input type="radio" name="presetReason" value="OTHER" onchange="toggleCustomReason(true)"><span class="custom-radio"></span><span class="radio-text">📝 Lý do khác...</span></label>
+                    <label class="radio-option">
+                        <input type="radio" name="presetReason" value="Gian lận" checked onchange="toggleCustomReason(false)" class="ban-radio">
+                        <span class="custom-radio"></span><span class="radio-text">⚔️ Sử dụng phần mềm gian lận (Hack/Cheat)</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="presetReason" value="OTHER" onchange="toggleCustomReason(true)" class="ban-radio">
+                        <span class="custom-radio"></span><span class="radio-text">📝 Vi phạm khác (Tự nhập lý do)</span>
+                    </label>
                 </div>
-                <div class="custom-reason-box" id="customReasonWrapper">
-                    <textarea id="customReasonInput" rows="3" placeholder="Nhập lý do..."></textarea>
+                <div class="custom-reason-box" id="customReasonWrapper" style="display: none;">
+                    <textarea id="customReasonInput" rows="3" placeholder="Nhập lý do chi tiết để thông báo cho người dùng..."></textarea>
                 </div>
             </div>
+
             <div class="modal-footer">
-                <button type="button" class="btn-cancel" onclick="closeBanModal()">Hủy bỏ</button>
-                <button type="submit" class="btn-submit-lock" onclick="prepareSubmitBan(event)">Khóa tài khoản</button>
+                <button type="button" class="btn-cancel" onclick="closeBanModal()">Hủy</button>
+                <button type="submit" class="btn-submit-ban" onclick="prepareSubmitBan(event)">XÁC NHẬN KHÓA</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Đã bổ sung th:inline="javascript" để Server có thể kết nối với Script -->
+<!-- SCRIPTS HỖ TRỢ HIỂN THỊ UI -->
 <script th:inline="javascript">
-
     // Ngăn chặn xung đột click bằng event.stopPropagation()
     function toggleDropdown(btn, event) {
         if(event) event.stopPropagation();
@@ -351,7 +464,6 @@
         currentMenu.style.display = currentMenu.style.display === 'block' ? 'none' : 'block';
     }
 
-    // Đóng dropdown khi bấm ra ngoài
     window.addEventListener('click', function(e) {
         if (!e.target.matches('.action-btn')) {
             document.querySelectorAll('.dropdown-menu').forEach(menu => menu.style.display = 'none');
@@ -397,7 +509,6 @@
     function showRbacConfig(roleValue) {
         currentSelectedRole = roleValue;
 
-        // NẾU LÀ ADMIN THÌ ẨN KHUNG CHỈNH QUYỀN, NGƯỢC LẠI THÌ HIỆN
         if (roleValue === 'ADMIN') {
             document.getElementById('rbacSection').style.display = 'none';
         } else {
@@ -409,7 +520,7 @@
         const checkboxes = document.querySelectorAll('.perm-checkbox');
         checkboxes.forEach(cb => {
             cb.checked = false;
-            cb.parentElement.style.borderColor = '#333';
+            cb.parentElement.style.borderColor = 'rgba(255,255,255,0.15)';
         });
 
         const activePerms = currentMappings.filter(m => m.roleName === roleValue).map(m => m.permissionName);
@@ -421,12 +532,13 @@
             }
         });
     }
+
     function togglePermissionViaAjax(checkboxElem) {
         const permName = checkboxElem.getAttribute('data-perm-name');
         const isGranted = checkboxElem.checked;
         const roleName = currentSelectedRole;
 
-        checkboxElem.parentElement.style.borderColor = isGranted ? '#d4af37' : '#333';
+        checkboxElem.parentElement.style.borderColor = isGranted ? '#d4af37' : 'rgba(255,255,255,0.15)';
 
         const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content') || '';
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
@@ -447,7 +559,7 @@
             if (!response.ok) {
                 alert("Lỗi lưu quyền! Mã lỗi HTTP: " + response.status);
                 checkboxElem.checked = !isGranted;
-                checkboxElem.parentElement.style.borderColor = !isGranted ? '#d4af37' : '#333';
+                checkboxElem.parentElement.style.borderColor = !isGranted ? '#d4af37' : 'rgba(255,255,255,0.15)';
             } else {
                 if (isGranted) {
                     currentMappings.push({ roleName: roleName, permissionName: permName });
@@ -487,9 +599,9 @@
         } else reasonInput.value = selectedRadio.value;
     }
 </script>
+
 <!-- ==================== RADAR BÁO CÓ TIN NHẮN MỚI CHO ADMIN ==================== -->
 <script th:inline="javascript">
-    // Lấy số lượng tin nhắn cuối cùng từ bộ nhớ tạm của trình duyệt
     let lastCustomerMessageCount = localStorage.getItem('globalCustomerMsgCount') || 0;
 
     setInterval(() => {
@@ -497,30 +609,25 @@
             .then(res => res.text())
             .then(countStr => {
                 let currentCount = parseInt(countStr);
-
-                // NẾU CÓ TIN NHẮN TĂNG LÊN
                 if (currentCount > lastCustomerMessageCount) {
                     localStorage.setItem('globalCustomerMsgCount', currentCount);
-
-                    // 1. Phát âm thanh Ting!
                     let audio = new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3');
-                    audio.play().catch(e => console.log("Trình duyệt chặn auto-play âm thanh"));
+                    audio.play().catch(e => console.log("Auto-play chặn"));
 
-                    // 2. Làm Nút Menu đỏ chót để gây chú ý
                     let chatMenuLink = document.querySelector('a[href="/admin/chat"]');
                     if(chatMenuLink) {
-                        chatMenuLink.style.background = '#ff4444';
+                        chatMenuLink.style.background = '#ef4444';
                         chatMenuLink.style.color = '#ffffff';
-                        chatMenuLink.style.boxShadow = '0 0 15px rgba(255, 68, 68, 0.8)';
+                        chatMenuLink.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.6)';
                         chatMenuLink.innerHTML = '💬 HỖ TRỢ KHÁCH (Có tin mới!)';
                     }
                 } else if (currentCount < lastCustomerMessageCount) {
-                    // Reset nếu lỡ có ai xóa lịch sử
                     localStorage.setItem('globalCustomerMsgCount', currentCount);
                 }
             })
             .catch(err => {});
-    }, 4000); // 4 giây quét hệ thống 1 lần
+    }, 4000);
 </script>
+
 </body>
 </html>

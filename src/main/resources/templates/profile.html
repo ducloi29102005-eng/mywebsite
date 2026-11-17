@@ -1,234 +1,241 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thông tin tài khoản | Panthera</title>
+    <title>Thông tin tài khoản | Panthera ID</title>
+    <!-- THÊM CSRF ĐỂ ĐẢM BẢO LOGOUT BẰNG POST HOẠT ĐỘNG -->
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}"/>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --primary: #ff5a00;
+            --primary-light: #ff7b33;
             --primary-hover: #e04e00;
-            --bg-dark: #050505;
-            --surface: #111111;
-            --surface-card: #151515;
-            --border: #222222;
-            --text-main: #ffffff;
-            --text-muted: #888888;
+            --primary-glow: rgba(255, 90, 0, 0.25);
+            --bg-dark: #07080a;
+            --bg-sidebar: #0b0d12;
+            --surface: #14171f;
+            --surface-hover: #1b1f2a;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-light: rgba(255, 255, 255, 0.15);
+            --text-main: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --danger: #ef4444;
         }
 
         * { box-sizing: border-box; }
+
         body {
             margin: 0;
             background-color: var(--bg-dark);
             color: var(--text-main);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            background-image: radial-gradient(circle at 80% 20%, rgba(255, 90, 0, 0.04) 0%, transparent 40%);
         }
 
-        /* 1. THANH HEADER NGANG TRÊN CÙNG (HÌNH 1) */
+        /* ==================== 1. HEADER (ĐỒNG BỘ VỚI TRANG CHỦ & SHOP) ==================== */
         .navbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 40px;
-            height: 65px;
-            background-color: #000000;
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 48px; height: 76px;
+            background: rgba(7, 8, 10, 0.85); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000;
         }
 
-        .nav-left { display: flex; align-items: center; gap: 35px; }
+        .nav-left { display: flex; align-items: center; gap: 48px; }
         .brand-logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            color: #ffffff;
-            font-weight: 800;
-            font-size: 19px;
-            letter-spacing: 1.5px;
+            display: flex; align-items: center; gap: 13px; text-decoration: none;
+            color: #fff; font-weight: 900; font-size: 21px; letter-spacing: 1.2px;
         }
         .brand-logo img {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--primary);
+            width: 44px; height: 44px; border-radius: 12px; object-fit: cover;
+            border: 2px solid var(--primary); box-shadow: 0 0 16px var(--primary-glow);
+            transition: transform 0.3s ease;
         }
+        .brand-logo:hover img { transform: scale(1.06) rotate(-2deg); }
         .brand-logo span { color: var(--primary); }
 
-        .nav-links { display: flex; list-style: none; margin: 0; padding: 0; gap: 24px; }
+        .nav-links { display: flex; list-style: none; margin: 0; padding: 0; gap: 32px; }
         .nav-links li a {
-            text-decoration: none;
-            color: #cccccc;
-            font-size: 14px;
-            font-weight: 500;
-            transition: 0.25s;
+            text-decoration: none; color: var(--text-secondary); font-size: 14.5px;
+            font-weight: 600; padding: 26px 0; position: relative; transition: color 0.25s;
         }
         .nav-links li a:hover { color: #ffffff; }
 
-        /* AVATAR VÀ DROPDOWN GÓC TRÊN BÊN PHẢI */
+        .nav-shop-badge {
+            display: inline-flex; align-items: center; gap: 5px; background: rgba(255, 90, 0, 0.14);
+            color: var(--primary-light) !important; padding: 7px 14px !important;
+            border-radius: 99px; border: 1px solid rgba(255, 90, 0, 0.3); font-weight: 700 !important;
+        }
+        .nav-shop-badge:hover { background: var(--primary); color: #fff !important; box-shadow: 0 4px 18px var(--primary-glow); }
+
+        /* HEADER AVATAR DROPDOWN */
         .user-dropdown-wrapper { position: relative; padding: 10px 0; cursor: pointer; }
-        .avatar-btn { display: flex; align-items: center; gap: 8px; background: transparent; border: none; padding: 0; cursor: pointer; }
-        .user-avatar-img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid #333; }
-        .arrow-down { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #888; transition: transform 0.2s; }
+        .avatar-btn {
+            display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border); padding: 5px 12px 5px 6px; border-radius: 99px; cursor: pointer; transition: 0.25s;
+        }
+        .avatar-btn:hover { border-color: var(--primary); background: rgba(255, 90, 0, 0.08); }
+        .user-avatar-img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+        .arrow-down {
+            width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #94a3b8;
+            transition: transform 0.2s;
+        }
 
         .user-dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 55px;
-            right: 0;
-            width: 270px;
-            background: #ffffff;
-            color: #222222;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-            padding: 16px;
-            z-index: 1100;
+            display: none; position: absolute; top: 62px; right: 0; width: 290px;
+            background: #14171f; color: #f8fafc; border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85); padding: 18px; z-index: 1100;
         }
         .user-dropdown-wrapper:hover .user-dropdown-menu { display: block; }
         .user-dropdown-wrapper:hover .arrow-down { transform: rotate(180deg); }
 
-        .dropdown-profile-header { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #eee; }
-        .dropdown-avatar-img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
-        .dropdown-profile-info h4 { margin: 0; font-size: 14.5px; color: #111; font-weight: 700; }
-        .dropdown-profile-info p { margin: 3px 0 0 0; font-size: 11px; color: #777; }
+        .dropdown-profile-header { display: flex; align-items: center; gap: 13px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+        .dropdown-avatar-img { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; border: 2px solid var(--primary); }
+        .dropdown-profile-info h4 { margin: 0; font-size: 15px; color: #fff; font-weight: 700; }
+        .dropdown-profile-info p { margin: 4px 0 0 0; font-size: 12px; color: var(--text-secondary); font-family: monospace; }
 
-        .dropdown-links { list-style: none; padding: 8px 0 0 0; margin: 0; }
-        .dropdown-links li a { display: flex; align-items: center; gap: 10px; padding: 9px 10px; text-decoration: none; color: #333; font-size: 13.5px; font-weight: 600; border-radius: 6px; }
-        .dropdown-links li a:hover { background-color: #f5f5f5; color: var(--primary); }
-        .dropdown-links li a.logout-link { color: #dc3545; }
-
-        /* 2. KHUNG NỘI DUNG DƯỚI HEADER (SIDEBAR + MAIN CONTENT) */
-        .page-body {
-            display: flex;
-            flex: 1;
+        .dropdown-links { list-style: none; padding: 10px 0 0 0; margin: 0; }
+        .dropdown-links li a, .dropdown-links li button {
+            display: flex; align-items: center; gap: 10px; padding: 10px 12px; text-decoration: none;
+            color: #cbd5e1; font-size: 13.5px; font-weight: 600; border-radius: 10px; transition: 0.2s;
+            width: 100%; text-align: left; background: none; border: none; font-family: inherit; cursor: pointer;
         }
+        .dropdown-links li a:hover, .dropdown-links li button:hover { background-color: rgba(255, 255, 255, 0.06); color: #fff; transform: translateX(3px); }
+        .logout-link { color: #f87171 !important; }
+        .logout-link:hover { background-color: rgba(239, 68, 68, 0.12) !important; color: #fca5a5 !important; }
+
+        /* ==================== 2. MAIN LAYOUT ==================== */
+        .page-body { display: flex; flex: 1; max-width: 1500px; width: 100%; margin: 0 auto; }
 
         /* SIDEBAR BÊN TRÁI */
         .sidebar {
-            width: 260px;
-            background: var(--surface);
-            border-right: 1px solid var(--border);
-            padding: 30px 18px;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
+            width: 300px; background: var(--bg-sidebar); border-right: 1px solid var(--border);
+            padding: 40px 24px; display: flex; flex-direction: column; flex-shrink: 0;
+            box-shadow: 15px 0 30px rgba(0,0,0,0.2); z-index: 10;
         }
 
-        .sidebar .profile-avatar-circle {
-            width: 130px;
-            height: 130px;
-            border-radius: 50%;
-            object-fit: cover;
-            display: block;
-            margin: 0 auto 30px auto;
-            border: 3px solid var(--primary);
+        .sidebar-avatar-wrapper {
+            position: relative; width: 140px; height: 140px; margin: 0 auto 35px auto;
         }
+        .profile-avatar-circle {
+            width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+            border: 3px solid var(--border-light); background: var(--surface); padding: 4px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .sidebar-avatar-wrapper::after {
+            content: ''; position: absolute; inset: -4px; border-radius: 50%;
+            border: 2px solid transparent; border-top-color: var(--primary);
+            border-bottom-color: var(--primary-light); opacity: 0.8;
+            animation: spin 8s linear infinite; pointer-events: none;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; flex: 1; }
+        .sidebar-menu li { margin-bottom: 10px; }
         .sidebar-menu li a {
-            display: flex;
-            align-items: center;
-            padding: 13px 18px;
-            color: var(--text-muted);
-            text-decoration: none;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            transition: 0.25s;
+            display: flex; align-items: center; padding: 14px 20px; color: var(--text-secondary);
+            text-decoration: none; border-radius: 12px; font-size: 14px; font-weight: 600; transition: all 0.25s ease;
+            border: 1px solid transparent;
         }
-        .sidebar-menu li a:hover { background: rgba(255, 90, 0, 0.08); color: var(--primary); }
+        .sidebar-menu li a:hover { background: rgba(255, 255, 255, 0.03); border-color: var(--border-light); color: #fff; }
+
+        /* Hiệu ứng Nút Active trên Menu trái */
         .sidebar-menu li a.active {
-            background: rgba(255, 90, 0, 0.12);
-            color: var(--primary);
-            border-left: 4px solid var(--primary);
+            background: linear-gradient(90deg, rgba(255, 90, 0, 0.15) 0%, transparent 100%);
+            color: var(--primary-light); font-weight: 700; border-left: 3px solid var(--primary);
+            border-radius: 0 12px 12px 0;
         }
 
-        /* MAIN CONTENT BÊN PHẢI */
+        .sidebar-menu form { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border); }
+        .sidebar-menu form button {
+            width: 100%; text-align: center; padding: 14px; font-size: 14px; font-weight: 700;
+            color: var(--danger); background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px; cursor: pointer; transition: 0.25s; font-family: inherit;
+        }
+        .sidebar-menu form button:hover { background: var(--danger); color: #fff; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); }
+
+        /* NỘI DUNG CHÍNH BÊN PHẢI */
         .main-content {
-            flex: 1;
-            padding: 40px 50px;
-            background-color: var(--bg-dark);
+            flex: 1; padding: 50px 70px;
+            background: radial-gradient(circle at top right, rgba(255,255,255,0.02) 0%, transparent 50%);
         }
 
-        .content-title {
-            margin: 0 0 25px 0;
-            font-size: 22px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+        .content-header { margin-bottom: 40px; }
+        .content-subtitle { font-size: 12.5px; color: var(--primary); font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; display: block; }
+        .content-title { margin: 0; font-size: 28px; font-weight: 900; letter-spacing: -0.5px; color: #fff; }
 
         .account-card {
-            background: var(--surface-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 30px;
-            max-width: 680px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 20px; padding: 40px; max-width: 800px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            position: relative; overflow: hidden;
+        }
+        /* Hiệu ứng viền phát sáng góc thẻ */
+        .account-card::before {
+            content: ''; position: absolute; top: 0; right: 0; width: 150px; height: 150px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%); opacity: 0.4;
         }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
+        .form-group { display: flex; flex-direction: column; position: relative; z-index: 2; }
         .form-group label {
-            font-size: 11.5px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+            font-size: 12px; color: var(--text-secondary); text-transform: uppercase;
+            margin-bottom: 10px; font-weight: 700; letter-spacing: 0.8px;
         }
 
         .form-control {
-            background-color: #0a0a0a;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: #ffffff;
-            padding: 12px 14px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.25s;
+            background-color: #0b0d12; border: 1px solid var(--border-light);
+            border-radius: 12px; color: #ffffff; padding: 14px 16px;
+            font-size: 14.5px; font-family: inherit; font-weight: 500;
+            outline: none; transition: all 0.3s ease;
         }
-        .form-control:focus { border-color: var(--primary); }
+        .form-control:focus { border-color: var(--primary); background: rgba(255, 90, 0, 0.03); box-shadow: 0 0 0 4px rgba(255, 90, 0, 0.1); }
+        .form-control::placeholder { color: #475569; }
+
+        /* Input chỉ đọc (ID & Username) */
         .form-control:disabled, .form-control[readonly] {
-            color: #e04e00;
-            cursor: not-allowed;
-            background-color: #070707;
+            color: var(--primary-light); background-color: rgba(255,255,255,0.02);
+            border-color: transparent; cursor: not-allowed; font-family: monospace; font-size: 15px;
         }
 
+        .form-actions { margin-top: 40px; display: flex; justify-content: flex-end; position: relative; z-index: 2; border-top: 1px solid var(--border); padding-top: 30px; }
+
         .btn-save {
-            width: 100%;
-            background-color: var(--primary);
-            color: #ffffff;
-            border: none;
-            padding: 13px;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            margin-top: 25px;
-            transition: background-color 0.25s;
+            background: linear-gradient(135deg, var(--primary), #ff7a00); color: #ffffff;
+            border: none; padding: 15px 36px; border-radius: 12px;
+            font-weight: 800; font-size: 14.5px; letter-spacing: 0.5px; cursor: pointer;
+            transition: all 0.3s ease; box-shadow: 0 8px 20px var(--primary-glow);
         }
-        .btn-save:hover { background-color: var(--primary-hover); }
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(255, 90, 0, 0.5); }
+
+        @media (max-width: 1024px) {
+            .page-body { flex-direction: column; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); padding: 30px; }
+            .sidebar-avatar-wrapper { width: 100px; height: 100px; margin-bottom: 20px; }
+            .main-content { padding: 40px 30px; }
+        }
+        @media (max-width: 768px) {
+            .navbar { padding: 0 20px; }
+            .nav-links { display: none; }
+            .form-grid { grid-template-columns: 1fr; gap: 20px; }
+            .btn-save { width: 100%; }
+        }
     </style>
 </head>
 <body>
 
-<!-- 1. HEADER (HÌNH 1) -->
+<!-- 1. HEADER CHUẨN GIAO DIỆN MỚI -->
 <header class="navbar">
     <div class="nav-left">
         <a th:href="@{/}" class="brand-logo">
@@ -239,7 +246,7 @@
             <li><a th:href="@{/}">Trang chủ</a></li>
             <li><a th:href="@{/#games}">Games</a></li>
             <li><a th:href="@{/#news}">Tin tức</a></li>
-            <li><a th:href="@{/shop}" class="active-shop" style="color: #ff5a00; font-weight: 700;">SHOP <span style="font-size: 11px;">↗</span></a></li>
+            <li><a th:href="@{/shop}" class="nav-shop-badge">SHOP ↗</a></li>
             <li><a th:href="@{/#about}">Về chúng tôi</a></li>
         </ul>
     </div>
@@ -248,13 +255,13 @@
     <div class="nav-right">
         <div class="user-dropdown-wrapper">
             <button class="avatar-btn">
-                <img th:src="@{/images/logo.jpg}" class="user-avatar-img" alt="Avatar">
+                <img th:src="@{/images/logo.jpg}" class="user-avatar-img" alt="Avatar" onerror="this.src='https://placehold.co/100x100/ff5a00/ffffff?text=U'">
                 <div class="arrow-down"></div>
             </button>
 
             <div class="user-dropdown-menu">
                 <div class="dropdown-profile-header">
-                    <img th:src="@{/images/logo.jpg}" class="dropdown-avatar-img" alt="Avatar">
+                    <img th:src="@{/images/logo.jpg}" class="dropdown-avatar-img" alt="Avatar" onerror="this.src='https://placehold.co/100x100/ff5a00/ffffff?text=U'">
                     <div class="dropdown-profile-info">
                         <h4 th:text="${profile != null && profile.fullName != null && !#strings.isEmpty(profile.fullName) ? profile.fullName : user.username}">Người dùng</h4>
                         <p>ID: <span th:text="${user != null && user.userId != null ? #strings.substring(user.userId, 0, 8) : ''}">34e17c94</span> • VN</p>
@@ -266,18 +273,20 @@
                     <th:block th:if="${user != null and user.role != 'ADMIN'}">
                         <li><a th:href="@{/profile}">👤 Tài khoản</a></li>
                         <li><a th:href="@{/profile/games}">🎮 Trò chơi đã liên kết</a></li>
-                        <li><a th:href="@{/profile/security}">⚙️ Cài đặt tài khoản</a></li>
+                        <li><a th:href="@{/profile/security}">⚙️ Cài đặt bảo mật</a></li>
                     </th:block>
 
                     <!-- Chỉ hiện cho Admin -->
                     <li th:if="${user != null and user.role == 'ADMIN'}">
-                        <a th:href="@{/admin/dashboard}" style="color: #ff5a00; font-weight: 700; background: rgba(255, 90, 0, 0.08);">
+                        <a th:href="@{/admin/dashboard}" style="color: #ff7b33; font-weight: 700; background: rgba(255, 90, 0, 0.12);">
                             🛡️ Trang Quản Trị
                         </a>
                     </li>
 
-                    <li style="border-top: 1px solid #eeeeee; margin-top: 6px; padding-top: 6px;">
-                        <a th:href="@{/logout}" class="logout-link">🚪 Đăng xuất</a>
+                    <li style="border-top: 1px solid rgba(255,255,255,0.08); margin-top: 8px; padding-top: 8px;">
+                        <form th:action="@{/logout}" method="post" style="margin: 0; padding: 0;">
+                            <button type="submit" class="logout-link">🚪 Đăng xuất</button>
+                        </form>
                     </li>
                 </ul>
             </div>
@@ -285,72 +294,78 @@
     </div>
 </header>
 
-<!-- 2. BODY GIAO DIỆN HỒ SƠ (HÌNH 2) -->
+<!-- 2. BODY GIAO DIỆN HỒ SƠ -->
 <div class="page-body">
     <!-- Sidebar bên trái -->
     <aside class="sidebar">
-        <img th:src="@{/images/logo.jpg}" alt="Avatar" class="profile-avatar-circle" onerror="this.src='https://placehold.co/130x130/ff5a00/ffffff?text=P'">
+        <div class="sidebar-avatar-wrapper">
+            <img th:src="@{/images/logo.jpg}" alt="Avatar" class="profile-avatar-circle" onerror="this.src='https://placehold.co/150x150/ff5a00/ffffff?text=P'">
+        </div>
+
         <ul class="sidebar-menu">
-            <li><a th:href="@{/profile}" class="active">Hồ sơ của bạn</a></li>
+            <li><a th:href="@{/profile}" class="active">Hồ sơ cá nhân</a></li>
             <li><a th:href="@{/profile/games}">Trò chơi đã liên kết</a></li>
-            <li><a th:href="@{/profile/security}">Cài đặt tài khoản</a></li>
+            <li><a th:href="@{/profile/security}">Bảo mật tài khoản</a></li>
             <li th:if="${user != null and user.role == 'ADMIN'}" style="margin-top: 15px;">
-                <a th:href="@{/admin/dashboard}" style="color: #ff9900; border-left: 2px solid #ff9900; padding-left: 14px;">Trang Quản Trị</a>
+                <a th:href="@{/admin/dashboard}" style="color: #fbbf24; border-left: 2px solid #fbbf24; padding-left: 14px;">Trang Quản Trị</a>
             </li>
-            <li style="margin-top: auto;">
-            <form th:action="@{/logout}" method="post" style="margin: 0; padding: 0;">
-                <button type="submit"
-                        style="background: none; border: none; color: #ff4444; font-weight: 600; font-size: 14px; padding: 12px 20px; cursor: pointer; text-align: left; width: 100%; font-family: inherit;">
-                    Đăng xuất
-                </button>
-            </form>
+
+            <li>
+                <!-- NÚT POST ĐĂNG XUẤT NẰM DƯỚI CÙNG MENU TRÁI -->
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit">ĐĂNG XUẤT TÀI KHOẢN</button>
+                </form>
             </li>
         </ul>
     </aside>
 
     <!-- Nội dung chính bên phải -->
     <main class="main-content">
-        <h2 class="content-title">THÔNG TIN TÀI KHOẢN</h2>
+        <div class="content-header">
+            <span class="content-subtitle">Panthera ID Control Panel</span>
+            <h2 class="content-title">THÔNG TIN TÀI KHOẢN</h2>
+        </div>
 
         <div class="account-card">
             <form th:action="@{/profile/edit}" method="post">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label>USER ID</label>
+                        <label>MÃ ĐỊNH DANH (USER ID)</label>
                         <input type="text" class="form-control" th:value="${user != null ? user.userId : ''}" readonly>
                     </div>
 
                     <div class="form-group">
-                        <label>TÊN ĐĂNG NHẬP</label>
+                        <label>TÊN ĐĂNG NHẬP HIỆN TẠI</label>
                         <input type="text" class="form-control" th:value="${user != null ? user.username : ''}" readonly>
                     </div>
 
                     <div class="form-group">
                         <label>HỌ VÀ TÊN</label>
-                        <input type="text" name="fullName" class="form-control" th:value="${profile != null ? profile.fullName : ''}" placeholder="Nhập họ và tên">
+                        <input type="text" name="fullName" class="form-control" th:value="${profile != null ? profile.fullName : ''}" placeholder="Vd: Nguyễn Văn A">
                     </div>
 
                     <div class="form-group">
                         <label>NGÀY SINH</label>
-                        <!-- Dùng birthDate (hoặc đổi thành birthday/dob nếu model của bạn dùng tên khác) -->
                         <input type="date" name="birthDate" class="form-control"
                                th:value="${profile != null && profile['birthDate'] != null ? profile['birthDate'] : ''}">
                     </div>
 
                     <div class="form-group">
-                        <label>SỐ ĐIỆN THOẠI</label>
+                        <label>SỐ ĐIỆN THOẠI LIÊN LẠC</label>
                         <input type="text" name="phone" class="form-control"
-                               th:value="${profile != null && profile['phone'] != null ? profile['phone'] : ''}" placeholder="Nhập số điện thoại">
+                               th:value="${profile != null && profile['phone'] != null ? profile['phone'] : ''}" placeholder="Vd: 0912 345 678">
                     </div>
 
                     <div class="form-group">
-                        <label>ĐỊA CHỈ</label>
+                        <label>ĐỊA CHỈ NHẬN HÀNG (SHOP)</label>
                         <input type="text" name="address" class="form-control"
-                               th:value="${profile != null && profile['address'] != null ? profile['address'] : ''}" placeholder="Nhập địa chỉ">
+                               th:value="${profile != null && profile['address'] != null ? profile['address'] : ''}" placeholder="Nhập địa chỉ nhận quà/vật phẩm">
                     </div>
                 </div>
 
-                <button type="submit" class="btn-save">LƯU THAY ĐỔI</button>
+                <div class="form-actions">
+                    <button type="submit" class="btn-save">LƯU CẬP NHẬT</button>
+                </div>
             </form>
         </div>
     </main>

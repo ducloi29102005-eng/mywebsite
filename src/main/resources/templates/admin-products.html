@@ -1,239 +1,217 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Sản phẩm | Panthera Admin</title>
+
+    <!-- CSRF Token -->
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}"/>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --primary: #ff5a00;
             --primary-hover: #e04e00;
-            --danger: #ff4444;
-            --bg-dark: #0a0a0a;
-            --surface: #141414;
-            --surface-hover: #1b1b1b;
-            --border: #222222;
-            --text-main: #ffffff;
-            --text-muted: #888888;
-        }
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            display: flex;
-            min-height: 100vh;
+            --primary-glow: rgba(255, 90, 0, 0.25);
+            --danger: #ef4444;
+            --success: #10b981;
+            --bg-dark: #07080a;
+            --bg-sidebar: #0b0d12;
+            --surface: #14171f;
+            --surface-hover: #1b1f2a;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-light: rgba(255, 255, 255, 0.15);
+            --text-main: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
         }
 
-        /* 1. SIDEBAR BÊN TRÁI ĐỒNG BỘ */
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0; font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+            background-color: var(--bg-dark); color: var(--text-main);
+            display: flex; min-height: 100vh; overflow: hidden;
+            background-image: radial-gradient(circle at top right, rgba(255, 90, 0, 0.05) 0%, transparent 40%);
+        }
+
+        /* ==================== 1. SIDEBAR ==================== */
         .sidebar {
-            width: 260px;
-            background: transparent;
-            padding: 30px 24px;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
+            width: 280px; background: var(--bg-sidebar); padding: 32px 24px;
+            display: flex; flex-direction: column; border-right: 1px solid var(--border);
+            box-shadow: 10px 0 30px rgba(0,0,0,0.3); z-index: 10;
         }
         .sidebar-brand {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--primary);
-            letter-spacing: 1.5px;
-            margin-bottom: 35px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            font-size: 20px; font-weight: 900; color: #fff; letter-spacing: 1px;
+            margin-bottom: 40px; display: flex; align-items: center; gap: 12px;
         }
-        .nav-links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; height: 100%; }
-        .nav-links li { margin-bottom: 12px; }
-        .nav-links a {
-            display: block;
-            padding: 14px 20px;
-            color: var(--text-main);
-            text-decoration: none;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 15px;
-            transition: 0.2s;
-            border: 1px solid transparent;
+        .sidebar-brand span { color: var(--primary); }
+        .sidebar-brand-icon {
+            width: 36px; height: 36px; background: rgba(255, 90, 0, 0.15);
+            border: 1px solid var(--primary); border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
         }
-        .nav-links a:hover {
-            background: #191919;
-            border-color: #333;
-        }
-        .nav-links a.active {
-            background: rgba(255, 90, 0, 0.12);
-            color: var(--primary);
-            border: 1px solid rgba(255, 90, 0, 0.25);
-        }
-        .logout-btn {
-            color: var(--danger) !important;
-            border: 1px solid rgba(255, 68, 68, 0.35) !important;
-            text-align: center;
-            margin-top: auto;
-        }
-        .logout-btn:hover { background: rgba(255, 68, 68, 0.1) !important; }
 
-        /* 2. MAIN CONTENT */
-        .main-content {
-            flex: 1;
-            padding: 40px 50px;
-            overflow-y: auto;
+        .nav-links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; flex: 1; }
+        .nav-links li { margin-bottom: 10px; }
+        .nav-links a {
+            display: flex; align-items: center; gap: 12px; padding: 14px 18px;
+            color: var(--text-secondary); text-decoration: none; border-radius: 12px;
+            font-weight: 600; font-size: 14.5px; transition: all 0.25s; border: 1px solid transparent;
         }
-        .header-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 30px;
+        .nav-links a:hover { background: rgba(255, 255, 255, 0.03); color: #fff; }
+        .nav-links a.active {
+            background: linear-gradient(90deg, rgba(255, 90, 0, 0.15) 0%, transparent 100%);
+            color: var(--primary); font-weight: 700; border-left: 3px solid var(--primary);
+            border-radius: 0 12px 12px 0;
         }
-        .header-section h1 { margin: 0 0 8px 0; font-size: 26px; text-transform: uppercase; font-weight: 700; }
-        .header-section p { margin: 0; color: var(--text-muted); font-size: 14px; }
+
+        .logout-btn {
+            color: #fca5a5 !important; background: rgba(239, 68, 68, 0.08) !important;
+            border: 1px solid rgba(239, 68, 68, 0.2) !important; text-align: center;
+            display: block; width: 100%; padding: 14px 20px; border-radius: 12px;
+            font-weight: 700; cursor: pointer; transition: 0.2s; font-family: inherit; margin-top: 20px;
+        }
+        .logout-btn:hover { background: var(--danger) !important; color: #fff !important; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); }
+
+        /* ==================== 2. MAIN CONTENT ==================== */
+        .main-content { flex: 1; padding: 48px; overflow-y: auto; }
+
+        .header-section { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 36px; }
+        .header-section h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; color: #fff; }
+        .header-section p { margin: 8px 0 0 0; color: var(--text-muted); font-size: 14.5px; }
 
         .btn-add-main {
-            background-color: var(--primary);
-            color: #fff;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.2s;
+            background: linear-gradient(135deg, var(--primary), #ff7a00);
+            color: #fff; border: none; padding: 12px 24px; border-radius: 10px;
+            font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 6px 15px var(--primary-glow); display: flex; align-items: center; gap: 8px;
         }
-        .btn-add-main:hover { background-color: var(--primary-hover); }
+        .btn-add-main:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 90, 0, 0.4); }
 
-        /* 3. THỐNG KÊ 3 Ô */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 22px;
-            margin-bottom: 35px;
-        }
+        /* Khối Thống kê (Stats) */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 40px; }
         .stat-card {
-            background: #111111;
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 24px;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 28px; display: flex; flex-direction: column; position: relative; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: 0.3s;
         }
-        .stat-card .label {
-            font-size: 12px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-            margin-bottom: 12px;
+        .stat-card:hover { transform: translateY(-4px); border-color: var(--border-light); }
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; right: 0; width: 120px; height: 120px;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%); border-radius: 50%;
         }
-        .stat-card .number { font-size: 32px; font-weight: 800; line-height: 1; }
+        .stat-card .label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 12px; }
+        .stat-card .number { margin: 0; font-size: 38px; font-weight: 900; line-height: 1; color: var(--text-main); }
 
-        /* 4. BẢNG DỮ LIỆU */
+        /* ==================== 4. BẢNG DỮ LIỆU ==================== */
         .table-container {
-            background: #111111;
-            border: 1px solid #1f1f1f;
-            border-radius: 14px;
-            overflow: hidden;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25); overflow: hidden;
         }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
-        th {
-            background: #151515;
-            padding: 16px 20px;
-            color: var(--text-muted);
-            font-weight: 600;
-            font-size: 12.5px;
-            text-transform: uppercase;
-            border-bottom: 1px solid #202020;
-        }
-        td { padding: 14px 20px; border-bottom: 1px solid #1c1c1c; vertical-align: middle; }
-        tr:hover { background-color: var(--surface-hover); }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14.5px; }
+        th { background: rgba(0,0,0,0.2); padding: 20px 24px; color: var(--text-muted); font-weight: 700; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+        td { padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: var(--surface-hover); }
 
-        .prod-img { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; background: #222; }
-        .tag-badge { background: rgba(255, 90, 0, 0.15); color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
-        .action-btns { display: flex; gap: 8px; justify-content: flex-end; }
+        .prod-img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-light); background: #000; }
+
+        .tag-badge {
+            background: linear-gradient(135deg, var(--primary), #ff7a00); color: #fff;
+            padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px var(--primary-glow);
+        }
+
+        .action-btns { display: flex; gap: 10px; justify-content: flex-end; align-items: center; }
+        .action-btns form { margin: 0; }
 
         .btn-sm {
-            padding: 7px 14px;
-            border-radius: 6px;
-            font-size: 12.5px;
-            font-weight: 600;
-            cursor: pointer;
-            border: 1px solid #333;
-            background: #1a1a1a;
-            color: #ddd;
-            transition: 0.2s;
+            padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;
+            border: 1px solid var(--border-light); background: rgba(255,255,255,0.05); color: #cbd5e1; transition: 0.2s; font-family: inherit;
         }
-        .btn-sm:hover { border-color: var(--primary); color: var(--primary); }
-        .btn-del { border-color: rgba(255, 68, 68, 0.3); color: var(--danger); }
-        .btn-del:hover { background: rgba(255, 68, 68, 0.15); border-color: var(--danger); color: #fff; }
+        .btn-sm:hover { border-color: var(--primary); color: #fff; background: rgba(255, 90, 0, 0.1); }
 
-        /* 5. POPUP MODAL */
+        .btn-del { border-color: rgba(239, 68, 68, 0.3); color: #fca5a5; }
+        .btn-del:hover { background: rgba(239, 68, 68, 0.15); border-color: var(--danger); color: #fff; }
+
+        /* ==================== 5. POPUP MODAL THÊM/SỬA SẢN PHẨM ==================== */
         .modal-backdrop {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(6px);
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
+            align-items: center; justify-content: center; z-index: 9999;
         }
         .modal-card {
-            background: #141414;
-            border: 1px solid #2e2e2e;
-            border-radius: 14px;
-            width: 520px;
-            max-width: 90vw;
-            padding: 30px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.9);
+            position: relative; background: #14171f; border: 1px solid var(--border-light);
+            border-radius: 20px; width: 560px; max-width: 90vw; max-height: 90vh; overflow-y: auto;
+            padding: 32px; box-shadow: 0 25px 60px rgba(0,0,0,0.9);
         }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
-        .modal-header h2 { margin: 0; font-size: 18px; text-transform: uppercase; color: var(--primary); font-weight: 800; }
-        .close-btn { background: none; border: none; color: #888; font-size: 24px; cursor: pointer; }
-        .close-btn:hover { color: #fff; }
+        .modal-card::-webkit-scrollbar { width: 6px; }
+        .modal-card::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        .modal-card::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--primary), #ff7a00);
+        }
 
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 6px; text-transform: uppercase; font-weight: 600; }
-        .form-control {
-            width: 100%;
-            padding: 11px 14px;
-            background: #0a0a0a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 14px;
-            outline: none;
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .modal-header h2 { margin: 0; font-size: 20px; text-transform: uppercase; color: #fff; font-weight: 800; letter-spacing: -0.5px; }
+        .close-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 50%;
+            width: 32px; height: 32px; color: #aaa; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;
         }
-        .form-control:focus { border-color: var(--primary); }
+        .close-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+
+        .form-control {
+            width: 100%; padding: 12px 16px; background: #0b0d12; border: 1px solid var(--border-light);
+            border-radius: 10px; color: #fff; font-size: 14px; font-family: inherit; font-weight: 500; outline: none; transition: 0.3s;
+        }
+        .form-control:focus { border-color: var(--primary); background: rgba(255, 90, 0, 0.03); box-shadow: 0 0 0 3px rgba(255, 90, 0, 0.1); }
+        .form-control:disabled, .form-control[readonly] { background: rgba(255,255,255,0.02); color: var(--primary-light); border-color: transparent; cursor: not-allowed; }
+
+        .btn-submit-modal {
+            width: 100%; background: linear-gradient(135deg, var(--primary), #ff7a00); color: #fff;
+            border: none; padding: 14px; border-radius: 10px; font-weight: 800; font-size: 14.5px;
+            cursor: pointer; transition: 0.3s; box-shadow: 0 6px 20px var(--primary-glow); margin-top: 15px; letter-spacing: 1px;
+        }
+        .btn-submit-modal:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(255, 90, 0, 0.5); }
     </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
 <aside class="sidebar">
-    <div class="sidebar-brand">PANTHERA ADMIN</div>
+    <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">P</div>
+        <span>ADMIN</span>
+    </div>
     <ul class="nav-links">
-        <li th:if="${currentUser.role == 'ADMIN'}"><a th:href="@{/admin/dashboard}">Quản lý Tài khoản</a></li>
-        <li><a th:href="@{/admin/products}" class="active">Quản lý Sản phẩm</a></li>
-        <li><a th:href="@{/}">Quay lại Website</a></li>
+        <li th:if="${currentUser.role == 'ADMIN'}"><a th:href="@{/admin/dashboard}">🛡 Quản lý Tài khoản</a></li>
+        <li><a th:href="@{/admin/products}" class="active">📦 Quản lý Sản phẩm</a></li>
         <li><a th:href="@{/admin/sockets}">🔌 Giám sát Socket</a></li>
+        <li><a th:href="@{/}">🏠 Quay lại Website</a></li>
         <li style="margin-top: auto;">
             <form th:action="@{/logout}" method="post" style="margin: 0; padding: 0;">
-                <button type="submit" class="logout-btn" style="width: 100%; background: transparent; cursor: pointer; display: block; padding: 14px 20px; font-weight: 600; font-size: 15px; border-radius: 12px; transition: 0.2s; font-family: inherit;">
-                    Đăng xuất
-                </button>
+                <button type="submit" class="logout-btn">ĐĂNG XUẤT</button>
             </form>
         </li>
     </ul>
 </aside>
 
-<!-- MAIN CONTENT -->
 <main class="main-content">
     <div class="header-section">
         <div>
             <h1>DANH SÁCH SẢN PHẨM</h1>
-            <p>Quản lý toàn bộ kho vật phẩm, mô hình và trang phục trong cửa hàng</p>
+            <p>Quản lý toàn bộ kho vật phẩm, mô hình và trang phục trên Panthera Hub</p>
         </div>
         <button th:if="${currentUser.role == 'ADMIN' or currentUser.role == 'SHOP_MANAGER'}"
-                type="button" class="btn-add-main" onclick="openModal()">+ THÊM SẢN PHẨM</button>
+                type="button" class="btn-add-main" onclick="openModal()">➕ THÊM SẢN PHẨM</button>
     </div>
 
     <!-- KHỐI THỐNG KÊ -->
@@ -244,15 +222,15 @@
         </div>
         <div class="stat-card">
             <div class="label">Sản phẩm nổi bật / HOT</div>
-            <div class="number" style="color: var(--primary);" th:text="${hotProducts}">7</div>
+            <div class="number" style="color: var(--primary-light);" th:text="${hotProducts}">7</div>
         </div>
         <div class="stat-card">
             <div class="label">Thời trang & Phụ kiện</div>
-            <div class="number" style="color: #00c851;" th:text="${apparelProducts}">2</div>
+            <div class="number" style="color: var(--success);" th:text="${apparelProducts}">2</div>
         </div>
     </div>
 
-    <!-- BẢNG SẢN PHẨM (ĐÃ CHUẨN HÓA CỘT KÍCH CỠ VÀ HÀNH ĐỘNG) -->
+    <!-- BẢNG SẢN PHẨM -->
     <div class="table-container">
         <table>
             <thead>
@@ -264,6 +242,7 @@
                 <th>Đơn giá</th>
                 <th>Huy hiệu</th>
                 <th>Kích cỡ</th>
+                <th>Kho</th>
                 <th style="text-align: right;">Hành động</th>
             </tr>
             </thead>
@@ -272,21 +251,21 @@
                 <td>
                     <img th:src="${p.image}" class="prod-img" onerror="this.src='https://placehold.co/100x100?text=None'">
                 </td>
-                <td><strong th:text="${p.name}">Tên SP</strong></td>
-                <td style="color: #aaa;" th:text="${p.category}">accessories</td>
-                <td th:text="${p.game}">Valorant</td>
-                <td style="color: var(--primary); font-weight: 700;" th:text="${#numbers.formatDecimal(p.price, 0, 'POINT', 0, 'POINT')} + ' đ'">220.000 đ</td>
+                <td><strong style="color: #fff; font-size: 15px;" th:text="${p.name}">Tên SP</strong></td>
+                <td style="color: var(--text-muted); font-weight: 500;" th:text="${p.category}">accessories</td>
+                <td style="font-weight: 600;" th:text="${p.game}">Valorant</td>
+                <td style="color: var(--primary-light); font-weight: 800;" th:text="${#numbers.formatDecimal(p.price, 0, 'POINT', 0, 'POINT')} + ' đ'">220.000 đ</td>
                 <td>
                     <span th:if="${p.tag != null && p.tag != ''}" class="tag-badge" th:text="${p.tag}">MỚI</span>
                     <span th:unless="${p.tag != null && p.tag != ''}" style="color: #555;">—</span>
                 </td>
                 <td>
-                    <span th:if="${p.sizes == null || (p.sizes.size() == 1 && p.sizes[0] == 'Freesize')}" style="color: #888; font-size: 13px;">Freesize</span>
-                    <span th:unless="${p.sizes == null || (p.sizes.size() == 1 && p.sizes[0] == 'Freesize')}" style="color: #00c851; font-weight: 600; font-size: 13px;" th:text="${#strings.listJoin(p.sizes, ', ')}">S, M, L</span>
+                    <span th:if="${p.sizes == null || (p.sizes.size() == 1 && p.sizes[0] == 'Freesize')}" style="color: var(--text-secondary); font-size: 13px; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px;">Freesize</span>
+                    <span th:unless="${p.sizes == null || (p.sizes.size() == 1 && p.sizes[0] == 'Freesize')}" style="color: var(--success); font-weight: 700; font-size: 13px;" th:text="${#strings.listJoin(p.sizes, ', ')}">S, M, L</span>
                 </td>
                 <td>
-                    <span th:if="${p.stockQuantity <= 0}" style="color: #ff4444; font-weight: bold;">0 (Hết)</span>
-                    <span th:unless="${p.stockQuantity <= 0}" style="color: #00c851; font-weight: bold;" th:text="${p.stockQuantity}">10</span>
+                    <span th:if="${p.stockQuantity <= 0}" style="color: #fca5a5; font-weight: bold; background: rgba(239, 68, 68, 0.15); padding: 4px 8px; border-radius: 4px;">0 (Hết)</span>
+                    <span th:unless="${p.stockQuantity <= 0}" style="color: #34d399; font-weight: bold; background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 4px;" th:text="${p.stockQuantity}">10</span>
                 </td>
                 <td style="text-align: right;">
                     <div class="action-btns">
@@ -302,7 +281,7 @@
                                 th:data-sizes="${p.sizes != null ? #strings.listJoin(p.sizes, ',') : 'Freesize'}"
                                 onclick="editProduct(this)">Sửa</button>
                         <form th:if="${currentUser.role == 'ADMIN' or currentUser.role == 'SHOP_MANAGER'}"
-                              th:action="@{/admin/products/delete/{id}(id=${p.id})}" method="post" ...>
+                              th:action="@{/admin/products/delete/{id}(id=${p.id})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">
                             <button type="submit" class="btn-sm btn-del">Xóa</button>
                         </form>
                     </div>
@@ -318,7 +297,7 @@
     <div class="modal-card">
         <div class="modal-header">
             <h2 id="modalTitle">Thêm Sản Phẩm Mới</h2>
-            <button type="button" class="close-btn" onclick="closeModal()">×</button>
+            <button type="button" class="close-btn" onclick="closeModal()">✕</button>
         </div>
         <form th:action="@{/admin/products/save}" method="post">
             <input type="hidden" id="prodId" name="id">
@@ -328,7 +307,7 @@
                 <input type="text" id="prodName" name="name" class="form-control" required placeholder="Ví dụ: Áo Hoodie Panthera">
             </div>
 
-            <div style="display: flex; gap: 15px;">
+            <div style="display: flex; gap: 16px;">
                 <div class="form-group" style="flex: 1;">
                     <label>Danh mục</label>
                     <select id="prodCategory" name="category" class="form-control" required>
@@ -345,7 +324,7 @@
                 </div>
             </div>
 
-            <div style="display: flex; gap: 15px;">
+            <div style="display: flex; gap: 16px;">
                 <div class="form-group" style="flex: 1;">
                     <label>Đơn giá (VNĐ)</label>
                     <input type="number" id="prodPrice" name="price" class="form-control" required placeholder="500000">
@@ -376,13 +355,13 @@
                 <label>Đường dẫn ảnh (Image URL)</label>
                 <input type="text" id="prodImage" name="image" class="form-control" required placeholder="https://...">
             </div>
-            <!-- Thêm vào trong Form của Modal -->
+
             <div class="form-group">
                 <label>Số lượng trong kho (Stock)</label>
                 <input type="number" id="prodStock" name="stockQuantity" class="form-control" required value="10">
             </div>
 
-            <button type="submit" class="btn-add-main" style="width: 100%; margin-top: 10px; padding: 13px;">LƯU VÀO MONGODB</button>
+            <button type="submit" class="btn-submit-modal">LƯU THÔNG TIN</button>
         </form>
     </div>
 </div>
@@ -404,6 +383,7 @@
         document.getElementById('prodPrice').value = '';
         document.getElementById('prodTag').value = '';
         document.getElementById('prodImage').value = '';
+        document.getElementById('prodStock').value = '10';
 
         const sizeSelect = document.getElementById('prodSizeType');
         if (sizeSelect) sizeSelect.value = 'FREESIZE';
@@ -430,7 +410,8 @@
         const sizeSelect = document.getElementById('prodSizeType');
         const customGroup = document.getElementById('customSizeGroup');
         const customInput = document.getElementById('prodCustomSizes');
-        // Lấy Role từ biến Thymeleaf truyền xuống JS (bạn có thể set biến ẩn hoặc nhúng trực tiếp)
+
+        // Lấy Role từ biến Thymeleaf truyền xuống JS
         const userRole = '[[${currentUser.role}]]';
 
         if (userRole === 'EMPLOYEE') {
@@ -442,13 +423,22 @@
             document.getElementById('prodTag').readOnly = true;
             document.getElementById('prodImage').readOnly = true;
             document.getElementById('prodSizeType').disabled = true;
+        } else {
+            // Admin và Shop Manager được sửa bình thường
+            document.getElementById('prodName').readOnly = false;
+            document.getElementById('prodCategory').disabled = false;
+            document.getElementById('prodGame').readOnly = false;
+            document.getElementById('prodPrice').readOnly = false;
+            document.getElementById('prodTag').readOnly = false;
+            document.getElementById('prodImage').readOnly = false;
+            document.getElementById('prodSizeType').disabled = false;
         }
 
         if (rawSizes === 'Freesize') {
             if (sizeSelect) sizeSelect.value = 'FREESIZE';
             if (customGroup) customGroup.style.display = 'none';
             if (customInput) customInput.value = '';
-        } else if (rawSizes === 'S,M,L,XL,2XL') {
+        } else if (rawSizes === 'S,M,L,XL,2XL' || rawSizes === 'S, M, L, XL, 2XL') {
             if (sizeSelect) sizeSelect.value = 'CLOTHING';
             if (customGroup) customGroup.style.display = 'none';
             if (customInput) customInput.value = '';
@@ -471,9 +461,10 @@
             closeModal();
         }
     };
-<!-- ==================== RADAR BÁO CÓ TIN NHẮN MỚI CHO ADMIN ==================== -->
+</script>
+
 <script th:inline="javascript">
-    // Lấy số lượng tin nhắn cuối cùng từ bộ nhớ tạm của trình duyệt
+    // RADAR BÁO CÓ TIN NHẮN MỚI CHO ADMIN
     let lastCustomerMessageCount = localStorage.getItem('globalCustomerMsgCount') || 0;
 
     setInterval(() => {
@@ -482,29 +473,25 @@
             .then(countStr => {
                 let currentCount = parseInt(countStr);
 
-                // NẾU CÓ TIN NHẮN TĂNG LÊN
                 if (currentCount > lastCustomerMessageCount) {
                     localStorage.setItem('globalCustomerMsgCount', currentCount);
 
-                    // 1. Phát âm thanh Ting!
                     let audio = new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3');
-                    audio.play().catch(e => console.log("Trình duyệt chặn auto-play âm thanh"));
+                    audio.play().catch(e => console.log("Auto-play chặn"));
 
-                    // 2. Làm Nút Menu đỏ chót để gây chú ý
                     let chatMenuLink = document.querySelector('a[href="/admin/chat"]');
                     if(chatMenuLink) {
-                        chatMenuLink.style.background = '#ff4444';
+                        chatMenuLink.style.background = '#ef4444';
                         chatMenuLink.style.color = '#ffffff';
-                        chatMenuLink.style.boxShadow = '0 0 15px rgba(255, 68, 68, 0.8)';
+                        chatMenuLink.style.boxShadow = '0 0 15px rgba(239, 68, 68, 0.8)';
                         chatMenuLink.innerHTML = '💬 HỖ TRỢ KHÁCH (Có tin mới!)';
                     }
                 } else if (currentCount < lastCustomerMessageCount) {
-                    // Reset nếu lỡ có ai xóa lịch sử
                     localStorage.setItem('globalCustomerMsgCount', currentCount);
                 }
             })
             .catch(err => {});
-    }, 4000); // 4 giây quét hệ thống 1 lần
+    }, 4000);
 </script>
 
 </body>

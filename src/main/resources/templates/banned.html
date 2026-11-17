@@ -1,119 +1,184 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Tài Khoản Bị Khóa | Panthera</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tài Khoản Bị Khóa | Panthera Games</title>
+
+    <!-- CSRF Token để hỗ trợ Logout POST -->
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}"/>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
     <style>
+        :root {
+            --primary: #ff5a00;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --danger-glow: rgba(239, 68, 68, 0.2);
+            --bg-dark: #07080a;
+            --surface: #14171f;
+            --surface-elevated: #1b1f2a;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-light: rgba(255, 255, 255, 0.15);
+            --text-main: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+        }
+
+        * { box-sizing: border-box; }
+
         body {
-            margin: 0;
-            background-color: #0b0b0b;
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            margin: 0; background-color: var(--bg-dark); color: var(--text-main);
+            font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            min-height: 100vh; overflow: hidden; position: relative;
+            background-image: radial-gradient(circle at 50% -20%, rgba(239, 68, 68, 0.08) 0%, transparent 60%);
         }
 
-        /* Hiệu ứng rung giật / động đậy cho chữ BANNED */
-        @keyframes pulseShake {
-            0% {
-                transform: scale(1) translate(0, 0);
-                text-shadow: 0 0 25px rgba(255, 30, 30, 0.6);
-            }
-            20% {
-                transform: scale(1.02) translate(-1px, 1px);
-                text-shadow: 0 0 35px rgba(255, 42, 42, 0.9);
-            }
-            40% {
-                transform: scale(0.99) translate(1px, -1px);
-                text-shadow: 0 0 20px rgba(255, 20, 20, 0.5);
-            }
-            60% {
-                transform: scale(1.03) translate(-2px, -1px);
-                text-shadow: 0 0 40px rgba(255, 50, 50, 1);
-            }
-            80% {
-                transform: scale(1.01) translate(1px, 1px);
-                text-shadow: 0 0 30px rgba(255, 30, 30, 0.7);
-            }
-            100% {
-                transform: scale(1) translate(0, 0);
-                text-shadow: 0 0 25px rgba(255, 30, 30, 0.6);
-            }
+        /* KHUNG CẢNH BÁO */
+        .banned-card {
+            background: rgba(20, 23, 31, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-light);
+            border-radius: 24px;
+            padding: 50px 48px;
+            width: 100%;
+            max-width: 540px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            position: relative;
+            animation: fadeUp 0.5s ease-out;
         }
 
+        /* Viền trên màu đỏ */
+        .banned-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, transparent, var(--danger), transparent);
+            border-radius: 24px 24px 0 0;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* LOGO */
+        .brand-logo {
+            display: inline-flex; align-items: center; gap: 12px; text-decoration: none;
+            color: #fff; font-weight: 900; font-size: 20px; letter-spacing: 1px;
+            margin-bottom: 35px;
+        }
+        .brand-logo img {
+            width: 44px; height: 44px; border-radius: 12px; object-fit: cover;
+            border: 2px solid var(--border-light);
+        }
+        .brand-logo span { color: var(--primary); }
+
+        /* ICON CẢNH BÁO */
+        .alert-icon {
+            width: 72px; height: 72px; margin: 0 auto 20px;
+            background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 32px; color: var(--danger); box-shadow: 0 0 20px var(--danger-glow);
+        }
+
+        /* TIÊU ĐỀ */
         .banned-title {
-            color: #ff2a2a;
-            font-size: 96px;
-            font-weight: 900;
-            letter-spacing: 4px;
-            margin: 0 0 10px 0;
-            user-select: none;
-            /* Kích hoạt chuyển động liên tục */
-            animation: pulseShake 1.8s infinite ease-in-out;
+            margin: 0 0 10px 0; font-size: 28px; font-weight: 900;
+            color: #fff; letter-spacing: -0.5px; text-transform: uppercase;
         }
 
         .account-label {
-            font-size: 18px;
-            color: #ffffff;
-            margin-bottom: 25px;
+            font-size: 14.5px; color: var(--text-secondary); margin-bottom: 30px; font-weight: 500;
+        }
+        .account-label span {
+            color: #fff; font-weight: 700; background: rgba(255, 255, 255, 0.05);
+            padding: 4px 10px; border-radius: 6px; margin-left: 6px; border: 1px solid var(--border);
         }
 
+        /* HỘP LÝ DO */
         .reason-box {
-            background-color: #141414;
-            border: 1px solid #222222;
-            border-left: 4px solid #ff2a2a;
-            border-radius: 8px;
-            padding: 16px 24px;
-            width: 100%;
-            max-width: 580px;
-            box-sizing: border-box;
-            text-align: center;
-            font-size: 14px;
-            font-weight: bold;
-            color: #999999;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 30px;
+            background: var(--bg-dark); border: 1px solid var(--border);
+            border-left: 4px solid var(--danger); border-radius: 12px;
+            padding: 20px 24px; text-align: left; margin-bottom: 40px;
         }
+        .reason-header {
+            font-size: 11.5px; font-weight: 800; color: var(--danger);
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+        }
+        .reason-text {
+            font-size: 14.5px; font-weight: 500; color: var(--text-secondary); line-height: 1.6;
+            margin: 0;
+        }
+
+        /* NÚT ĐĂNG XUẤT (FORM POST) */
+        .action-form { margin: 0; width: 100%; }
 
         .btn-logout {
-            background-color: #1a1a1a;
-            color: #ffffff;
-            border: 1px solid #2a2a2a;
-            padding: 12px 28px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: 0.2s;
+            width: 100%; background: var(--surface-elevated); color: #fff;
+            border: 1px solid var(--border-light); padding: 16px; border-radius: 12px;
+            font-size: 14.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+            cursor: pointer; transition: all 0.25s ease; font-family: inherit;
+        }
+        .btn-logout:hover {
+            background: var(--danger); border-color: var(--danger); color: #fff;
+            transform: translateY(-2px); box-shadow: 0 8px 20px var(--danger-glow);
         }
 
-        .btn-logout:hover {
-            background-color: #252525;
-            border-color: #3a3a3a;
+        .footer-note {
+            margin-top: 24px; font-size: 13px; color: var(--text-muted); font-weight: 500;
         }
+        .footer-note a { color: var(--text-secondary); text-decoration: underline; transition: 0.2s; }
+        .footer-note a:hover { color: #fff; }
+
     </style>
 </head>
 <body>
 
-<!-- Chỉ duy nhất dòng này chuyển động rung lắc và phát sáng -->
-<h1 class="banned-title">BANNED</h1>
+<div class="banned-card">
 
-<!-- Tên tài khoản -->
-<div class="account-label">
-    Tài khoản: <span style="font-weight: bold;" th:text="${username}"></span>
+    <!-- Logo Panthera (Đồng bộ) -->
+    <a href="#" class="brand-logo">
+        <img th:src="@{/images/logo.jpg}" alt="Panthera Logo" onerror="this.src='https://placehold.co/100x100/ff5a00/ffffff?text=P'">
+        <div>PANTHERA<span>.GAMES</span></div>
+    </a>
+
+    <!-- Icon Cảnh báo -->
+    <div class="alert-icon">⚠️</div>
+
+    <!-- Tiêu đề -->
+    <h1 class="banned-title">Tài Khoản Bị Khóa</h1>
+
+    <!-- Thông tin định danh -->
+    <div class="account-label">
+        Mã định danh Panthera ID: <span th:text="${username}">username</span>
+    </div>
+
+    <!-- Khung lý do vi phạm -->
+    <div class="reason-box">
+        <div class="reason-header">THÔNG BÁO TỪ HỆ THỐNG</div>
+        <p class="reason-text" th:text="${reason != null ? reason : 'Tài khoản của bạn đã bị khóa quyền truy cập do phát hiện các hành vi vi phạm Điều khoản Dịch vụ và Tiêu chuẩn Cộng đồng của hệ thống.'}">
+            Lý do sẽ hiển thị ở đây
+        </p>
+    </div>
+
+    <!-- Nút Đăng xuất dùng FORM POST chống lỗi 404 -->
+    <form th:action="@{/logout}" method="post" class="action-form">
+        <button type="submit" class="btn-logout">
+            Đăng Xuất Khỏi Hệ Thống
+        </button>
+    </form>
+
+    <div class="footer-note">
+        Bạn cho rằng đây là một sự nhầm lẫn? <a href="#">Liên hệ đội ngũ hỗ trợ</a>
+    </div>
+
 </div>
-
-<!-- Khung lý do: Tự động đổi nội dung nếu có truyền reason, không thì giữ chữ mặc định -->
-<div class="reason-box" th:text="${reason != null ? reason : 'Tài khoản của bạn đã bị khóa do vi phạm chính sách tiêu chuẩn cộng đồng.'}">
-    LÝ DO BỊ KHÓA
-</div>
-
-<!-- Nút Đăng xuất tĩnh -->
-<a th:href="@{/login}" class="btn-logout">Đăng xuất</a>
 
 </body>
 </html>

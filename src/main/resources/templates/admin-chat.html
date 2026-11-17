@@ -1,82 +1,197 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hỗ Trợ Khách Hàng | Panthera Admin</title>
+    <!-- THÊM CSRF ĐỂ ĐẢM BẢO LOGOUT BẰNG POST HOẠT ĐỘNG -->
     <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}"/>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --primary: #ff5a00;
-            --danger: #ff4444;
-            --success: #00c851;
-            --bg-dark: #0a0a0a;
-            --surface: #141414;
-            --surface-hover: #1b1b1b;
-            --border: #262626;
-            --text-main: #ffffff;
-            --text-muted: #888888;
+            --primary-hover: #e04e00;
+            --primary-glow: rgba(255, 90, 0, 0.25);
+            --danger: #ef4444;
+            --success: #10b981;
+            --bg-dark: #07080a;
+            --bg-sidebar: #0b0d12;
+            --surface: #14171f;
+            --surface-hover: #1b1f2a;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-light: rgba(255, 255, 255, 0.15);
+            --text-main: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
         }
 
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden;}
+        * { box-sizing: border-box; }
 
-        /* Sidebar */
-        .sidebar { width: 260px; padding: 30px 24px; border-right: 1px solid var(--border); display: flex; flex-direction: column; background: transparent; }
-        .sidebar-brand { font-size: 20px; font-weight: 800; color: var(--primary); letter-spacing: 1.5px; margin-bottom: 35px; }
-        .nav-links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; height: 100%; }
-        .nav-links li { margin-bottom: 12px; }
-        .nav-links a { display: block; padding: 14px 20px; color: var(--text-main); text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 15px; transition: 0.2s; border: 1px solid transparent; }
-        .nav-links a:hover { background: #191919; border-color: #333; }
-        .nav-links a.active { background: rgba(255, 90, 0, 0.12); color: var(--primary); border: 1px solid rgba(255, 90, 0, 0.25); }
-        .logout-btn { color: var(--danger) !important; border: 1px solid rgba(255, 68, 68, 0.35) !important; text-align: center; }
-        .logout-btn:hover { background: rgba(255, 68, 68, 0.1) !important; }
+        body {
+            margin: 0; font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+            background-color: var(--bg-dark); color: var(--text-main);
+            display: flex; height: 100vh; overflow: hidden;
+            background-image: radial-gradient(circle at top right, rgba(255, 90, 0, 0.05) 0%, transparent 40%);
+        }
 
-        /* Giao diện Chat chia đôi */
-        .chat-layout { flex: 1; display: flex; height: 100%; }
+        /* ==================== 1. SIDEBAR ==================== */
+        .sidebar {
+            width: 280px; background: var(--bg-sidebar); padding: 32px 24px;
+            display: flex; flex-direction: column; border-right: 1px solid var(--border);
+            box-shadow: 10px 0 30px rgba(0,0,0,0.3); z-index: 10;
+        }
+        .sidebar-brand {
+            font-size: 20px; font-weight: 900; color: #fff; letter-spacing: 1px;
+            margin-bottom: 40px; display: flex; align-items: center; gap: 12px;
+        }
+        .sidebar-brand span { color: var(--primary); }
+        .sidebar-brand-icon {
+            width: 36px; height: 36px; background: rgba(255, 90, 0, 0.15);
+            border: 1px solid var(--primary); border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
+        }
 
-        /* Cột trái: Danh sách phòng chat */
-        .room-list { width: 300px; background: #111111; border-right: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column;}
-        .room-item { padding: 16px 20px; border-bottom: 1px solid #1c1c1c; cursor: pointer; transition: 0.2s; }
-        .room-item:hover { background: #1a1a1a; }
-        .room-item.active { background: #1e1e1e; border-left: 4px solid var(--primary); }
+        .nav-links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; flex: 1; }
+        .nav-links li { margin-bottom: 10px; }
+        .nav-links a {
+            display: flex; align-items: center; gap: 12px; padding: 14px 18px;
+            color: var(--text-secondary); text-decoration: none; border-radius: 12px;
+            font-weight: 600; font-size: 14.5px; transition: all 0.25s; border: 1px solid transparent;
+        }
+        .nav-links a:hover { background: rgba(255, 255, 255, 0.03); color: #fff; }
+        .nav-links a.active {
+            background: linear-gradient(90deg, rgba(255, 90, 0, 0.15) 0%, transparent 100%);
+            color: var(--primary); font-weight: 700; border-left: 3px solid var(--primary);
+            border-radius: 0 12px 12px 0;
+        }
 
-        /* Cột phải: Nội dung chat */
-        .chat-area { flex: 1; display: flex; flex-direction: column; background: var(--bg-dark); }
-        .chat-header { padding: 20px 25px; background: #141414; border-bottom: 1px solid var(--border); font-weight: bold; display: flex; justify-content: space-between; align-items: center;}
+        .logout-btn {
+            color: #fca5a5 !important; background: rgba(239, 68, 68, 0.08) !important;
+            border: 1px solid rgba(239, 68, 68, 0.2) !important; text-align: center;
+            display: block; width: 100%; padding: 14px 20px; border-radius: 12px;
+            font-weight: 700; cursor: pointer; transition: 0.2s; font-family: inherit; margin-top: 20px;
+        }
+        .logout-btn:hover { background: var(--danger) !important; color: #fff !important; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); }
 
-        /* Hộp hiển thị tin nhắn */
-        .messages-box { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        /* ==================== 2. MAIN LAYOUT (CHAT) ==================== */
+        .chat-layout { flex: 1; display: flex; height: 100%; padding: 32px; gap: 24px; }
+
+        /* Cột Trái: Danh sách Khách Hàng */
+        .room-list-container {
+            width: 320px; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 20px; display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+        }
+        .room-list-header {
+            padding: 24px 24px 16px 24px; border-bottom: 1px solid var(--border);
+            background: rgba(0,0,0,0.2);
+        }
+        .room-list-header h3 { margin: 0; font-size: 16px; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .room-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+        .room-list::-webkit-scrollbar { width: 5px; }
+        .room-list::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
+        .room-item {
+            padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer;
+            transition: all 0.25s; position: relative;
+        }
+        .room-item:hover { background: rgba(255,255,255,0.02); }
+        .room-item.active { background: linear-gradient(90deg, rgba(255, 90, 0, 0.1) 0%, transparent 100%); }
+        .room-item.active::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .room-name { font-weight: 700; color: #fff; font-size: 15px; margin-bottom: 6px; }
+        .room-id { font-size: 12px; color: var(--text-muted); font-family: monospace; }
+        .room-id span { color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; }
+
+        /* Cột Phải: Khung Chat Chính */
+        .chat-area {
+            flex: 1; display: flex; flex-direction: column; background: var(--surface);
+            border: 1px solid var(--border); border-radius: 20px; overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25); position: relative;
+        }
+
+        .chat-header {
+            padding: 24px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .chat-title { font-size: 18px; font-weight: 800; color: #fff; }
+        .socket-status {
+            font-size: 12.5px; font-weight: 700; background: rgba(255,255,255,0.05);
+            padding: 6px 12px; border-radius: 99px; border: 1px solid var(--border); display: flex; align-items: center; gap: 6px;
+        }
+        .socket-status.connected { color: #34d399; border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.1); }
+        .socket-status.disconnected { color: #f87171; border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1); }
+
+        /* Khối hiển thị tin nhắn */
+        .messages-box {
+            flex: 1; padding: 32px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.01) 0%, transparent 80%);
+        }
         .messages-box::-webkit-scrollbar { width: 6px; }
-        .messages-box::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        .messages-box::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
 
-        .msg-bubble { max-width: 65%; padding: 12px 16px; border-radius: 14px; font-size: 14px; line-height: 1.4; word-wrap: break-word;}
-        .msg-user { align-self: flex-start; background: #1f1f1f; color: #eee; border-bottom-left-radius: 4px;}
-        .msg-admin { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px;}
+        .msg-bubble {
+            max-width: 70%; padding: 14px 20px; border-radius: 16px; font-size: 14px;
+            line-height: 1.5; word-wrap: break-word; position: relative;
+        }
+        .msg-user {
+            align-self: flex-start; background: #1b1f2a; color: #e2e8f0;
+            border: 1px solid var(--border-light); border-bottom-left-radius: 4px;
+        }
+        .msg-admin {
+            align-self: flex-end; background: linear-gradient(135deg, var(--primary), #ff7a00);
+            color: white; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px var(--primary-glow);
+        }
+        .msg-sender { font-size: 11px; font-weight: 800; opacity: 0.8; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Ô nhập liệu */
-        .reply-form { display: flex; padding: 18px 25px; background: #141414; border-top: 1px solid var(--border); gap: 12px; }
-        .reply-input { flex: 1; background: #0a0a0a; border: 1px solid #333; color: white; padding: 14px 18px; border-radius: 10px; outline: none; font-size: 14px;}
-        .reply-input:focus { border-color: var(--primary); }
-        .reply-btn { background: var(--primary); color: white; border: none; padding: 0 24px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s;}
-        .reply-btn:hover { background: #e65200; }
+        /* Form Nhập Liệu */
+        .reply-form {
+            display: flex; padding: 20px 24px; background: rgba(0,0,0,0.2);
+            border-top: 1px solid var(--border); gap: 16px; align-items: center;
+        }
+        .reply-input {
+            flex: 1; background: #0b0d12; border: 1px solid var(--border-light);
+            color: white; padding: 16px 20px; border-radius: 12px; outline: none; font-size: 14.5px; font-family: inherit; transition: 0.2s;
+        }
+        .reply-input:focus { border-color: var(--primary); background: rgba(255, 90, 0, 0.03); box-shadow: 0 0 0 3px rgba(255, 90, 0, 0.1); }
+
+        .reply-btn {
+            background: linear-gradient(135deg, var(--primary), #ff7a00); color: white; border: none;
+            padding: 0 32px; height: 54px; border-radius: 12px; font-weight: 800; font-size: 14px;
+            cursor: pointer; transition: 0.25s; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 6px 15px var(--primary-glow);
+        }
+        .reply-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(255, 90, 0, 0.4); }
+
     </style>
 </head>
 <body>
 
 <!-- THANH MENU BÊN TRÁI -->
 <aside class="sidebar">
-    <div class="sidebar-brand">PANTHERA ADMIN</div>
+    <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">P</div>
+        <span>ADMIN</span>
+    </div>
     <ul class="nav-links">
-        <li><a th:href="@{/admin/dashboard}">Quản lý Tài khoản</a></li>
-        <li><a th:href="@{/admin/products}">Quản lý Sản phẩm</a></li>
+        <li><a th:href="@{/admin/dashboard}">🛡 Quản lý Tài khoản</a></li>
+        <li><a th:href="@{/admin/products}">📦 Quản lý Sản phẩm</a></li>
         <li><a th:href="@{/admin/chat}" class="active">💬 Hỗ trợ Khách hàng</a></li>
         <li><a th:href="@{/admin/sockets}">🔌 Giám sát Socket</a></li>
-        <li><a th:href="@{/}">Quay lại Website</a></li>
-        <!-- ĐÃ SỬA: Dùng form POST để không bị 404 khi đăng xuất -->
+        <li><a th:href="@{/}">🏠 Quay lại Website</a></li>
+
         <li style="margin-top: auto;">
             <form th:action="@{/logout}" method="post" style="margin: 0; padding: 0;">
-                <button type="submit" class="logout-btn" style="width: 100%; background: transparent; cursor: pointer; display: block; padding: 14px 20px; font-weight: 600; font-size: 15px; border-radius: 12px; transition: 0.2s; font-family: inherit;">
-                    Đăng xuất
+                <button type="submit" class="logout-btn">
+                    ĐĂNG XUẤT
                 </button>
             </form>
         </li>
@@ -84,28 +199,35 @@
 </aside>
 
 <div class="chat-layout">
-    <!-- CỘT TRÁI: DANH SÁCH KHÁCH HÀNG NHẮN TIN -->
-    <div class="room-list" id="roomListContainer">
-        <div style="padding: 20px; text-align: center; color: #666; font-size: 13px;">Đang tải danh sách...</div>
+    <!-- CỘT TRÁI: DANH SÁCH KHÁCH HÀNG -->
+    <div class="room-list-container">
+        <div class="room-list-header">
+            <h3>DANH SÁCH HỘI THOẠI</h3>
+        </div>
+        <div class="room-list" id="roomListContainer">
+            <div style="padding: 30px 20px; text-align: center; color: var(--text-muted); font-size: 13.5px; font-weight: 600;">Đang đồng bộ dữ liệu...</div>
+        </div>
     </div>
 
     <!-- CỘT PHẢI: KHUNG CHAT CHÍNH -->
     <div class="chat-area">
         <div class="chat-header">
-            <span id="activeRoomTitle" style="font-size: 18px;">Chọn một khách hàng bên trái để bắt đầu hỗ trợ</span>
-            <span id="socketStatus" style="font-size: 12px; color: #888;">● Đang kết nối...</span>
+            <span class="chat-title" id="activeRoomTitle">Chưa chọn phiên làm việc</span>
+            <span class="socket-status" id="socketStatus">Đang khởi tạo kết nối...</span>
         </div>
 
-        <div class="messages-box" id="adminMessagesBox"></div>
+        <div class="messages-box" id="adminMessagesBox">
+            <!-- Tin nhắn sẽ được Render qua JS -->
+        </div>
 
         <form class="reply-form" id="adminReplyForm" style="display: none;" onsubmit="sendAdminReply(event)">
-            <input type="text" id="adminReplyInput" class="reply-input" placeholder="Nhập câu trả lời cho khách hàng..." required autocomplete="off">
-            <button type="submit" class="reply-btn">Gửi phản hồi</button>
+            <input type="text" id="adminReplyInput" class="reply-input" placeholder="Soạn nội dung hỗ trợ khách hàng..." required autocomplete="off">
+            <button type="submit" class="reply-btn">GỬI ĐI ↗</button>
         </form>
     </div>
 </div>
 
-<!-- THƯ VIỆN WEBSOCKET (CHỈ NHÚNG 1 LẦN DUY NHẤT) -->
+<!-- THƯ VIỆN WEBSOCKET -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
@@ -125,14 +247,14 @@
 
         stompClient.connect({}, function () {
             const statusEl = document.getElementById('socketStatus');
-            statusEl.innerText = '● Trực tuyến (Real-time)';
-            statusEl.style.color = '#00c851';
+            statusEl.innerText = 'Trực tuyến (Real-time)';
+            statusEl.className = 'socket-status connected';
 
             // Lắng nghe toàn bộ tin nhắn gửi đến hệ thống
             stompClient.subscribe('/topic/admin-chat', function (payload) {
                 const msg = JSON.parse(payload.body);
 
-                // Nếu khách nhắn -> Kêu Ting và cập nhật danh sách hội thoại bên trái
+                // Nếu khách nhắn -> Kêu Ting và cập nhật danh sách
                 if (msg.senderRole === 'USER') {
                     playNotificationSound();
                     loadRooms();
@@ -145,8 +267,8 @@
             });
         }, function () {
             const statusEl = document.getElementById('socketStatus');
-            statusEl.innerText = '● Mất kết nối, đang thử lại...';
-            statusEl.style.color = '#ff4444';
+            statusEl.innerText = 'Mất kết nối, thử lại...';
+            statusEl.className = 'socket-status disconnected';
             stompClient = null;
             setTimeout(connectAdminWebSocket, 3000);
         });
@@ -158,7 +280,7 @@
             .then(res => res.json())
             .then(data => {
                 const container = document.getElementById('roomListContainer');
-                let html = '<div style="padding: 20px; font-size: 12px; color: #888; font-weight: bold; border-bottom: 1px solid #222;">DANH SÁCH HỘI THOẠI</div>';
+                let html = '';
                 let hasRooms = false;
 
                 for (const [rId, rName] of Object.entries(data)) {
@@ -166,14 +288,14 @@
                     const activeClass = (rId === currentRoomId) ? 'active' : '';
                     html += `
                         <div class="room-item ${activeClass}" data-room="${rId}" data-name="${rName}" onclick="selectRoom(this)">
-                            <div style="font-weight: bold; color: #fff; font-size: 15px;">${rName}</div>
-                            <div style="font-size: 12px; color: #777; margin-top: 6px;">Mã phòng: <span style="font-family: monospace;">${rId.substring(0, 8)}...</span></div>
+                            <div class="room-name">${rName}</div>
+                            <div class="room-id">Mã Code: <span>${rId.substring(0, 8)}...</span></div>
                         </div>
                     `;
                 }
 
                 if (!hasRooms) {
-                    html += '<div style="padding: 30px 20px; text-align: center; color: #555; font-size: 14px;">Chưa có tin nhắn nào từ khách hàng.</div>';
+                    html = '<div style="padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 14px; font-weight: 600;">Hệ thống chưa ghi nhận<br>yêu cầu hỗ trợ nào.</div>';
                 }
                 container.innerHTML = html;
             })
@@ -183,7 +305,7 @@
     // 3. Khi Admin bấm chọn một khách hàng bên trái
     function selectRoom(elem) {
         currentRoomId = elem.getAttribute('data-room');
-        document.getElementById('activeRoomTitle').innerText = 'Đang hỗ trợ khách hàng: ' + elem.getAttribute('data-name');
+        document.getElementById('activeRoomTitle').innerText = 'Đang hỗ trợ: ' + elem.getAttribute('data-name');
 
         // Đánh dấu active trên giao diện
         document.querySelectorAll('.room-item').forEach(item => item.classList.remove('active'));
@@ -207,9 +329,15 @@
     function drawAdminMessage(m) {
         const box = document.getElementById('adminMessagesBox');
         const isUser = m.senderRole === 'USER';
+
         const div = document.createElement('div');
         div.className = 'msg-bubble ' + (isUser ? 'msg-user' : 'msg-admin');
-        div.innerHTML = `<div style="font-size:11px; font-weight:bold; opacity:0.6; margin-bottom:5px;">${m.senderName}</div>${m.content}`;
+
+        div.innerHTML = `
+            <div class="msg-sender">${m.senderName}</div>
+            ${m.content}
+        `;
+
         box.appendChild(div);
         box.scrollTop = box.scrollHeight;
     }
@@ -222,7 +350,7 @@
         if (!content || !currentRoomId) return;
 
         if (!stompClient || !stompClient.connected) {
-            alert("Chưa kết nối được WebSocket, vui lòng đợi 1 giây!");
+            alert("Chưa kết nối được với Server, vui lòng đợi 1 giây!");
             connectAdminWebSocket();
             return;
         }
@@ -236,7 +364,7 @@
         input.focus();
     }
 
-    // Khởi chạy khi mở trang
+    // Khởi chạy hệ thống khi vào trang
     loadRooms();
     connectAdminWebSocket();
 </script>

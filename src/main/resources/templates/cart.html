@@ -1,73 +1,223 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Giỏ Hàng | Panthera</title>
+
+    <!-- CSRF Token (Phòng hờ Spring Security yêu cầu) -->
+    <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}"/>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
     <style>
-        body { margin: 0; background-color: #080808; color: #fff; font-family: 'Segoe UI', sans-serif; }
-        .navbar { display: flex; align-items: center; justify-content: space-between; padding: 0 45px; height: 68px; background-color: #000; border-bottom: 1px solid #222; }
-        .brand-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; font-weight: 800; font-size: 19px; }
-        .brand-logo img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #ff5a00; }
-        .brand-logo span { color: #ff5a00; }
-        .nav-links a { text-decoration: none; color: #ccc; margin-left: 20px; }
+        :root {
+            --primary: #ff5a00;
+            --primary-hover: #e04e00;
+            --primary-glow: rgba(255, 90, 0, 0.25);
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.2);
+            --bg-dark: #07080a;
+            --surface: #14171f;
+            --surface-hover: #1b1f2a;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-light: rgba(255, 255, 255, 0.15);
+            --text-main: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+        }
 
-        .cart-container { max-width: 1000px; margin: 50px auto; padding: 0 20px; }
-        .cart-title { font-size: 28px; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 30px; }
+        * { box-sizing: border-box; }
 
-        .cart-item { display: flex; align-items: center; background: #111; padding: 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #222; }
-        .cart-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; margin-right: 20px; }
+        body {
+            margin: 0; font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+            background-color: var(--bg-dark); color: var(--text-main);
+            min-height: 100vh; display: flex; flex-direction: column;
+            background-image: radial-gradient(circle at top center, rgba(255, 90, 0, 0.05) 0%, transparent 60%);
+        }
+
+        /* ================= NAVIGATION BAR ================= */
+        .navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 5%; height: 80px; background: rgba(7, 8, 10, 0.8);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-light);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .brand-logo {
+            display: flex; align-items: center; gap: 12px; text-decoration: none;
+            color: #fff; font-weight: 900; font-size: 22px; letter-spacing: 1px;
+        }
+        .brand-logo img { width: 44px; height: 44px; border-radius: 12px; border: 2px solid var(--border-light); object-fit: cover; }
+        .brand-logo span { color: var(--primary); }
+
+        .nav-links a {
+            text-decoration: none; color: var(--text-secondary); font-weight: 700;
+            padding: 10px 20px; border-radius: 99px; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border); transition: 0.3s; display: flex; align-items: center; gap: 8px;
+        }
+        .nav-links a:hover { background: rgba(255,255,255,0.1); color: #fff; transform: translateY(-2px); }
+
+        /* ================= CART CONTAINER ================= */
+        .cart-container { max-width: 1000px; margin: 60px auto 100px; padding: 0 24px; width: 100%; flex: 1; }
+
+        .cart-title {
+            font-size: 32px; font-weight: 900; letter-spacing: -0.5px; text-transform: uppercase;
+            margin: 0 0 40px 0; display: flex; align-items: center; gap: 16px;
+        }
+        .cart-title span {
+            background: rgba(255, 90, 0, 0.15); color: var(--primary); padding: 4px 14px;
+            border-radius: 12px; font-size: 20px; border: 1px solid rgba(255, 90, 0, 0.3);
+        }
+
+        /* Tình trạng trống */
+        .empty-state {
+            background: var(--surface); border: 1px dashed var(--border-light);
+            border-radius: 24px; padding: 80px 20px; text-align: center;
+        }
+        .empty-state h3 { font-size: 20px; color: var(--text-secondary); margin-bottom: 24px; font-weight: 600; }
+        .btn-shop-now {
+            display: inline-block; background: linear-gradient(135deg, var(--primary), #ff7a00);
+            color: #fff; text-decoration: none; padding: 14px 32px; border-radius: 12px; font-weight: 800;
+            box-shadow: 0 8px 20px var(--primary-glow); transition: 0.3s;
+        }
+        .btn-shop-now:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(255, 90, 0, 0.4); }
+
+        /* Danh sách sản phẩm */
+        .cart-list { display: flex; flex-direction: column; gap: 20px; }
+
+        .cart-item {
+            display: flex; align-items: center; background: var(--surface);
+            padding: 24px; border-radius: 20px; border: 1px solid var(--border);
+            transition: 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; overflow: hidden;
+        }
+        .cart-item:hover { transform: translateY(-2px); border-color: var(--border-light); background: var(--surface-hover); }
+        .cart-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: rgba(255,255,255,0.05); transition: 0.3s; }
+        .cart-item:hover::before { background: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
+
+        .cart-item img {
+            width: 100px; height: 100px; object-fit: cover; border-radius: 12px;
+            margin-right: 24px; border: 1px solid var(--border-light); background: #000;
+        }
+
         .item-info { flex: 1; }
-        .item-info h4 { margin: 0 0 5px 0; font-size: 16px; }
-        .item-info p { margin: 0; color: #888; font-size: 13px; }
+        .item-info h4 { margin: 0 0 10px 0; font-size: 18px; font-weight: 700; color: #fff; }
+        .item-meta { display: flex; gap: 12px; align-items: center; }
+        .item-meta span {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            padding: 6px 12px; border-radius: 8px; font-size: 13.5px; color: var(--text-secondary); font-weight: 600;
+        }
+        .item-meta span b { color: #fff; margin-left: 4px; }
 
-        .item-price { font-size: 16px; font-weight: bold; color: #ff5a00; width: 120px; text-align: right; }
-        .item-remove { background: transparent; color: #ff4d4d; border: 1px solid #ff4d4d; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: 20px; }
+        .item-price { font-size: 20px; font-weight: 900; color: #34d399; width: 150px; text-align: right; }
 
-        .cart-summary { background: #111; padding: 25px; border-radius: 8px; margin-top: 30px; text-align: right; border: 1px solid #ff5a00; }
-        .cart-total { font-size: 22px; margin-bottom: 20px; }
-        .cart-total span { font-weight: 800; color: #ff5a00; font-size: 28px; margin-left: 15px; }
-        .btn-checkout { background: #ff5a00; color: #fff; border: none; padding: 15px 40px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        /* Form và Nút Xóa */
+        .remove-form { margin: 0 0 0 32px; }
+        .item-remove {
+            background: rgba(239, 68, 68, 0.05); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 10px 16px; border-radius: 10px; cursor: pointer; font-weight: 700; font-family: inherit; font-size: 14px; transition: 0.25s;
+        }
+        .item-remove:hover { background: var(--danger); color: #fff; border-color: var(--danger); box-shadow: 0 4px 15px var(--danger-glow); transform: translateY(-1px); }
+
+        /* ================= CART SUMMARY ================= */
+        .cart-summary {
+            background: linear-gradient(135deg, var(--surface), rgba(255, 90, 0, 0.03));
+            padding: 32px 40px; border-radius: 20px; margin-top: 40px;
+            border: 1px solid var(--border-light); box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .summary-info p { margin: 0 0 8px 0; color: var(--text-muted); font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .cart-total { font-size: 36px; font-weight: 900; color: var(--primary); line-height: 1; text-shadow: 0 0 20px var(--primary-glow); }
+
+        .checkout-form { margin: 0; }
+        .btn-checkout {
+            background: linear-gradient(135deg, var(--primary), #ff7a00); color: #fff;
+            border: none; padding: 18px 40px; font-size: 16px; font-weight: 800; text-transform: uppercase;
+            border-radius: 12px; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 25px var(--primary-glow); font-family: inherit; letter-spacing: 1px;
+        }
+        .btn-checkout:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(255, 90, 0, 0.4); }
+
+        /* Responsive mượt mà */
+        @media (max-width: 768px) {
+            .cart-summary { flex-direction: column; text-align: center; gap: 24px; padding: 24px; }
+            .btn-checkout { width: 100%; }
+            .cart-item { flex-direction: column; text-align: center; padding: 20px; }
+            .cart-item img { margin: 0 0 16px 0; }
+            .item-price { text-align: center; width: 100%; margin: 16px 0; }
+            .remove-form { margin: 0; width: 100%; }
+            .item-remove { width: 100%; }
+        }
     </style>
 </head>
 <body>
 
 <header class="navbar">
-    <a th:href="@{/}" class="brand-logo"><img th:src="@{/images/logo.jpg}" alt="Logo"><div>PANTHERA<span>.GAMES</span></div></a>
-    <div class="nav-links"><a th:href="@{/shop}">← Tiếp tục mua sắm</a></div>
+    <a th:href="@{/}" class="brand-logo">
+        <img th:src="@{/images/logo.jpg}" alt="Panthera Logo" onerror="this.src='https://placehold.co/100x100/ff5a00/ffffff?text=P'">
+        <div>PANTHERA<span>.GAMES</span></div>
+    </a>
+    <div class="nav-links">
+        <a th:href="@{/shop}">
+            <span style="font-size: 18px;">←</span> Tiếp tục mua sắm
+        </a>
+    </div>
 </header>
 
-<div class="cart-container">
-    <h1 class="cart-title">Giỏ hàng của bạn (<span th:text="${cartCount}">0</span>)</h1>
+<main class="cart-container">
+    <h1 class="cart-title">GIỎ HÀNG CỦA BẠN <span th:text="${cartCount}">0</span></h1>
 
-    <div th:if="${cart.items.empty}" style="text-align: center; padding: 50px; color: #888;">
-        Giỏ hàng đang trống. <a th:href="@{/shop}" style="color: #ff5a00;">Khám phá ngay</a>
+    <!-- Khi giỏ hàng TRỐNG -->
+    <div th:if="${cart.items.empty}" class="empty-state">
+        <div style="font-size: 64px; margin-bottom: 20px; opacity: 0.5;">🛒</div>
+        <h3>Kho đồ của bạn đang trống trải.</h3>
+        <a th:href="@{/shop}" class="btn-shop-now">KHÁM PHÁ CỬA HÀNG NGAY</a>
     </div>
 
-    <div th:each="item : ${cart.items}" class="cart-item">
-        <img th:src="${item.image}" alt="Product">
-        <div class="item-info">
-            <h4 th:text="${item.name}">Tên sản phẩm</h4>
-            <p>Phân loại (Size): <span th:text="${item.size}">M</span> | Số lượng: <span th:text="${item.quantity}">1</span></p>
+    <!-- Khi giỏ hàng CÓ SẢN PHẨM -->
+    <div th:unless="${cart.items.empty}" class="cart-list">
+        <div th:each="item : ${cart.items}" class="cart-item">
+            <img th:src="${item.image}" alt="Product" onerror="this.src='https://placehold.co/100x100?text=SP'">
+
+            <div class="item-info">
+                <h4 th:text="${item.name}">Tên sản phẩm</h4>
+                <div class="item-meta">
+                    <span>Phân loại: <b th:text="${item.size}">M</b></span>
+                    <span>Số lượng: <b th:text="${item.quantity}">1</b></span>
+                </div>
+            </div>
+
+            <div class="item-price" th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'POINT', 0, 'POINT')} + ' đ'">
+                0 đ
+            </div>
+
+            <!-- Nút Xóa (FORM POST BẢO MẬT) -->
+            <form th:action="@{/cart/remove}" method="post" class="remove-form">
+                <input type="hidden" name="productId" th:value="${item.productId}">
+                <input type="hidden" name="size" th:value="${item.size}">
+                <button type="submit" class="item-remove">✕ Gỡ bỏ</button>
+            </form>
         </div>
-        <div class="item-price" th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'POINT', 0, 'POINT')} + ' đ'"></div>
-
-        <form th:action="@{/cart/remove}" method="post">
-            <input type="hidden" name="productId" th:value="${item.productId}">
-            <input type="hidden" name="size" th:value="${item.size}">
-            <button type="submit" class="item-remove">Xóa</button>
-        </form>
     </div>
+
+    <!-- TỔNG TIỀN VÀ THANH TOÁN -->
     <div class="cart-summary" th:unless="${cart.items.empty}">
-        <div class="cart-total">
-            TỔNG THANH TOÁN:
-            <span th:text="${#numbers.formatDecimal(total, 0, 'POINT', 0, 'POINT')} + ' đ'">0 đ</span>
+        <div class="summary-info">
+            <p>Tổng giá trị đơn hàng</p>
+            <div class="cart-total" th:text="${#numbers.formatDecimal(total, 0, 'POINT', 0, 'POINT')} + ' đ'">
+                0 đ
+            </div>
         </div>
-        <!-- BỌC FORM GỬI YÊU CẦU ĐẶT HÀNG -->
-        <form th:action="@{/checkout}" method="post">
-            <button type="submit" class="btn-checkout">TIẾN HÀNH ĐẶT HÀNG</button>
-        </form>
+
+        <!-- Nút chuyển sang trang nhập địa chỉ -->
+        <div class="checkout-form">
+            <a th:href="@{/checkout}" class="btn-checkout" style="display:inline-block; text-decoration:none; text-align:center;">TIẾN HÀNH THANH TOÁN ↗</a>
+        </div>
     </div>
-</div>
+</main>
 
 </body>
 </html>

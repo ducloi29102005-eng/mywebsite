@@ -196,6 +196,7 @@
         <li th:if="${currentUser.role == 'ADMIN'}"><a th:href="@{/admin/dashboard}">🛡 Quản lý Tài khoản</a></li>
         <li><a th:href="@{/admin/products}" class="active">📦 Quản lý Sản phẩm</a></li>
         <li><a th:href="@{/admin/sockets}">🔌 Giám sát Socket</a></li>
+        <li><a th:href="@{/admin/orders}">🧾 Quản lý Đơn hàng</a></li>
         <li><a th:href="@{/}">🏠 Quay lại Website</a></li>
         <li style="margin-top: auto;">
             <form th:action="@{/logout}" method="post" style="margin: 0; padding: 0;">

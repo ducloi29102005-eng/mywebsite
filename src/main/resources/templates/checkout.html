@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh Toán | Panthera</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #ff5a00;
+            --primary-hover: #e04e00;
+            --primary-glow: rgba(255, 90, 0, 0.25);
+            --bg-dark: #07080a;
+            --surface: #14171f;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-light: rgba(255, 255, 255, 0.15);
+            --text-main: #f8fafc;
+            --text-secondary: #cbd5e1;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0; font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: var(--bg-dark); color: var(--text-main);
+            min-height: 100vh; display: flex; flex-direction: column;
+            background-image: radial-gradient(circle at top center, rgba(255, 90, 0, 0.05) 0%, transparent 60%);
+        }
+
+        .navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 5%; height: 80px; background: rgba(7, 8, 10, 0.8);
+            backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-light);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .brand-logo {
+            display: flex; align-items: center; gap: 12px; text-decoration: none;
+            color: #fff; font-weight: 900; font-size: 22px;
+        }
+        .brand-logo img { width: 44px; height: 44px; border-radius: 12px; border: 2px solid var(--border-light); }
+        .brand-logo span { color: var(--primary); }
+
+        .checkout-container {
+            max-width: 1200px; margin: 50px auto; padding: 0 24px;
+            display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px;
+        }
+
+        /* Form Bên Trái */
+        .form-section {
+            background: var(--surface); padding: 40px; border-radius: 20px;
+            border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .form-title {
+            font-size: 24px; font-weight: 800; margin-top: 0; margin-bottom: 30px;
+            padding-bottom: 15px; border-bottom: 1px solid var(--border-light);
+        }
+
+        .form-group { margin-bottom: 24px; }
+        .form-group label {
+            display: block; margin-bottom: 10px; font-size: 14px;
+            font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .form-group input, .form-group select {
+            width: 100%; padding: 16px; background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-light); border-radius: 10px;
+            color: #fff; font-family: inherit; font-size: 16px; transition: 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none; border-color: var(--primary); background: rgba(255, 90, 0, 0.05);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        /* Tóm tắt đơn hàng bên phải */
+        .summary-section {
+            background: linear-gradient(135deg, var(--surface), rgba(255, 90, 0, 0.03));
+            padding: 40px; border-radius: 20px; border: 1px solid var(--border-light);
+            height: fit-content; position: sticky; top: 100px;
+        }
+
+        .summary-item {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed var(--border-light);
+        }
+        .summary-item img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); }
+        .item-details { flex: 1; margin: 0 15px; }
+        .item-details h5 { margin: 0 0 5px 0; font-size: 14px; font-weight: 600; }
+        .item-details p { margin: 0; font-size: 12px; color: var(--text-secondary); }
+        .item-price { font-weight: 700; color: #34d399; }
+
+        .total-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 30px; margin-bottom: 30px;
+        }
+        .total-row span { font-size: 16px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; }
+        .total-row strong { font-size: 32px; font-weight: 900; color: var(--primary); text-shadow: 0 0 20px var(--primary-glow); }
+
+        .btn-submit {
+            width: 100%; background: linear-gradient(135deg, var(--primary), #ff7a00);
+            color: #fff; border: none; padding: 18px; font-size: 16px; font-weight: 800;
+            text-transform: uppercase; border-radius: 12px; cursor: pointer;
+            transition: 0.3s; box-shadow: 0 10px 25px var(--primary-glow); letter-spacing: 1px;
+        }
+        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(255, 90, 0, 0.4); }
+
+        @media (max-width: 900px) {
+            .checkout-container { grid-template-columns: 1fr; }
+            .summary-section { position: relative; top: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="navbar">
+    <a th:href="@{/}" class="brand-logo">
+        <img th:src="@{/images/logo.jpg}" alt="Panthera Logo" onerror="this.src='https://placehold.co/100x100/ff5a00/ffffff?text=P'">
+        <div>PANTHERA<span>.GAMES</span></div>
+    </a>
+    <a th:href="@{/cart}" style="color: var(--text-secondary); text-decoration: none; font-weight: 600;">← Quay lại Giỏ hàng</a>
+</header>
+
+<main class="checkout-container">
+
+    <!-- Form Nhập Thông Tin Nhận Hàng -->
+    <section class="form-section">
+        <h2 class="form-title">THÔNG TIN GIAO HÀNG</h2>
+
+        <form th:action="@{/checkout}" method="post">
+            <div class="form-group">
+                <label>Họ và Tên Người Nhận</label>
+                <input type="text" name="receiverName" th:value="${userProfile != null ? userProfile.fullName : ''}" required placeholder="VD: Nguyễn Văn A">
+            </div>
+
+            <div class="form-group">
+                <label>Số Điện Thoại</label>
+                <input type="tel" name="phone" th:value="${userProfile != null ? userProfile.phone : ''}" required placeholder="VD: 0912345678">
+            </div>
+
+            <div class="form-group">
+                <label>Địa Chỉ Giao Hàng Chi Tiết</label>
+                <input type="text" name="address" th:value="${userProfile != null ? userProfile.address : ''}" required placeholder="Số nhà, Đường, Phường/Xã, Quận/Huyện, Tỉnh/Thành phố">
+            </div>
+
+            <div class="form-group">
+                <label>Phương Thức Thanh Toán</label>
+                <select name="paymentMethod" required>
+                    <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+                    <option value="BANK_TRANSFER">Chuyển khoản ngân hàng</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-submit">XÁC NHẬN ĐẶT HÀNG</button>
+        </form>
+    </section>
+
+    <!-- Tóm tắt Đơn Hàng -->
+    <section class="summary-section">
+        <h2 class="form-title">ĐƠN HÀNG CỦA BẠN</h2>
+
+        <div class="summary-list">
+            <div th:each="item : ${cart.items}" class="summary-item">
+                <img th:src="${item.image}" alt="Product" onerror="this.src='https://placehold.co/100x100?text=SP'">
+                <div class="item-details">
+                    <h5 th:text="${item.name}">Tên sản phẩm</h5>
+                    <p>Phân loại: <span th:text="${item.size}">M</span> | SL: <span th:text="${item.quantity}">1</span></p>
+                </div>
+                <div class="item-price" th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'POINT', 0, 'POINT')} + ' đ'">0 đ</div>
+            </div>
+        </div>
+
+        <div class="total-row">
+            <span>TỔNG CỘNG</span>
+            <strong th:text="${#numbers.formatDecimal(total, 0, 'POINT', 0, 'POINT')} + ' đ'">0 đ</strong>
+        </div>
+    </section>
+
+</main>
+
+</body>
+</html>

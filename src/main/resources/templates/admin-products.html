@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -193,10 +195,10 @@
         <span>ADMIN</span>
     </div>
     <ul class="nav-links">
-        <li th:if="${currentUser.role == 'ADMIN'}"><a th:href="@{/admin/dashboard}">🛡 Quản lý Tài khoản</a></li>
-        <li><a th:href="@{/admin/products}" class="active">📦 Quản lý Sản phẩm</a></li>
-        <li><a th:href="@{/admin/sockets}">🔌 Giám sát Socket</a></li>
-        <li><a th:href="@{/admin/orders}">🧾 Quản lý Đơn hàng</a></li>
+        <li sec:authorize="hasPermission('USER', 'READ')"><a th:href="@{/admin/dashboard}">🛡 Quản lý Tài khoản</a></li>
+        <li sec:authorize="hasPermission('PRODUCT', 'READ')"><a th:href="@{/admin/products}" class="active">📦 Quản lý Sản phẩm</a></li>
+        <li sec:authorize="hasPermission('PRODUCT', 'READ')"><a th:href="@{/admin/sockets}">🔌 Giám sát Socket</a></li>
+        <li sec:authorize="hasPermission('PRODUCT', 'EDIT_STOCK')"><a th:href="@{/admin/orders}">🧾 Quản lý Đơn hàng</a></li>
         <li><a th:href="@{/}">🏠 Quay lại Website</a></li>
         <li style="margin-top: auto;">
             <form th:action="@{/logout}" method="post" style="margin: 0; padding: 0;">
@@ -207,15 +209,27 @@
 </aside>
 
 <main class="main-content">
-    <div class="header-section">
+    <div class="header-section" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 36px;">
         <div>
-            <h1>DANH SÁCH SẢN PHẨM</h1>
-            <p>Quản lý toàn bộ kho vật phẩm, mô hình và trang phục trên Panthera Hub</p>
-        </div>
-        <button th:if="${currentUser.role == 'ADMIN' or currentUser.role == 'SHOP_MANAGER'}"
-                type="button" class="btn-add-main" onclick="openModal()">➕ THÊM SẢN PHẨM</button>
-    </div>
+            <h1 style="margin: 0; font-size: 28px; font-weight: 800; color: #fff;">DANH SÁCH SẢN PHẨM</h1>
+            <p style="margin: 8px 0 0 0; color: var(--text-muted); font-size: 14.5px;">Quản lý toàn bộ kho vật phẩm, mô hình và trang phục trên Panthera Hub</p>
 
+            <!-- Thay th:if bằng sec:authorize -->
+            <button sec:authorize="hasPermission('PRODUCT', 'WRITE')"
+                    type="button" class="btn-add-main" style="margin-top: 20px;" onclick="openModal()">➕ THÊM SẢN PHẨM</button>
+        </div>
+
+        <!-- HIỂN THỊ TÀI KHOẢN ĐANG ĐĂNG NHẬP GÓC PHẢI -->
+        <div th:if="${currentUser != null}" style="display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.03); padding: 8px 12px 8px 20px; border-radius: 50px; border: 1px solid var(--border-light); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <div style="text-align: right;">
+                <div style="font-size: 15px; font-weight: 800; color: #fff;" th:text="${currentUser.username}">Username</div>
+                <div style="font-size: 11.5px; font-weight: 700; color: var(--primary); letter-spacing: 0.5px;" th:text="${currentUser.role}">ROLE</div>
+            </div>
+            <div style="width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; color: #fff; background: linear-gradient(135deg, var(--primary), #ff7a00); box-shadow: 0 4px 10px var(--primary-glow); border: 2px solid var(--surface);"
+                 th:text="${#strings.substring(currentUser.username, 0, 1).toUpperCase()}">U
+            </div>
+        </div>
+    </div>
     <!-- KHỐI THỐNG KÊ -->
     <div class="stats-grid">
         <div class="stat-card">
@@ -272,6 +286,7 @@
                 <td style="text-align: right;">
                     <div class="action-btns">
                         <button type="button" class="btn-sm"
+                                sec:authorize="hasPermission('PRODUCT', 'EDIT_STOCK')"
                                 th:data-id="${p.id}"
                                 th:data-name="${p.name}"
                                 th:data-stock="${p.stockQuantity}"
@@ -282,7 +297,10 @@
                                 th:data-image="${p.image}"
                                 th:data-sizes="${p.sizes != null ? #strings.listJoin(p.sizes, ',') : 'Freesize'}"
                                 onclick="editProduct(this)">Sửa</button>
-                        <form th:action="@{/admin/products/delete/{id}(id=${p.id})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">
+
+                        <form th:action="@{/admin/products/delete/{id}(id=${p.id})}" method="post"
+                              sec:authorize="hasPermission('PRODUCT', 'DELETE')"
+                              onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">
                             <button type="submit" class="btn-sm btn-del">Xóa</button>
                         </form>
                     </div>

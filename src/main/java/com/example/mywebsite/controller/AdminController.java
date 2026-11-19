@@ -46,7 +46,24 @@ public class AdminController {
         if (currentUser != null) {
             String role = currentUser.getRole();
             if ("SHOP_MANAGER".equals(role) || "EMPLOYEE".equals(role)) {
-                return "redirect:/admin/products";
+
+                // Lấy danh sách quyền thực tế của người dùng từ Spring Security
+                org.springframework.security.core.Authentication auth = (org.springframework.security.core.Authentication) principal;
+
+                boolean canReadProduct = auth.getAuthorities().stream()
+                        .anyMatch(a -> a.getAuthority().equals("PRODUCT_READ"));
+                boolean canReadUser = auth.getAuthorities().stream()
+                        .anyMatch(a -> a.getAuthority().equals("USER_READ"));
+
+                // Chuyển hướng dựa trên quyền đang có
+                if (canReadProduct) {
+                    return "redirect:/admin/products";
+                } else if (canReadUser) {
+                    return "redirect:/admin/dashboard";
+                } else {
+                    // Nếu không có cả quyền xem Sản phẩm và Tài khoản
+                    return "redirect:/admin/orders";
+                }
             }
         }
         return "redirect:/admin/dashboard";
@@ -143,10 +160,12 @@ public class AdminController {
         return "redirect:/admin/dashboard?success=permission_removed";
     }
 
-    @PreAuthorize("hasPermission('USER', 'WRITE')")
+    @PreAuthorize("hasPermission('USER', 'WRITE')") // Hoặc quyền tương ứng cho phép sửa Role
     @PostMapping("/api/roles/toggle-permission")
     @ResponseBody
-    public String togglePermission(@RequestParam String roleName, @RequestParam String permissionName, @RequestParam boolean isGranted) {
+    public String togglePermission(@RequestParam String roleName,
+                                   @RequestParam String permissionName,
+                                   @RequestParam boolean isGranted) {
         adminService.toggleRolePermission(roleName, permissionName, isGranted);
         return "OK";
     }
@@ -165,7 +184,7 @@ public class AdminController {
     }
     // ==================== CÁC CHỨC NĂNG QUẢN LÝ ĐƠN HÀNG ====================
 
-    @PreAuthorize("hasPermission('PRODUCT', 'READ')") // Dùng tạm quyền đọc sản phẩm hoặc bạn có thể tạo quyền ORDER riêng
+    @PreAuthorize("hasPermission('PRODUCT', 'READ') or hasPermission('PRODUCT', 'EDIT_STOCK')")
     @GetMapping("/orders")
     public String manageOrders(Principal principal, Model model) {
         String currentUserId = adminService.getUserIdFromPrincipal(principal);
@@ -177,7 +196,7 @@ public class AdminController {
         // Lấy danh sách đơn hàng
         model.addAttribute("orders", adminService.getAllOrdersDesc());
 
-        return "admin-orders"; // Gọi file giao diện admin-orders.html
+        return "admin-orders"; // Trỏ tới file src/main/resources/templates/admin-orders.html
     }
 
     @PreAuthorize("hasPermission('PRODUCT', 'WRITE') or hasPermission('PRODUCT', 'EDIT_STOCK')")
@@ -187,4 +206,5 @@ public class AdminController {
         adminService.updateOrderStatus(orderId, status);
         return "redirect:/admin/orders?success=status_updated";
     }
+
 }
